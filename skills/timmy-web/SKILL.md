@@ -1,7 +1,7 @@
 ---
 name: timmy-web
 description: >-
-  產出「單檔 HTML + Tailwind CDN」網頁,可選 10 款策展風格——預設 = Timmy 招牌「編輯/手札風」(暖紙 + 深藏青 + 金棕、Noto Serif TC 襯線、雙線報頭);另有 薄荷柑橘、清爽扁平、毛玻璃、粉彩便當、鮮豔漸層、彩色雜誌、彩色藍圖、彩色 IDE、撞色粗野派。每款內建 淺/深/系統主題切換、繁中/English i18n、RWD 貼邊寬版、主色/背景設定與一鍵匯出乾淨 HTML。涵蓋履歷、作品集、landing 行銷頁、部落格、活動、產品、文件、dashboard、HTML 報告。
+  產出「單檔 HTML + Tailwind CDN」網頁,可選 10 款策展風格——預設 = Timmy 招牌「編輯/手札風」(暖紙 + 深藏青 + 金棕、Noto Serif TC 襯線、雙線報頭);另有 薄荷柑橘、清爽扁平、毛玻璃、粉彩便當、鮮豔漸層、彩色雜誌、彩色藍圖、彩色 IDE、撞色粗野派。每款內建 淺/深/系統主題切換、繁中/English i18n、RWD 貼邊寬版、主色/背景設定、右下角浮動 AI 聊天助理(BYOK 自帶金鑰・Gemini/OpenAI/Claude)與一鍵匯出乾淨 HTML。涵蓋履歷、作品集、landing 行銷頁、部落格、活動、產品、文件、dashboard、HTML 報告。
   只要 Timmy 要求製作、設計、美化任何網頁/網站/landing/hero/儀表板/HTML 報告,或說「我的風格」「弄成我那種樣子」「像我之前那個網站」,就使用本 skill——即使他沒明講風格名稱。任何 Timmy 要的 HTML/前端畫面,優先用這套而非預設或通用樣式。
 allowed-tools: Read, Write, Edit, Glob
 ---
@@ -62,6 +62,20 @@ allowed-tools: Read, Write, Edit, Glob
 - **RWD 貼邊寬版**:`max-w-[1760px]` + `px-4 sm:px-6 lg:px-10`。
 - 改色 / 深色換算 / 必踩坑見 `references/theme-engine.md`;編輯風視覺另見 `references/design-system.md`。
 
+## AI 助理(浮動聊天 widget・10 款內建)
+
+每款風格頁右下角內建一顆浮動 icon,點開即 AI 聊天面板;由共用引擎注入(改一處、10 款同步,無需逐頁手改)。
+
+- **BYOK(Bring Your Own Key)**:使用者在面板 ⚙ 設定填自己的 API 金鑰,存 `localStorage['timmy-web-chat']`(**僅本機**),由**瀏覽器直接呼叫** LLM,不經任何中介伺服器。**嚴禁** hardcode 任何金鑰。
+- **儲存即驗證**:按「儲存」會先發一個最小請求驗證金鑰/模型是否可用,**通過才存**(綠 ✓)、失敗顯示原因不存(紅字)。
+- **開關**:右下角 FAB 即開關鈕,開啟時 icon 變 ✕、面板浮於其上;再點即關。
+- **RWD**:桌機為右下浮動面板(寬 380、浮於 FAB 上方);**手機(≤480px)開啟時全螢幕**(滿版、去圓角、收起 FAB,靠 header ✕ 關;用 `inset:0` 避開 `100vh` 網址列破版)。
+- **供應商**:預設 **Gemini**(`gemini-2.5-flash`);另支援 **OpenAI**(`gpt-4o-mini`)、**Claude / Anthropic**(`claude-sonnet-4-6`)。Anthropic 瀏覽器直呼需 `anthropic-dangerous-direct-browser-access: true` 標頭(引擎已帶)。
+- **選模型(動態)**:填好金鑰後,模型下拉**自動向該供應商的 list-models API 抓取「該金鑰實際可用」的模型**(切供應商 / 改金鑰 / 按 ↻ 重抓);保留「自訂…」可手打任意 model id。
+- **沿用主題**:配色取自該頁 `--accent` / `--bg` + `[data-mode]`,自動適配 10 款與淺/深;標籤走 i18n(`chat.*` key,繁中 / English)。
+- **匯出**:下載乾淨 HTML 時**自動剝除**聊天 widget(視為預覽期工具,同設定面板);此剝除由引擎**集中處理**,不需逐頁改 export 邏輯。
+- **改它**:屬共用引擎一部分 → 只改正本 `assets/tw-engine.js`(`chat.*` 字典 + widget IIFE)再跑 `sync_engine.py`;**勿逐頁手改**。新風格頁若用新的「下載」鈕 id,於引擎 `EXPORT_TRIGGERS` 補一個即可。
+
 ## 各頁型提示
 
 - **Landing**:封面圖 → h1+lead → 三欄數據盒 → 左色條 callout(重點)→ 區段(h2 細線)→ 箭頭快速連結 → 頁尾。
@@ -72,7 +86,7 @@ allowed-tools: Read, Write, Edit, Glob
 
 - `examples/styles/` — **10 款風格頁**(每款 = 完整範本:風格 + 引擎 + i18n + RWD + 面板 + 匯出)。產出時從選定款起手。
 - `examples/choose_style.html` — **風格實驗室**(本機版):一次預覽/切換 10 款 + 主色 + 背景(預設 `00-editorial`)。**線上版**(部署於 Cloudflare Pages):https://timmy-web-style.pages.dev/(挑選頁 `/choose_style.html`、單款 `/styles/<style>.html`)。
-- `assets/tw-engine.js` — **共用引擎正本 (source of truth)**:10 款共用的 dark / i18n / store 引擎(pre-paint + main 兩段 + 共用 I18N 內容字典)。**改引擎只改這裡**。
+- `assets/tw-engine.js` — **共用引擎正本 (source of truth)**:10 款共用的 dark / i18n / store 引擎 **+ AI 聊天 widget**(pre-paint + main 兩段 + 共用 I18N 內容字典)。**改引擎只改這裡**。
 - `scripts/sync_engine.py` — 把正本 inline 注入各頁標記區(`PYTHONUTF8=1 python skills/timmy-web/scripts/sync_engine.py`;加 `--check` 只驗不寫 / 冪等檢查)。改完正本**必跑**。
 - `references/theme-engine.md` — **引擎契約**:dark + i18n + 貼邊寬版的共用規格與必踩坑(改任何風格頁前必讀)。
 - `references/design-system.md` — 編輯風(預設款)tokens、原則、Do/Don't、如何演進。

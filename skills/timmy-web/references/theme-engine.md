@@ -14,6 +14,7 @@
 - [7. 共用引擎 JS(可貼）](#7-共用引擎-js)
 - [8. 驗證清單](#8-驗證清單)
 - [9. 編輯風(第 10 款)特例](#9-編輯風特例)
+- [12. AI 助理(浮動聊天 widget)](#12-ai-助理浮動聊天-widget)
 
 ---
 
@@ -202,3 +203,28 @@ IDE(06)試點已驗證契約並修掉以下坑。**每款都必踩,務必照辦*
 10. **token 雙重語意(實心塊 vs 文字)。** 若同一 token(如 brutalist 的 `ink`)既當「文字/邊框」(深色→淺)又當「實心深塊背景 `bg-ink`」(深色→維持深),深色段要 `[data-mode=dark] .bg-ink{background:<深黑>}` 單獨壓回,且塊上文字走恆淺色變數(如 `--cream-fixed`)。落在「維持鮮明的撞色塊」內、明寫 `text-ink` 的子孫也要 `[data-mode=dark] .<pop> .text-ink{color:<深>}` 壓回。
 11. **export 補充(rule 6 續)**:(d) 匯出前**移除 clone `<html>` 的 inline style**(否則 pre-paint 寫入的 inline `--accent/--bg` 蓋過注入的 `:root`,配色錯亂);(e) 每款 tailwind config script 必須 `id="tw-config"`,export 以 id/src 身分白名單保留(CDN + `tw-config` + `tab-script`)。
 12. **驗證注意**:Chromium 對 `color-mix()` 派生色的 `getComputedStyle` 可能回 `color(srgb r g b)`(0–1 浮點)而非 `rgb()`,斷言要相容兩格式。語言選擇鈕標籤「繁體中文 / English」刻意各自原文,非缺漏。
+
+---
+
+## 12. AI 助理(浮動聊天 widget)
+
+右下角浮動 icon → 聊天面板,**BYOK(Bring Your Own Key)**:使用者自帶 API 金鑰、瀏覽器直呼 LLM。屬**共用引擎**一部分,落在正本 `assets/tw-engine.js` 的 `==TW-MAIN==` 段(緊接主引擎 IIFE 之後的第二個 IIFE),10 款由 `sync_engine.py` 一併注入 —— **勿逐頁手改**。
+
+**不變量 / 設計要點**
+1. **注入而非逐頁標記**:widget 的 `<style id="tw-chatbot-style">`(進 `<head>`)與容器 `<div id="tw-chatbot">`(進 `<body>`)由引擎 JS 在載入時建立;不依賴各頁 HTML 標記,故無需新增第三組 sync 標記。
+2. **配色沿用主題**:只依賴兩個保證存在的 token `var(--accent)` / `var(--bg)`,其餘以 `color-mix` 派生;深淺靠 `:root[data-mode="dark"] #tw-chatbot{…}` 覆寫。CSS 用獨立命名空間 `twc-`,不污染頁面 / Tailwind。FAB 與使用者氣泡用該頁 accent → 自動適配 10 款。
+3. **i18n**:標籤掛 `data-i18n` / `data-i18n-attr`,key 為 `chat.*`(收在共用 `I18N` 字典,繁中 + EN);widget 建好後呼叫一次 `window.__twApplyI18n()`(引擎首次 `applyI18n` 在 widget 建立前已跑),之後切語言由引擎既有流程自動重譯。
+4. **持久化**:獨立 localStorage key `timmy-web-chat` = `{ provider, key, model, turns }`(**與主題 store `timmy-web-stylelab` 分開**);對話最多保留最近 40 turn。金鑰**僅存本機**,絕不 hardcode。
+5. **供應商**(規格查證日 2026-06-13,皆瀏覽器直呼):
+   - **Gemini**(預設,`gemini-2.5-flash`):`POST generativelanguage.googleapis.com/v1beta/models/<model>:generateContent`,header `x-goog-api-key`;body `{systemInstruction,contents:[{role:user|model,parts:[{text}]}]}`;回 `candidates[0].content.parts[].text`。
+   - **OpenAI**(`gpt-4o-mini`):`POST api.openai.com/v1/chat/completions`,`Authorization: Bearer`;回 `choices[0].message.content`。
+   - **Anthropic**(`claude-sonnet-4-6`):`POST api.anthropic.com/v1/messages`,header `x-api-key` + `anthropic-version: 2023-06-01` + **`anthropic-dangerous-direct-browser-access: true`**(瀏覽器 CORS 必備);回 `content[].text`。
+   - 模型欄可自訂;model 名稱會漂移,預設值僅起手。
+   - **選模型(動態 list-models)**:各供應商另有 `list(key)` 抓「該金鑰可用模型」填下拉 —— Gemini `GET /v1beta/models`(篩 `supportedGenerationMethods`/`supportedActions` 含 `generateContent`、去 `models/` 前綴)、OpenAI `GET /v1/models`(篩 `^(gpt-|o1|o3|o4|chatgpt)`)、Anthropic `GET /v1/models`(同 messages 的三個標頭)。觸發:填金鑰(`change`)/ 切供應商 / 按 ↻ / 開設定;結果按 `provider|key` 快取避免重複請求;失敗或無金鑰時保留「自訂…」可手打。選到的 model 於**儲存時驗證並寫入** `state.model`。
+6. **安全**:訊息氣泡一律用 `textContent`(非 innerHTML)寫入,避免模型輸出注入 HTML。
+7. **匯出剝除(集中、零逐頁改)**:各頁「下載乾淨 HTML」同步 `cloneNode` live DOM;引擎在 `document` 上掛 **capture 階段** click listener,先於各頁 export handler 觸發,在 clone 前把 `#tw-chatbot` / `#tw-chatbot-style` 暫時卸下,於本輪事件結束後(`queueMicrotask`,paint 前)還原 → 匯出檔不含 widget、畫面不閃動。觸發鈕 id 集中於引擎常數 **`EXPORT_TRIGGERS`**(現含 `#downloadBtn,#download-html,#settings-download,#sp-download,[data-tw-export]`,涵蓋 10 款);新頁若用新 id,於此補一個。
+8. **儲存即驗證 (validate-on-save)**:點「儲存」不直接存,先用填入的 provider/key/model 發一個最小請求(複用 `PROVIDERS[].send`,prompt `'Hi'`)驗證「金鑰 + 模型 + CORS」是否真的可用 —— **通過才寫 localStorage**(status 顯示綠 ✓、自動收合設定);**失敗顯示原因、不儲存**(紅字)。i18n key:`chat.validating` / `chat.valid` / `chat.invalid` / `chat.nokey_save`。
+9. **FAB 即開關**:`data-act="toggle"`,開/關同一顆鈕;icon 由 `[data-open]` 在 💬 / ✕ 間 CSS 切換(`.twc-ic-open` / `.twc-ic-close`),桌機開啟時面板浮在 FAB 上方(`bottom:72px`)、FAB 不隱藏;`aria-label` 隨狀態在 `chat.open` / `chat.close` 切換。
+10. **RWD**:桌機 = 右下浮動面板(寬 `min(380px,…)`、`bottom:72px` 浮於 FAB 上);**手機(`@media max-width:480px`)開啟全螢幕** —— `.twc-panel{position:fixed;inset:0;border-radius:0;border-width:0}` 滿版(用 `inset:0` 而非 `100vh`,避開行動瀏覽器網址列高度造成的破版/捲動),且 `[data-open="true"] .twc-fab{display:none}` 收起 FAB,改靠 header ✕(`data-act="close"`)關閉。
+
+**驗證**(`.claude/temp/verify_chatbot.py`,Playwright file://):FAB 出現、開面板、無金鑰自動開設定、FAB 開啟時可見且顯示 ✕、動態載入模型清單(過濾非對話模型)、「自訂…」逃生口切換、儲存觸發驗證(mock 成功→存/失敗→不存)、選到的 model 寫入並用於送出、(mock fetch)送出渲染回覆、FAB 切換開關、深色適配、EN i18n、匯出檔不含 widget 且還原 live、console 零錯誤。

@@ -111,7 +111,7 @@ REM Windows(在 cmd / PowerShell 執行,非 git-bash)
 
 ## 現有 skills
 
-- [`timmy-web`](skills/timmy-web/) — 單檔 HTML + Tailwind CDN 網頁,10 款策展風格(預設編輯/手札風)、淺/深/系統主題、繁中 / English i18n、RWD 貼邊寬版、一鍵匯出。線上實驗室:<https://timmy-web-style.pages.dev/>。詳見 [`README`](skills/timmy-web/README.md) / 正本 [`SKILL.md`](skills/timmy-web/SKILL.md)。
+- [`timmy-web`](skills/timmy-web/) — 單檔 HTML + Tailwind CDN 網頁,10 款策展風格(預設編輯/手札風)、淺/深/系統主題、繁中 / English i18n、RWD 貼邊寬版、右下角浮動 AI 聊天助理(BYOK 自帶金鑰)、一鍵匯出。線上實驗室:<https://timmy-web-style.pages.dev/>。詳見 [`README`](skills/timmy-web/README.md) / 正本 [`SKILL.md`](skills/timmy-web/SKILL.md)。
 
 ## 現況 / 開放項
 
