@@ -72,6 +72,8 @@ allowed-tools: Read, Write, Edit, Glob
 - **RWD**:桌機為右下浮動面板(寬 380、浮於 FAB 上方);**手機(≤480px)開啟時全螢幕**(滿版、去圓角、收起 FAB,靠 header ✕ 關;用 `inset:0` 避開 `100vh` 網址列破版)。
 - **供應商**:預設 **Gemini**(`gemini-2.5-flash`);另支援 **OpenAI**(`gpt-4o-mini`)、**Claude / Anthropic**(`claude-sonnet-4-6`)。Anthropic 瀏覽器直呼需 `anthropic-dangerous-direct-browser-access: true` 標頭(引擎已帶)。
 - **選模型(動態)**:填好金鑰後,模型下拉**自動向該供應商的 list-models API 抓取「該金鑰實際可用」的模型**(切供應商 / 改金鑰 / 按 ↻ 重抓);保留「自訂…」可手打任意 model id。
+- **推薦問題**:面板有「💡 推薦問題」鈕,**點了才**由 AI 依「目前對話 + 本頁標題/標題列」生成 3 個追問,呈現為可點 chips(點一下即送出);只在使用者點按時才花 API。
+- **可開關(per-page)**:**引擎預設全頁啟用**;某頁不要 chatbot 時,於該頁 `window.TW_CONFIG.chat = false` 即不注入(對應 `web-spec.md` Q6 功能未勾選 → 產出時設此旗標)。
 - **沿用主題**:配色取自該頁 `--accent` / `--bg` + `[data-mode]`,自動適配 10 款與淺/深;標籤走 i18n(`chat.*` key,繁中 / English)。
 - **匯出**:下載乾淨 HTML 時**自動剝除**聊天 widget(視為預覽期工具,同設定面板);此剝除由引擎**集中處理**,不需逐頁改 export 邏輯。
 - **改它**:屬共用引擎一部分 → 只改正本 `assets/tw-engine.js`(`chat.*` 字典 + widget IIFE)再跑 `sync_engine.py`;**勿逐頁手改**。新風格頁若用新的「下載」鈕 id,於引擎 `EXPORT_TRIGGERS` 補一個即可。

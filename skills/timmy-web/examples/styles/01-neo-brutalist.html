@@ -1222,7 +1222,8 @@
       'chat.placeholder':'輸入訊息…(Enter 送出 / Shift+Enter 換行)','chat.send':'送出',
       'chat.greeting':'嗨!我是這個頁面的 AI 助理,有什麼想問的嗎?','chat.error':'發生錯誤:',
       'chat.validating':'驗證金鑰中…','chat.valid':'金鑰可用 ✓','chat.invalid':'金鑰無法使用:','chat.nokey_save':'請先填入 API 金鑰。',
-      'chat.model_auto':'(填金鑰後自動載入清單)','chat.model_loading':'載入模型清單中…','chat.model_loadfail':'無法載入清單,可改用「自訂…」手動輸入','chat.model_custom':'自訂…','chat.model_custom_ph':'輸入 model id','chat.model_refresh':'重新載入模型'
+      'chat.model_auto':'(填金鑰後自動載入清單)','chat.model_loading':'載入模型清單中…','chat.model_loadfail':'無法載入清單,可改用「自訂…」手動輸入','chat.model_custom':'自訂…','chat.model_custom_ph':'輸入 model id','chat.model_refresh':'重新載入模型',
+      'chat.suggest':'💡 推薦問題','chat.suggesting':'生成中…'
     },
     'en': {
       'nav.overview':'Overview','nav.routes':'Routes','nav.gear':'Gear','nav.journal':'Journal',
@@ -1267,7 +1268,8 @@
       'chat.placeholder':'Type a message…  (Enter to send / Shift+Enter for newline)','chat.send':'Send',
       'chat.greeting':'Hi! I\'m the AI assistant for this page. Ask me anything.','chat.error':'Error: ',
       'chat.validating':'Verifying key…','chat.valid':'Key works ✓','chat.invalid':'Key not usable: ','chat.nokey_save':'Enter an API key first.',
-      'chat.model_auto':'(enter key to auto-load list)','chat.model_loading':'Loading models…','chat.model_loadfail':'Could not load list — use “Custom…” to type one','chat.model_custom':'Custom…','chat.model_custom_ph':'Enter model id','chat.model_refresh':'Reload models'
+      'chat.model_auto':'(enter key to auto-load list)','chat.model_loading':'Loading models…','chat.model_loadfail':'Could not load list — use “Custom…” to type one','chat.model_custom':'Custom…','chat.model_custom_ph':'Enter model id','chat.model_refresh':'Reload models',
+      'chat.suggest':'💡 Suggest questions','chat.suggesting':'Generating…'
     }
   };
 
@@ -1367,6 +1369,8 @@
  * ========================================================================= */
 (function(){
   if (window.__twChatInit) return; window.__twChatInit = true;
+  // 該頁可停用 AI 助理:per-page 設 window.TW_CONFIG.chat = false 即不注入(web-spec.md 功能未勾選時用)。預設啟用。
+  if (window.TW_CONFIG && window.TW_CONFIG.chat === false) return;
   var T = function(k){ return window.twT ? window.twT(k) : k; };
   var CKEY = 'timmy-web-chat';
   // 各風格頁的「下載乾淨 HTML」觸發鈕 id(集中於此,新頁若用新 id 在此補一個即可)
@@ -1517,6 +1521,13 @@
     '.twc-input:focus{border-color:var(--twc-accent)}',
     '.twc-send{width:40px;height:40px;border:0;border-radius:11px;cursor:pointer;background:var(--twc-accent);color:#fff;display:grid;place-items:center;flex:none}',
     '.twc-send:disabled{opacity:.5;cursor:default}.twc-send svg{width:18px;height:18px}',
+    '.twc-sugbar{display:flex;padding:8px 10px 0}',
+    '.twc-sug{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--twc-line);border-radius:999px;background:color-mix(in srgb,var(--twc-accent) 8%,var(--twc-panel));color:var(--twc-accent);font:inherit;font-weight:600;font-size:12px;cursor:pointer}',
+    '.twc-sug:hover{background:color-mix(in srgb,var(--twc-accent) 16%,var(--twc-panel))}',
+    '.twc-sug:disabled{opacity:.6;cursor:default}',
+    '.twc-chips{display:none;flex-wrap:wrap;gap:6px;padding:8px 10px 0}',
+    '.twc-chip{text-align:left;padding:7px 11px;border:1px solid var(--twc-line);border-radius:12px;background:var(--twc-panel);color:var(--twc-ink);font:inherit;font-size:12.5px;line-height:1.4;cursor:pointer;max-width:100%}',
+    '.twc-chip:hover{border-color:var(--twc-accent);background:color-mix(in srgb,var(--twc-accent) 7%,var(--twc-panel))}',
     '@media (max-width:480px){#tw-chatbot{right:12px;bottom:12px}',
     '#tw-chatbot[data-open="true"] .twc-fab{display:none}',          /* 手機全螢幕:收起 FAB,靠 header ✕ 關 */
     '.twc-panel{position:fixed;inset:0;width:auto;height:auto;border-radius:0;border-width:0}}'   /* inset:0 滿版,避開 100vh 網址列破版 */
@@ -1562,6 +1573,8 @@
           '<span class="twc-status" role="status" aria-live="polite"></span></div>' +
       '</div>' +
       '<div class="twc-msgs"></div>' +
+      '<div class="twc-sugbar"><button class="twc-sug" type="button" data-act="suggest" data-i18n="chat.suggest">💡 推薦問題</button></div>' +
+      '<div class="twc-chips"></div>' +
       '<form class="twc-form">' +
         '<textarea class="twc-input" rows="1" data-i18n-attr="placeholder:chat.placeholder" placeholder="輸入訊息…"></textarea>' +
         '<button class="twc-send" type="submit" data-act="send" data-i18n-attr="aria-label:chat.send" aria-label="Send">' + I.send + '</button>' +
@@ -1582,6 +1595,9 @@
   var elMsgs = root.querySelector('.twc-msgs');
   var elInput = root.querySelector('.twc-input');
   var elSend = root.querySelector('.twc-send');
+  var elChips = root.querySelector('.twc-chips');
+  var elSug = root.querySelector('.twc-sug');
+  var sugBusy = false;
   var elProv = root.querySelector('.twc-provider');
   var elKey = root.querySelector('.twc-key');
   var elModel = root.querySelector('.twc-model');          // 自訂 model id(逃生口)
@@ -1666,7 +1682,7 @@
     var text = (elInput.value || '').trim(); if (!text) return;
     var key = (state.key || '').trim();
     if (!key){ setOpen(true); root.setAttribute('data-settings', 'true'); addMsg('error', T('chat.needkey')); elKey.focus(); return; }
-    elInput.value = ''; autoGrow();
+    elInput.value = ''; autoGrow(); clearChips();
     addMsg('user', text); state.turns.push({ role: 'user', content: text }); persist();
     setBusy(true);
     var ind = typing();
@@ -1680,6 +1696,42 @@
       if (ind.parentNode) ind.parentNode.removeChild(ind);
       addMsg('error', T('chat.error') + (err && err.message ? err.message : err));
     }).then(function(){ setBusy(false); elInput.focus(); });
+  }
+
+  /* ---- 推薦問題:點按鈕才請 AI 依「目前對話 + 本頁內容」生成 3 個追問,呈現為可點 chips ---- */
+  function pageContext(){
+    var hs = Array.prototype.slice.call(document.querySelectorAll('h1,h2')).slice(0, 6)
+      .map(function(h){ return (h.textContent || '').trim(); }).filter(Boolean).join(' / ');
+    return ((document.title || '') + (hs ? ' — ' + hs : '')).slice(0, 400);
+  }
+  function clearChips(){ elChips.innerHTML = ''; elChips.style.display = 'none'; }
+  function renderChips(qs){
+    elChips.innerHTML = '';
+    qs.forEach(function(q){
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'twc-chip'; c.textContent = q;
+      c.addEventListener('click', function(){ clearChips(); elInput.value = q; autoGrow(); send(); });
+      elChips.appendChild(c);
+    });
+    elChips.style.display = qs.length ? 'flex' : 'none';
+  }
+  function suggestQuestions(){
+    if (sugBusy) return;
+    var key = (state.key || '').trim();
+    if (!key){ setOpen(true); root.setAttribute('data-settings', 'true'); addMsg('error', T('chat.needkey')); elKey.focus(); return; }
+    sugBusy = true; elSug.disabled = true; elSug.textContent = T('chat.suggesting'); clearChips();
+    var lang = (window.twLang ? window.twLang() : 'zh-Hant');
+    var prompt = 'Based on this web page and our conversation, propose exactly 3 short, distinct questions the user is likely to want to ask next. '
+      + 'Page context: "' + pageContext() + '". Reply with ONLY the 3 questions, each on its own line — no numbering, no bullets, no extra text. '
+      + 'Write them in ' + (lang === 'en' ? 'English' : 'Traditional Chinese') + '.';
+    var p = PROVIDERS[curProv()];
+    var model = (state.model || '').trim() || p.model;
+    var turns = state.turns.slice(-6).concat([{ role: 'user', content: prompt }]);
+    p.send(key, model, turns).then(function(text){
+      var qs = (text || '').split('\n').map(function(s){ return s.replace(/^[\s\-*\d.)、。]+/, '').trim(); }).filter(Boolean).slice(0, 3);
+      renderChips(qs);
+    }).catch(function(err){
+      addMsg('error', T('chat.error') + (err && err.message ? err.message : err));
+    }).then(function(){ sugBusy = false; elSug.disabled = false; elSug.textContent = T('chat.suggest'); });
   }
 
   function autoGrow(){ elInput.style.height = 'auto'; elInput.style.height = Math.min(elInput.scrollHeight, 120) + 'px'; }
@@ -1722,7 +1774,8 @@
     else if (act === 'close'){ setOpen(false); }
     else if (act === 'settings'){ var openS = root.getAttribute('data-settings') !== 'true'; root.setAttribute('data-settings', openS ? 'true' : 'false'); if (openS) loadModels(); }
     else if (act === 'reload-models'){ loadModels(true); }
-    else if (act === 'clear'){ state.turns = []; save(); renderHistory(); }
+    else if (act === 'suggest'){ suggestQuestions(); }
+    else if (act === 'clear'){ state.turns = []; save(); renderHistory(); clearChips(); }
     else if (act === 'save'){ saveSettings(); }
   });
   root.querySelector('.twc-form').addEventListener('submit', function(e){ e.preventDefault(); send(); });
