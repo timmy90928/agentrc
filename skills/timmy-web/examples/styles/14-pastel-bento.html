@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山徑手記 — 高山縱走 2026 行記｜粉彩便當盒</title>
+
+<!-- ===== Pre-paint(theme-engine §7a):通用 pre-paint 由正本 assets/tw-engine.js 注入;
+     改正本後跑 scripts/sync_engine.py 同步。本標記區之間勿手改(會被覆蓋)。 ===== -->
+<!-- TW-PREPAINT:START -->
+<script>
+/* 通用 pre-paint(theme-engine §7a / §10-6):body 前定 data-mode / lang / accent。
+   只有 light 才寫 inline --bg(dark 留給 :root[data-mode=dark]{--bg} 規則,inline
+   specificity 最高會蓋過規則)。讀統一 store timmy-web-stylelab + URL ?accent/bg。
+   不需任何 per-page 設定 —— 9+1 款共用同一段。 */
+(function(){ try{
+  var el = document.documentElement,
+      s  = JSON.parse(localStorage.getItem('timmy-web-stylelab') || '{}'),
+      p  = new URLSearchParams(location.search),
+      m  = s.mode || 'light',
+      dark = (m === 'dark') || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  el.dataset.mode = dark ? 'dark' : 'light';
+  if (s.lang) el.lang = s.lang;
+  // hex 容錯:無 '#' 且非函式色(rgb()/color-mix())時補上 '#'
+  function norm(c){ return (c.charAt(0) === '#' || c.indexOf('(') > -1) ? c : '#' + c; }
+  var pa = p.get('accent');
+  if (s.accent) el.style.setProperty('--accent', s.accent);  // accent 兩模式皆 inline
+  if (pa)       el.style.setProperty('--accent', norm(pa));
+  // 只有 light 才寫 inline --bg;dark 交給 :root[data-mode="dark"]{--bg} 規則
+  if (!dark){ var bg = p.get('bg') || s.bg; if (bg) el.style.setProperty('--bg', norm(bg)); }
+}catch(e){} })();
+</script>
+<!-- TW-PREPAINT:END -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tw-config">tailwind.config={theme:{extend:{colors:{
+ /* ink/muted now resolve through CSS vars so dark mode can re-define them
+    (theme-engine §10 rule 1 — config hardcode would otherwise freeze text).
+    NOTE: Tailwind's `/NN` alpha modifier CANNOT inject opacity into a var()
+    colour (it silently falls back to black), so the previous `text-ink70..85`
+    are replaced by explicit color-mix tokens that also adapt to dark. */
+ ink:'var(--ink)',muted:'var(--muted)',
+ ink70:'color-mix(in srgb, var(--ink) 70%, transparent)',
+ ink75:'color-mix(in srgb, var(--ink) 75%, transparent)',
+ ink80:'color-mix(in srgb, var(--ink) 80%, transparent)',
+ ink85:'color-mix(in srgb, var(--ink) 85%, transparent)',
+ /* card = the white inner surface; cardsoft = the translucent white-on-tile
+    panes (formerly bg-white at 70-75% alpha). both re-defined in dark. */
+ card:'var(--card)',cardsoft:'var(--card-soft)',
+ /* every pastel token now resolves through CSS custom properties that are
+    derived from --accent + --bg (see :root). class names are unchanged so
+    the whole markup keeps working while colors follow the picked accent. */
+ mint:'var(--mint)',mintdeep:'var(--mint-deep)',minttint:'var(--mint-tint)',
+ peach:'var(--peach)',peachdeep:'var(--peach-deep)',peachtint:'var(--peach-tint)',
+ lav:'var(--lav)',lavdeep:'var(--lav-deep)',lavtint:'var(--lav-tint)',
+ butter:'var(--butter)',butterdeep:'var(--butter-deep)',buttertint:'var(--butter-tint)',
+ sky:'var(--sky)',skydeep:'var(--sky-deep)',skytint:'var(--sky-tint)',
+ rose:'var(--rose)',rosedeep:'var(--rose-deep)',rosetint:'var(--rose-tint)'},
+ fontFamily:{display:['"Baloo 2"','"Noto Sans TC"','sans-serif'],sans:['"Plus Jakarta Sans"','"Noto Sans TC"','sans-serif'],tc:['"Noto Sans TC"','"Plus Jakarta Sans"','sans-serif']},
+ borderRadius:{blob:'30px',pill:'999px'}}}}</script>
+<style>
+  /* ============================================================== */
+  /* THEME TOKENS — externally tunable                              */
+  /*   --accent : master highlight colour  (default = original mint) */
+  /*   --bg     : page background          (default = original warm) */
+  /* The 6 pastel families (mint/peach/lav/butter/sky/rose) are      */
+  /* DERIVED from --accent via OKLCH relative-colour hue rotation,   */
+  /* and their lightest tints are color-mix()'d with --bg so the     */
+  /* whole pastel set re-harmonises when you change either variable. */
+  /* ============================================================== */
+  :root{
+    --accent:#2F9E7E;   /* original main colour (mint-deep / teal)   */
+    --bg:#FBF7F4;       /* original warm off-white page background    */
+
+    /* ---- text + surfaces (Tailwind ink/muted/card/cardsoft point here,
+            so the dark block can re-define them — theme-engine §10) ---- */
+    --ink:#3A3A4A;            /* primary text (was hardcoded in config) */
+    --muted:#7B7B8C;          /* secondary text                         */
+    --card:#FFFFFF;           /* white inner surface (chip/navbtn/rows)  */
+    --card-soft:rgba(255,255,255,.72); /* translucent white-on-tile pane */
+    --on-deep:#FFFFFF;        /* text/icon sitting on a *-deep fill      */
+    --shadow-rgb:70,60,110;   /* soft violet shadow tint (deepens in dark) */
+
+    /* ---- per-family hue offsets relative to --accent ----
+       UNITLESS numbers on purpose: in relative-colour syntax the hue
+       channel keyword `h` is a <number> (degrees), so it must be added to
+       a plain number — `calc(h + 90deg)` is a type error and voids the value.
+       picked so the DEFAULT accent (#2F9E7E ≈ hue 169) reproduces the
+       original six families' positions on the wheel:
+         mint 0 · butter -85 · sky +90 · lav +120 · rose +190 · peach +233 */
+    --h-mint:0; --h-peach:233; --h-lav:120;
+    --h-butter:-85; --h-sky:90; --h-rose:190;
+
+    /* ---- DEEP: saturated, used for text / accents / dots ----
+       hue-rotated accent, normalised to a consistent deep L & chroma. */
+    --mint-deep:   oklch(from var(--accent) clamp(.55,l,.66) max(c,.13) calc(h + var(--h-mint)));
+    --peach-deep:  oklch(from var(--accent) clamp(.6,l,.68)  max(c,.16) calc(h + var(--h-peach)));
+    --lav-deep:    oklch(from var(--accent) clamp(.55,l,.64) max(c,.16) calc(h + var(--h-lav)));
+    --butter-deep: oklch(from var(--accent) clamp(.68,l,.74) max(c,.13) calc(h + var(--h-butter)));
+    --sky-deep:    oklch(from var(--accent) clamp(.6,l,.66)  max(c,.16) calc(h + var(--h-sky)));
+    --rose-deep:   oklch(from var(--accent) clamp(.6,l,.66)  max(c,.15) calc(h + var(--h-rose)));
+
+    /* ---- BASE: the chunky pastel fill (mid pastel) ----
+       same rotated hue, pushed light with softened chroma. */
+    --mint:   oklch(from var(--accent) .88 .10 calc(h + var(--h-mint)));
+    --peach:  oklch(from var(--accent) .88 .08 calc(h + var(--h-peach)));
+    --lav:    oklch(from var(--accent) .87 .07 calc(h + var(--h-lav)));
+    --butter: oklch(from var(--accent) .92 .10 calc(h + var(--h-butter)));
+    --sky:    oklch(from var(--accent) .88 .07 calc(h + var(--h-sky)));
+    --rose:   oklch(from var(--accent) .87 .08 calc(h + var(--h-rose)));
+
+    /* ---- TINT: the lightest wash ----
+       very light pastel, then color-mix()'d with --bg so the page
+       background bleeds into every tile's pale tint and keeps them warm. */
+    --mint-tint:   color-mix(in oklch, oklch(from var(--accent) .955 .04 calc(h + var(--h-mint)))   78%, var(--bg));
+    --peach-tint:  color-mix(in oklch, oklch(from var(--accent) .955 .035 calc(h + var(--h-peach))) 78%, var(--bg));
+    --lav-tint:    color-mix(in oklch, oklch(from var(--accent) .955 .03 calc(h + var(--h-lav)))    78%, var(--bg));
+    --butter-tint: color-mix(in oklch, oklch(from var(--accent) .97 .04 calc(h + var(--h-butter)))  78%, var(--bg));
+    --sky-tint:    color-mix(in oklch, oklch(from var(--accent) .955 .03 calc(h + var(--h-sky)))     78%, var(--bg));
+    --rose-tint:   color-mix(in oklch, oklch(from var(--accent) .95 .035 calc(h + var(--h-rose)))    78%, var(--bg));
+
+    /* ambient page-glow blobs, derived from accent family deeps */
+    --glow-a:var(--lav-deep);
+    --glow-b:var(--mint-deep);
+    --glow-c:var(--peach-deep);
+  }
+
+  /* ============================================================== */
+  /* DARK — soft midnight (#1a1820). The 6 pastel families stay      */
+  /* hue-locked to --accent but are re-derived DARKER + LOWER-CHROMA */
+  /* so bento tiles read as muted, layered slabs (not glowing neon); */
+  /* --deep stays bright enough to carry text/numbers on dark tiles. */
+  /* ============================================================== */
+  :root[data-mode="dark"]{
+    --bg:#1a1820;             /* soft midnight base                     */
+    --ink:#ECEAF2;            /* primary text: warm off-white           */
+    --muted:#A7A3B8;          /* secondary text: mid lilac-grey         */
+    --card:#26232f;           /* inner "white" surface → dark slab      */
+    --card-soft:rgba(255,255,255,.06); /* faint light wash on tiles     */
+    --on-deep:#15131b;        /* text on a *-deep fill (deeps are bright)*/
+    --shadow-rgb:0,0,0;       /* shadows go to true black, deeper        */
+
+    /* DEEP: keep vivid for text/numbers/dots on dark tiles
+       (slightly brighter L, a touch less chroma than light deeps). */
+    --mint-deep:   oklch(from var(--accent) clamp(.7,l,.8) min(max(c,.12),.16) calc(h + var(--h-mint)));
+    --peach-deep:  oklch(from var(--accent) clamp(.72,l,.8) min(max(c,.13),.17) calc(h + var(--h-peach)));
+    --lav-deep:    oklch(from var(--accent) clamp(.7,l,.8) min(max(c,.13),.17) calc(h + var(--h-lav)));
+    --butter-deep: oklch(from var(--accent) clamp(.78,l,.86) min(max(c,.11),.16) calc(h + var(--h-butter)));
+    --sky-deep:    oklch(from var(--accent) clamp(.72,l,.8) min(max(c,.13),.17) calc(h + var(--h-sky)));
+    --rose-deep:   oklch(from var(--accent) clamp(.72,l,.8) min(max(c,.12),.16) calc(h + var(--h-rose)));
+
+    /* BASE: the chunky tile fill → DARK desaturated slab
+       (low L mixed off the midnight base, faint accent-hued chroma). */
+    --mint:   oklch(from var(--accent) .31 .045 calc(h + var(--h-mint)));
+    --peach:  oklch(from var(--accent) .33 .05  calc(h + var(--h-peach)));
+    --lav:    oklch(from var(--accent) .32 .05  calc(h + var(--h-lav)));
+    --butter: oklch(from var(--accent) .33 .045 calc(h + var(--h-butter)));
+    --sky:    oklch(from var(--accent) .32 .05  calc(h + var(--h-sky)));
+    --rose:   oklch(from var(--accent) .33 .05  calc(h + var(--h-rose)));
+
+    /* TINT: the lightest wash → slightly-lifted dark
+       (sits just above --bg so tile gradients keep their layering). */
+    --mint-tint:   oklch(from var(--accent) .25 .03 calc(h + var(--h-mint)));
+    --peach-tint:  oklch(from var(--accent) .26 .035 calc(h + var(--h-peach)));
+    --lav-tint:    oklch(from var(--accent) .26 .035 calc(h + var(--h-lav)));
+    --butter-tint: oklch(from var(--accent) .26 .03 calc(h + var(--h-butter)));
+    --sky-tint:    oklch(from var(--accent) .26 .035 calc(h + var(--h-sky)));
+    --rose-tint:   oklch(from var(--accent) .26 .035 calc(h + var(--h-rose)));
+  }
+
+  html{background:var(--bg)}
+  body{-webkit-font-smoothing:antialiased;background:
+    radial-gradient(820px 520px at 88% -8%,color-mix(in oklch,var(--glow-a) 14%,transparent),transparent 60%),
+    radial-gradient(760px 520px at -6% 6%,color-mix(in oklch,var(--glow-b) 14%,transparent),transparent 58%),
+    radial-gradient(900px 600px at 50% 120%,color-mix(in oklch,var(--glow-c) 10%,transparent),transparent 60%),
+    var(--bg);background-attachment:fixed;transition:background-color .2s ease,color .2s ease}
+  .tc{font-family:'Noto Sans TC','Plus Jakarta Sans',sans-serif}
+  .disp{font-family:'Baloo 2','Noto Sans TC',sans-serif}
+  /* bento tile: chunky rounded, soft tinted shadow, no hard borders */
+  .tile{border-radius:30px;position:relative;overflow:hidden;
+    box-shadow:0 14px 34px -16px rgba(var(--shadow-rgb),.28),0 3px 10px -4px rgba(var(--shadow-rgb),.10);
+    transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,background-color .2s ease}
+  .tile.lift:hover{transform:translateY(-4px) rotate(-.3deg);box-shadow:0 24px 46px -18px rgba(var(--shadow-rgb),.36),0 5px 12px -4px rgba(var(--shadow-rgb),.14)}
+  /* little floating label pill */
+  .lab{display:inline-flex;align-items:center;gap:6px;border-radius:999px;
+    padding:5px 13px;font-size:11px;font-weight:800;letter-spacing:.06em;line-height:1;
+    box-shadow:0 5px 12px -6px rgba(var(--shadow-rgb),.30)}
+  .dot{width:9px;height:9px;border-radius:999px;display:inline-block;box-shadow:0 0 0 4px color-mix(in srgb,var(--card) 55%,transparent)}
+  .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;background:var(--card)}
+  /* tab buttons */
+  .navbtn{position:relative;border-radius:999px;font-weight:800;color:var(--muted);background:var(--card);
+    box-shadow:0 4px 12px -8px rgba(var(--shadow-rgb),.3);transition:all .18s cubic-bezier(.2,.8,.2,1)}
+  .navbtn:hover{transform:translateY(-2px);color:var(--ink)}
+  .navbtn.on{color:var(--on-deep);transform:translateY(-2px)}
+  .navbtn .em{font-size:15px;line-height:1}
+  .panel{animation:pop .26s cubic-bezier(.2,.9,.25,1)}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+  .ring{border-radius:999px;background:conic-gradient(var(--c) var(--p),color-mix(in srgb,var(--card) 60%,transparent) 0)}
+  .softline{height:1px;background:rgba(var(--shadow-rgb),.10)}
+  .blob{position:absolute;border-radius:999px;filter:blur(2px);opacity:.5}
+  :root[data-mode="dark"] .blob{opacity:.32}
+  *::-webkit-scrollbar{height:10px;width:10px}
+  *::-webkit-scrollbar-thumb{background:var(--lav);border-radius:999px}
+  *::-webkit-scrollbar-thumb:hover{background:var(--lav-deep)}
+  ::selection{background:var(--peach);color:var(--ink)}
+  a{text-decoration:none}
+
+  /* ---- settings panel (pastel-bento styled) ---- */
+  .settings-pop{animation:settingsPop .3s cubic-bezier(.2,.9,.25,1)}
+  @keyframes settingsPop{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
+  /* style picker rows — chunky blob pills (card surface, dark-aware) */
+  .style-row{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+    border-radius:18px;padding:10px 13px;background:var(--card);cursor:pointer;
+    box-shadow:0 5px 14px -10px rgba(var(--shadow-rgb),.4);
+    transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .16s ease}
+  .style-row:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(var(--shadow-rgb),.5)}
+  .style-row .em{font-size:18px;line-height:1;width:30px;height:30px;display:grid;place-items:center;
+    border-radius:999px;background:var(--mint-tint);flex:0 0 auto}
+  .style-row.active{background:var(--mint-deep);box-shadow:0 10px 22px -10px rgba(var(--shadow-rgb),.55)}
+  .style-row.active .nm,.style-row.active .sub{color:var(--on-deep)}
+  .style-row.active .em{background:color-mix(in srgb,var(--on-deep) 26%,transparent)}
+  .style-row.active .tick{opacity:1;color:var(--on-deep)}
+  .style-row .tick{margin-left:auto;font-weight:800;opacity:0;transition:opacity .16s ease;color:var(--mint-deep)}
+  /* mode / language segmented pills (chunky bento capsules) */
+  .seg-row{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+  .seg{flex:1 1 0;min-width:84px;display:flex;align-items:center;justify-content:center;gap:7px;
+    border-radius:999px;padding:10px 12px;background:var(--card);cursor:pointer;
+    font-weight:800;font-size:13px;color:var(--muted);line-height:1;
+    box-shadow:0 5px 14px -10px rgba(var(--shadow-rgb),.4);
+    transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .16s ease,color .16s ease,background-color .16s ease}
+  .seg .em{font-size:15px;line-height:1}
+  .seg:hover{transform:translateY(-2px);color:var(--ink)}
+  .seg[aria-pressed="true"]{background:var(--mint-deep);color:var(--on-deep);
+    box-shadow:0 9px 20px -10px rgba(var(--shadow-rgb),.55)}
+  /* colour swatches — round chunky chips */
+  .sw{width:38px;height:38px;border-radius:999px;cursor:pointer;position:relative;
+    box-shadow:0 5px 13px -6px rgba(var(--shadow-rgb),.4),inset 0 0 0 3px color-mix(in srgb,var(--card) 85%,transparent);
+    transition:transform .16s cubic-bezier(.2,.8,.2,1)}
+  .sw:hover{transform:translateY(-3px) scale(1.06)}
+  .sw.active{box-shadow:0 7px 16px -6px rgba(var(--shadow-rgb),.5),inset 0 0 0 3px var(--card),0 0 0 3px var(--ink)}
+  .sw .ck{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:900;
+    opacity:0;transition:opacity .14s ease;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .sw.active .ck{opacity:1}
+  /* swatch that shows the page bg — needs a soft outline ring to read on card */
+  .sw.lightsw{box-shadow:0 5px 13px -6px rgba(var(--shadow-rgb),.4),inset 0 0 0 1px rgba(var(--shadow-rgb),.16)}
+  .sw.lightsw.active{box-shadow:0 7px 16px -6px rgba(var(--shadow-rgb),.5),inset 0 0 0 1px rgba(var(--shadow-rgb),.16),0 0 0 3px var(--ink)}
+  .sw.lightsw .ck{color:var(--ink);text-shadow:none}
+</style>
+<!-- ===== favicon · 山徑手記 羅盤方位玫瑰 (compass rose) · timmy-web-favicon =====
+     依本頁解析後的 --accent 自動著色(含 ?accent= / store 覆寫);編輯風金棕北針 + 暖紙底。
+     屬「示範內容」非主題引擎,故不進 tw-engine.js;放各頁 <head> 末(pre-paint 之後)讀已解析 accent。
+     匯出「下載 HTML」剝除 <script> 但保留執行期注入的 <link rel=icon>,故乾淨檔仍帶 favicon。 -->
+<script>
+(function(){
+  function mix(hex){ // accent 與黑混 30%,作描邊 / 環(淺色 accent 仍可辨識);回 #rrggbb
+    hex=(hex||'').trim().replace('#','');
+    if(hex.length===3) hex=hex.replace(/./g,'$&$&');
+    if(hex.length<6) return '#142537';
+    var n=parseInt(hex.slice(0,6),16);
+    function d(x){ x=Math.round(x*0.7); return (x<16?'0':'')+x.toString(16); }
+    return '#'+d((n>>16)&255)+d((n>>8)&255)+d(n&255);
+  }
+  function paint(){
+    var accent=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim()||'#1d3557',
+        deep=mix(accent), gold='#9a7b4f', paper='#f4efe3',
+        svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+          +'<rect x="1" y="1" width="30" height="30" rx="6.5" fill="'+paper+'"/>'
+          +'<circle cx="16" cy="16" r="11.2" fill="none" stroke="'+deep+'" stroke-width="1.1"/>'
+          +'<g transform="rotate(45 16 16)"><path d="M16 8 17.7 14.3 24 16 17.7 17.7 16 24 14.3 17.7 8 16 14.3 14.3Z" fill="'+gold+'" fill-opacity=".32"/></g>'
+          +'<path d="M16 3.5 18.5 13.5 28.5 16 18.5 18.5 16 28.5 13.5 18.5 3.5 16 13.5 13.5Z" fill="'+accent+'" stroke="'+deep+'" stroke-width=".7" stroke-linejoin="round"/>'
+          +'<path d="M16 3.5 18.5 13.5 13.5 13.5Z" fill="'+gold+'"/>'
+          +'<circle cx="16" cy="16" r="1.8" fill="'+paper+'" stroke="'+deep+'" stroke-width=".9"/>'
+          +'</svg>',
+        href='data:image/svg+xml,'+encodeURIComponent(svg),
+        link=document.querySelector('link[rel="icon"]');
+    if(!link){ link=document.createElement('link'); link.setAttribute('rel','icon'); document.head.appendChild(link); }
+    link.setAttribute('type','image/svg+xml'); link.setAttribute('href',href);
+  }
+  try{ paint(); }catch(e){}
+  // accent 變更即時重繪(設定面板 twSetAccent 於主引擎載入後才有);讓 live favicon 與匯出同步
+  window.addEventListener('load',function(){ try{
+    if(typeof window.twSetAccent==='function' && !window.__twFaviconHook){
+      window.__twFaviconHook=true; var orig=window.twSetAccent;
+      window.twSetAccent=function(){ var r=orig.apply(this,arguments); try{ paint(); }catch(e){} return r; };
+    }
+    paint();
+  }catch(e){} });
+})();
+</script>
+</head>
+<body class="font-sans text-ink min-h-screen">
+
+<!-- 貼邊寬版:max-w-[1760px](超寬螢幕仍置中,避免過寬)+ 小 gutter px-4 sm:px-6 lg:px-10。 -->
+<div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-5 sm:py-8">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 mb-5">
+    <div class="flex items-center gap-3.5">
+      <span class="grid place-items-center w-14 h-14 rounded-blob text-[26px] shrink-0 disp font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(47,158,126,.6)]"
+            style="background:linear-gradient(135deg,var(--accent),var(--lav-deep))">⛰</span>
+      <div>
+        <h1 class="disp font-extrabold text-2xl sm:text-[30px] leading-none text-ink" data-i18n="chrome.brand">山徑手記</h1>
+        <div class="text-[10.5px] sm:text-[11px] font-bold tracking-[.22em] text-muted mt-1.5" data-i18n="hero.kicker">MOUNTAIN TRAILS · FIELD JOURNAL</div>
+      </div>
+    </div>
+    <div class="sm:ml-auto flex items-center gap-2 flex-wrap">
+      <span class="chip text-mintdeep shadow-[0_5px_14px_-8px_rgba(47,158,126,.6)]"><span class="dot bg-mintdeep"></span><span data-i18n="chrome.chip_days">14 日</span></span>
+      <span class="chip text-skydeep shadow-[0_5px_14px_-8px_rgba(79,134,230,.6)]"><span class="dot bg-skydeep"></span><span data-i18n="chrome.chip_ridges">3 稜線</span></span>
+      <span class="chip text-peachdeep shadow-[0_5px_14px_-8px_rgba(232,113,75,.6)]"><span class="dot bg-peachdeep"></span><span data-i18n="chrome.chip_km">142 km</span></span>
+      <!-- USER ICON → opens settings panel -->
+      <button id="userBtn" onclick="toggleSettings()" aria-label="使用者設定" data-i18n-attr="aria-label:chrome.user_settings" aria-expanded="false"
+        class="grid place-items-center w-11 h-11 rounded-pill shrink-0 text-white text-[18px] disp font-extrabold transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        style="background:linear-gradient(135deg,var(--accent),var(--lav-deep));box-shadow:0 8px 20px -8px rgba(70,60,110,.55)">🧑</button>
+    </div>
+  </header>
+
+  <!-- ===================== TAB NAV ===================== -->
+  <nav class="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-5 select-none">
+    <button onclick="nav(0)" data-tab="0" class="navbtn px-4 sm:px-5 py-2.5 flex items-center gap-2 tc" style="--on:var(--mint-deep)">
+      <span class="em">🗺️</span><span data-i18n="nav.overview">總覽</span><span class="opacity-60 text-[11px] hidden sm:inline font-bold">overview</span>
+    </button>
+    <button onclick="nav(1)" data-tab="1" class="navbtn px-4 sm:px-5 py-2.5 flex items-center gap-2 tc" style="--on:var(--sky-deep)">
+      <span class="em">🧭</span><span data-i18n="nav.routes">路線</span><span class="opacity-60 text-[11px] hidden sm:inline font-bold">routes</span>
+    </button>
+    <button onclick="nav(2)" data-tab="2" class="navbtn px-4 sm:px-5 py-2.5 flex items-center gap-2 tc" style="--on:var(--butter-deep)">
+      <span class="em">🎒</span><span data-i18n="nav.gear">裝備</span><span class="opacity-60 text-[11px] hidden sm:inline font-bold">gear</span>
+    </button>
+    <button onclick="nav(3)" data-tab="3" class="navbtn px-4 sm:px-5 py-2.5 flex items-center gap-2 tc" style="--on:var(--lav-deep)">
+      <span class="em">📝</span><span data-i18n="nav.journal">隨筆</span><span class="opacity-60 text-[11px] hidden sm:inline font-bold">notes</span>
+    </button>
+    <span class="ml-auto hidden md:inline-flex chip text-lavdeep shadow-[0_5px_14px_-8px_rgba(124,107,214,.6)]">🍱 bento</span>
+  </nav>
+
+  <!-- ============================================================== -->
+  <!-- PANEL 0 : 總覽 OVERVIEW                                         -->
+  <!-- ============================================================== -->
+  <section data-panel="0" class="panel">
+    <div class="grid grid-cols-1 sm:grid-cols-6 xl:grid-cols-12 gap-3.5 sm:gap-4 auto-rows-auto">
+
+      <!-- HERO tile (wide) -->
+      <div class="tile lift sm:col-span-4 xl:col-span-6 p-6 sm:p-8" style="background:linear-gradient(135deg,var(--mint-tint) 0%,var(--lav-tint) 60%,var(--sky-tint) 100%)">
+        <span class="blob w-40 h-40 -top-10 -right-8" style="background:var(--mint)"></span>
+        <span class="blob w-24 h-24 bottom-4 right-24" style="background:var(--lav)"></span>
+        <div class="relative">
+          <span class="lab bg-card text-mintdeep"><span class="dot bg-mintdeep"></span><span data-i18n="chrome.hero_lab">HIGH-MOUNTAIN TRAVERSE · 2026</span></span>
+          <h2 class="disp font-extrabold text-3xl sm:text-[44px] leading-[1.08] mt-4 text-ink">
+            <span data-i18n="chrome.hero_t1">高山縱走</span> <span class="text-transparent bg-clip-text" style="background-image:linear-gradient(90deg,var(--mint-deep),var(--lav-deep),var(--peach-deep))">2026</span> <span data-i18n="chrome.hero_t2">行記</span>
+          </h2>
+          <p class="tc text-[14.5px] sm:text-[15px] leading-8 text-ink80 mt-4 max-w-xl" data-i18n="hero.lead">三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。</p>
+        </div>
+      </div>
+
+      <!-- BEST SEASON highlight tile (tall, peach) -->
+      <div class="tile lift sm:col-span-2 sm:row-span-2 xl:col-span-3 p-6 flex flex-col" style="background:linear-gradient(160deg,var(--peach-tint),var(--peach))">
+        <span class="blob w-28 h-28 -bottom-6 -left-6" style="background:var(--rose)"></span>
+        <div class="relative flex-1 flex flex-col">
+          <span class="lab bg-card text-peachdeep self-start"><span class="dot bg-peachdeep"></span><span data-i18n="chrome.best_season">BEST SEASON</span></span>
+          <div class="disp font-extrabold text-[64px] leading-none text-peachdeep mt-5">7–9<span class="text-[26px] tc font-bold align-top ml-1" data-i18n="chrome.month">月</span></div>
+          <p class="tc text-[14px] leading-8 text-ink85 mt-4">
+            <span class="font-bold text-peachdeep" data-i18n="callout.season_lead">最佳季節</span> <span data-i18n="callout.season_body">7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</span>
+          </p>
+          <div class="mt-auto pt-5 flex gap-2 flex-wrap">
+            <span class="chip text-mintdeep text-[11px]" data-i18n="chrome.tag_rain">避梅雨</span>
+            <span class="chip text-skydeep text-[11px]" data-i18n="chrome.tag_snow">避初雪</span>
+            <span class="chip text-peachdeep text-[11px]" data-i18n="chrome.tag_cold">防寒流</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT: routes (mint) -->
+      <div class="tile lift sm:col-span-2 xl:col-span-3 p-6" style="background:linear-gradient(150deg,var(--mint-tint),var(--mint))">
+        <span class="lab bg-card text-mintdeep"><span class="dot bg-mintdeep"></span><span data-i18n="chrome.lab_routes">ROUTES · 路線</span></span>
+        <div class="flex items-end justify-between mt-4">
+          <div>
+            <div class="disp font-extrabold text-[56px] leading-none text-mintdeep">3</div>
+            <div class="tc text-[13px] font-semibold text-ink70 mt-1" data-i18n="stats.routes_sub">條經典稜線</div>
+          </div>
+          <span class="text-[34px] opacity-80">🏔️</span>
+        </div>
+      </div>
+
+      <!-- STAT: distance (sky) -->
+      <div class="tile lift sm:col-span-2 xl:col-span-3 p-6" style="background:linear-gradient(150deg,var(--sky-tint),var(--sky))">
+        <span class="lab bg-card text-skydeep"><span class="dot bg-skydeep"></span><span data-i18n="chrome.lab_dist">DISTANCE · 總里程</span></span>
+        <div class="flex items-end justify-between mt-4">
+          <div>
+            <div class="disp font-extrabold text-[56px] leading-none text-skydeep">142<span class="text-[22px] tc align-top ml-1" data-i18n="chrome.km">km</span></div>
+            <div class="tc text-[13px] font-semibold text-ink70 mt-1" data-i18n="stats.dist_sub">含接駁</div>
+          </div>
+          <span class="text-[34px] opacity-80">🥾</span>
+        </div>
+      </div>
+
+      <!-- STAT: days (butter) -->
+      <div class="tile lift sm:col-span-2 xl:col-span-3 p-6" style="background:linear-gradient(150deg,var(--butter-tint),var(--butter))">
+        <span class="lab bg-card text-butterdeep"><span class="dot bg-butterdeep"></span><span data-i18n="chrome.lab_days">DAYS · 天數</span></span>
+        <div class="flex items-end justify-between mt-4">
+          <div>
+            <div class="disp font-extrabold text-[56px] leading-none text-butterdeep">14</div>
+            <div class="tc text-[13px] font-semibold text-ink70 mt-1" data-i18n="stats.days_sub">含整裝日</div>
+          </div>
+          <span class="text-[34px] opacity-80">🗓️</span>
+        </div>
+      </div>
+
+      <!-- QUICK GOTO launcher (full width) -->
+      <div class="tile sm:col-span-6 xl:col-span-12 p-6 sm:p-7 bg-card">
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="lab bg-lavtint text-lavdeep"><span class="dot bg-lavdeep"></span><span data-i18n="chrome.lab_quick">QUICK GOTO · 快速前往</span></span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <a href="#" class="group rounded-blob p-4 flex items-center gap-3 transition-transform hover:-translate-y-1" style="background:var(--mint-tint)">
+            <span class="grid place-items-center w-9 h-9 rounded-pill bg-card text-mintdeep text-lg shrink-0">📖</span>
+            <span class="tc flex-1 font-bold text-ink" data-i18n="quick.routes">路線詳解</span>
+            <span class="text-mintdeep font-extrabold group-hover:translate-x-1 transition">→</span>
+          </a>
+          <a href="#" class="group rounded-blob p-4 flex items-center gap-3 transition-transform hover:-translate-y-1" style="background:var(--sky-tint)">
+            <span class="grid place-items-center w-9 h-9 rounded-pill bg-card text-skydeep text-lg shrink-0">🗺️</span>
+            <span class="tc flex-1 font-bold text-ink" data-i18n="quick.supply">補給點地圖</span>
+            <span class="text-skydeep font-extrabold group-hover:translate-x-1 transition">→</span>
+          </a>
+          <a href="#" class="group rounded-blob p-4 flex items-center gap-3 transition-transform hover:-translate-y-1" style="background:var(--butter-tint)">
+            <span class="grid place-items-center w-9 h-9 rounded-pill bg-card text-butterdeep text-lg shrink-0">💧</span>
+            <span class="tc flex-1 font-bold text-ink" data-i18n="quick.weather">天氣與水源</span>
+            <span class="text-butterdeep font-extrabold group-hover:translate-x-1 transition">→</span>
+          </a>
+          <a href="#" class="group rounded-blob p-4 flex items-center gap-3 transition-transform hover:-translate-y-1" style="background:var(--peach-tint)">
+            <span class="grid place-items-center w-9 h-9 rounded-pill bg-card text-peachdeep text-lg shrink-0">🎫</span>
+            <span class="tc flex-1 font-bold text-ink" data-i18n="quick.permit">申請與入山證</span>
+            <span class="text-peachdeep font-extrabold group-hover:translate-x-1 transition">↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- PANEL 1 : 路線 ROUTES                                          -->
+  <!-- ============================================================== -->
+  <section data-panel="1" class="panel hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-6 xl:grid-cols-12 gap-3.5 sm:gap-4">
+
+      <!-- route summary (wide, lavender) -->
+      <div class="tile sm:col-span-6 xl:col-span-12 p-6 sm:p-8" style="background:linear-gradient(135deg,var(--lav-tint),var(--lav))">
+        <span class="blob w-36 h-36 -top-8 right-10" style="background:var(--sky)"></span>
+        <div class="relative">
+          <span class="lab bg-card text-lavdeep"><span class="dot bg-lavdeep"></span><span data-i18n="chrome.lab_summary">SUMMARY · 路線概要</span></span>
+          <!-- 貼邊寬版:長文在寬螢幕分 2 欄(吃滿寬、單行不過長);窄螢幕單欄。 -->
+          <p class="tc text-[15px] sm:text-[16px] leading-9 text-ink mt-4 max-w-3xl xl:max-w-none xl:columns-2 xl:gap-10">
+            <span data-i18n="rsum.a">本季由北段</span><span class="font-bold text-mintdeep" data-i18n="rsum.qilai">奇萊連峰</span><span data-i18n="rsum.b">入山,沿主稜南下接</span><span class="font-bold text-skydeep" data-i18n="rsum.nenggao">能高安東軍</span><span data-i18n="rsum.c">,最後由</span><span class="font-bold text-peachdeep" data-i18n="rsum.nan3">南三段</span><span data-i18n="rsum.d">出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- daily highlights as bento mini-cards -->
+      <div class="tile sm:col-span-6 xl:col-span-12 p-6 sm:p-7 bg-card">
+        <span class="lab bg-skytint text-skydeep"><span class="dot bg-skydeep"></span><span data-i18n="chrome.lab_daily">DAILY · 每日重點</span></span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-5">
+
+          <div class="rounded-blob p-5 flex flex-col" style="background:var(--mint-tint)">
+            <div class="flex items-center justify-between">
+              <span class="chip text-mintdeep text-[12px]">D1–D3</span>
+              <span class="text-[22px]">🌅</span>
+            </div>
+            <div class="disp font-extrabold text-[19px] text-ink mt-3 leading-snug" data-i18n="day.r1_name">奇萊主北</div>
+            <p class="tc text-[13px] leading-7 text-ink70 mt-1.5" data-i18n="day.r1_focus">高度適應、看雲海日出</p>
+          </div>
+
+          <div class="rounded-blob p-5 flex flex-col" style="background:var(--sky-tint)">
+            <div class="flex items-center justify-between">
+              <span class="chip text-skydeep text-[12px]">D4–D7</span>
+              <span class="text-[22px]">🌾</span>
+            </div>
+            <div class="disp font-extrabold text-[19px] text-ink mt-3 leading-snug" data-i18n="day.r2_name">能高安東軍</div>
+            <p class="tc text-[13px] leading-7 text-ink70 mt-1.5" data-i18n="day.r2_focus">草原稜線、最長水線</p>
+          </div>
+
+          <div class="rounded-blob p-5 flex flex-col" style="background:var(--butter-tint)">
+            <div class="flex items-center justify-between">
+              <span class="chip text-butterdeep text-[12px]">D8–D11</span>
+              <span class="text-[22px]">🪵</span>
+            </div>
+            <div class="disp font-extrabold text-[19px] text-ink mt-3 leading-snug" data-i18n="day.r3_name">丹大林道</div>
+            <p class="tc text-[13px] leading-7 text-ink70 mt-1.5" data-i18n="day.r3_focus">廢棄索道與獵徑</p>
+          </div>
+
+          <div class="rounded-blob p-5 flex flex-col" style="background:var(--peach-tint)">
+            <div class="flex items-center justify-between">
+              <span class="chip text-peachdeep text-[12px]">D12–D14</span>
+              <span class="text-[22px]">♨️</span>
+            </div>
+            <div class="disp font-extrabold text-[19px] text-ink mt-3 leading-snug" data-i18n="day.r4_name">能高越嶺</div>
+            <p class="tc text-[13px] leading-7 text-ink70 mt-1.5" data-i18n="day.r4_focus">下山接駁、溫泉整裝</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- route metrics recap (3 mini stat, mint) -->
+      <div class="tile sm:col-span-3 xl:col-span-6 p-6" style="background:linear-gradient(150deg,var(--mint-tint),var(--mint))">
+        <span class="lab bg-card text-mintdeep"><span class="dot bg-mintdeep"></span><span data-i18n="chrome.lab_stats">STATS · 路線數據</span></span>
+        <div class="grid grid-cols-3 gap-2.5 mt-5">
+          <div class="bg-cardsoft rounded-blob px-3 py-4 text-center">
+            <div class="disp font-extrabold text-[30px] text-mintdeep leading-none">3</div>
+            <div class="tc text-[11px] font-semibold text-ink70 mt-1.5" data-i18n="chrome.m_ridges">條稜線</div>
+          </div>
+          <div class="bg-cardsoft rounded-blob px-3 py-4 text-center">
+            <div class="disp font-extrabold text-[30px] text-skydeep leading-none">142</div>
+            <div class="tc text-[11px] font-semibold text-ink70 mt-1.5" data-i18n="chrome.m_km">km 含接駁</div>
+          </div>
+          <div class="bg-cardsoft rounded-blob px-3 py-4 text-center">
+            <div class="disp font-extrabold text-[30px] text-peachdeep leading-none">14</div>
+            <div class="tc text-[11px] font-semibold text-ink70 mt-1.5" data-i18n="chrome.m_days">天 含整裝</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- season note (sky) -->
+      <div class="tile sm:col-span-3 xl:col-span-6 p-6" style="background:linear-gradient(150deg,var(--sky-tint),var(--sky))">
+        <span class="lab bg-card text-skydeep"><span class="dot bg-skydeep"></span><span data-i18n="chrome.lab_season">SEASON · 最佳季節</span></span>
+        <p class="tc text-[14.5px] leading-8 text-ink mt-4">
+          <span class="font-bold text-skydeep" data-i18n="callout.season_lead">最佳季節</span> <span data-i18n="callout.season_body">7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- PANEL 2 : 裝備 GEAR                                            -->
+  <!-- ============================================================== -->
+  <section data-panel="2" class="panel hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-6 xl:grid-cols-12 gap-3.5 sm:gap-4">
+
+      <!-- packing checklist (wide, butter) -->
+      <div class="tile sm:col-span-4 xl:col-span-8 p-6 sm:p-7" style="background:linear-gradient(135deg,var(--butter-tint),var(--butter))">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="lab bg-card text-butterdeep"><span class="dot bg-butterdeep"></span><span data-i18n="chrome.lab_checklist">CHECKLIST · 裝備清單</span></span>
+          <span class="chip text-mintdeep text-[12px]"><span class="dot bg-mintdeep"></span><span data-i18n="chrome.ready88">8 / 8 已備</span></span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 mt-5">
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">🎒</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i1">60L 背包</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">🛌</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i2">三季睡袋(-5°C)</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">⛺</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i3">輕量帳</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">💧</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i4">濾水器</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">🍫</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i5">行動糧 5 日</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">🔦</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i6">頭燈備用電池</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">🩹</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i7">急救包</span><span class="text-mintdeep font-extrabold">✓</span></div>
+          <div class="bg-cardsoft rounded-pill px-4 py-3 flex items-center gap-3"><span class="text-[18px]">🧭</span><span class="tc font-semibold text-ink flex-1" data-i18n="gear.i8">離線地圖</span><span class="text-mintdeep font-extrabold">✓</span></div>
+        </div>
+      </div>
+
+      <!-- pack progress ring (lavender) -->
+      <div class="tile sm:col-span-2 xl:col-span-4 p-6 flex flex-col items-center justify-center text-center" style="background:linear-gradient(160deg,var(--lav-tint),var(--lav))">
+        <span class="lab bg-card text-lavdeep self-start"><span class="dot bg-lavdeep"></span><span data-i18n="chrome.lab_load">LOAD · 打包進度</span></span>
+        <div class="ring grid place-items-center w-36 h-36 mt-6" style="--c:var(--lav-deep);--p:100%">
+          <div class="bg-card rounded-pill w-[104px] h-[104px] grid place-items-center">
+            <div class="disp font-extrabold text-[34px] text-lavdeep leading-none">100<span class="text-[16px]">%</span></div>
+          </div>
+        </div>
+        <div class="tc text-[13px] font-semibold text-ink70 mt-5" data-i18n="chrome.ready_all">8 / 8 項目已備齊</div>
+      </div>
+
+      <!-- season strip (full, peach) -->
+      <div class="tile sm:col-span-6 xl:col-span-12 p-6 sm:p-7" style="background:linear-gradient(135deg,var(--peach-tint),var(--peach))">
+        <span class="lab bg-card text-peachdeep"><span class="dot bg-peachdeep"></span><span data-i18n="chrome.lab_seasonnote">SEASON · 季節須知</span></span>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
+          <div class="bg-cardsoft rounded-blob px-5 py-4">
+            <div class="tc text-[12px] font-bold text-muted" data-i18n="chrome.window">適行窗口</div>
+            <div class="disp font-extrabold text-[24px] text-mintdeep mt-1" data-i18n="chrome.window_v">7–9 月</div>
+          </div>
+          <div class="bg-cardsoft rounded-blob px-5 py-4">
+            <div class="tc text-[12px] font-bold text-muted" data-i18n="chrome.avoid">避開</div>
+            <div class="disp font-extrabold text-[24px] text-skydeep mt-1" data-i18n="chrome.avoid_v">梅雨 · 初雪</div>
+          </div>
+          <div class="bg-cardsoft rounded-blob px-5 py-4">
+            <div class="tc text-[12px] font-bold text-muted" data-i18n="chrome.watch">留意</div>
+            <div class="disp font-extrabold text-[24px] text-peachdeep mt-1" data-i18n="chrome.watch_v">入秋首波寒流</div>
+          </div>
+        </div>
+        <p class="tc text-[14px] leading-8 text-ink80 mt-5 max-w-4xl">
+          <span class="font-bold text-peachdeep" data-i18n="callout.season_lead">最佳季節</span> <span data-i18n="callout.season_body">7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- PANEL 3 : 隨筆 NOTES                                           -->
+  <!-- ============================================================== -->
+  <section data-panel="3" class="panel hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-6 xl:grid-cols-12 gap-3.5 sm:gap-4">
+
+      <!-- foreword (wide, mint) -->
+      <div class="tile sm:col-span-6 xl:col-span-12 p-6 sm:p-8" style="background:linear-gradient(135deg,var(--mint-tint),var(--mint))">
+        <span class="blob w-32 h-32 -bottom-8 right-12" style="background:var(--butter)"></span>
+        <div class="relative">
+          <span class="lab bg-card text-mintdeep"><span class="dot bg-mintdeep"></span><span data-i18n="chrome.lab_foreword">FOREWORD · 前言</span></span>
+          <p class="disp text-[20px] sm:text-[26px] leading-[1.6] text-ink mt-5 max-w-3xl xl:max-w-5xl font-semibold" data-i18n="hero.lead">三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。</p>
+        </div>
+      </div>
+
+      <!-- note: 路線概要 (lavender) -->
+      <div class="tile lift sm:col-span-2 xl:col-span-4 p-6" style="background:linear-gradient(160deg,var(--lav-tint),var(--lav))">
+        <span class="lab bg-card text-lavdeep"><span class="dot bg-lavdeep"></span><span data-i18n="chrome.note_summary">NOTE · 路線概要</span></span>
+        <p class="tc text-[13.5px] leading-8 text-ink85 mt-4">
+          <span data-i18n="rsum.a">本季由北段</span><span class="font-bold text-mintdeep" data-i18n="rsum.qilai">奇萊連峰</span><span data-i18n="rsum.b">入山,沿主稜南下接</span><span class="font-bold text-skydeep" data-i18n="rsum.nenggao">能高安東軍</span><span data-i18n="rsum.c">,最後由</span><span class="font-bold text-peachdeep" data-i18n="rsum.nan3">南三段</span><span data-i18n="rsum.d">出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。</span>
+        </p>
+      </div>
+
+      <!-- note: 每日重點 (sky) -->
+      <div class="tile lift sm:col-span-2 xl:col-span-4 p-6" style="background:linear-gradient(160deg,var(--sky-tint),var(--sky))">
+        <span class="lab bg-card text-skydeep"><span class="dot bg-skydeep"></span><span data-i18n="chrome.note_daily">NOTE · 每日重點</span></span>
+        <div class="mt-4 space-y-2.5 text-[13px]">
+          <div class="flex gap-2.5"><span class="chip text-mintdeep text-[11px] shrink-0">D1–D3</span><span class="tc text-ink85 leading-6" data-i18n="nday.r1">奇萊主北 · 高度適應、看雲海日出</span></div>
+          <div class="flex gap-2.5"><span class="chip text-skydeep text-[11px] shrink-0">D4–D7</span><span class="tc text-ink85 leading-6" data-i18n="nday.r2">能高安東軍 · 草原稜線、最長水線</span></div>
+          <div class="flex gap-2.5"><span class="chip text-butterdeep text-[11px] shrink-0">D8–D11</span><span class="tc text-ink85 leading-6" data-i18n="nday.r3">丹大林道 · 廢棄索道與獵徑</span></div>
+          <div class="flex gap-2.5"><span class="chip text-peachdeep text-[11px] shrink-0">D12–D14</span><span class="tc text-ink85 leading-6" data-i18n="nday.r4">能高越嶺 · 下山接駁、溫泉整裝</span></div>
+        </div>
+      </div>
+
+      <!-- note: 裝備清單 (butter) -->
+      <div class="tile lift sm:col-span-2 xl:col-span-4 p-6" style="background:linear-gradient(160deg,var(--butter-tint),var(--butter))">
+        <span class="lab bg-card text-butterdeep"><span class="dot bg-butterdeep"></span><span data-i18n="chrome.note_gear">NOTE · 裝備清單</span></span>
+        <p class="tc text-[13.5px] leading-8 text-ink85 mt-4" data-i18n="chrome.gear_inline">60L 背包 · 三季睡袋(-5°C)· 輕量帳 · 濾水器 · 行動糧 5 日 · 頭燈備用電池 · 急救包 · 離線地圖</p>
+      </div>
+
+      <!-- season aside (full, peach) -->
+      <div class="tile sm:col-span-6 xl:col-span-12 p-6" style="background:linear-gradient(135deg,var(--peach-tint),var(--rose))">
+        <div class="flex items-start gap-4">
+          <span class="grid place-items-center w-11 h-11 rounded-pill bg-card text-[20px] shrink-0 shadow-[0_6px_14px_-8px_rgba(224,88,138,.6)]">🌦️</span>
+          <p class="tc text-[14.5px] leading-8 text-ink85 max-w-4xl">
+            <span class="font-bold text-peachdeep" data-i18n="callout.season_lead">最佳季節</span> <span data-i18n="callout.season_body">7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="mt-5 tile bg-card p-6 sm:px-8 sm:py-6">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="grid place-items-center w-9 h-9 rounded-pill text-white text-[16px] shrink-0" style="background:linear-gradient(135deg,var(--accent),var(--lav-deep))">⛰</span>
+        <span class="disp font-extrabold text-ink text-[16px]" data-i18n="chrome.brand">山徑手記</span>
+      </div>
+      <div class="softline flex-1 hidden sm:block"></div>
+      <p class="tc text-[13px] text-muted leading-relaxed" data-i18n="ui.footer_note">個人山徑手記 · 內容若有異動以現場與官方公告為準。</p>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ============================================================== -->
+<!-- SETTINGS PANEL — fully styled in this "粉彩便當" pastel-bento     -->
+<!-- look: chunky blob tiles, soft tinted shadows, lab pills, dots.  -->
+<!-- ============================================================== -->
+<div id="settingsOverlay" class="fixed inset-0 z-[60] hidden">
+  <!-- scrim -->
+  <div onclick="toggleSettings(false)" class="absolute inset-0"
+       style="background:color-mix(in oklch,var(--lav-deep) 22%,transparent);backdrop-filter:blur(6px) saturate(1.1)"></div>
+
+  <!-- panel card -->
+  <div id="settingsCard" role="dialog" aria-modal="true" aria-label="設定面板" data-i18n-attr="aria-label:ui.settings_panel"
+       class="settings-pop absolute right-3 sm:right-5 top-[84px] sm:top-[88px] w-[min(440px,calc(100vw-1.5rem))] max-h-[calc(100vh-110px)] overflow-y-auto tile bg-card p-5 sm:p-6">
+    <span class="blob w-32 h-32 -top-10 -right-8" style="background:var(--lav)"></span>
+    <span class="blob w-24 h-24 -bottom-8 -left-6" style="background:var(--mint)"></span>
+
+    <!-- header row -->
+    <div class="relative flex items-center gap-3 mb-5">
+      <span class="grid place-items-center w-11 h-11 rounded-blob text-white text-[20px] shrink-0 disp font-extrabold"
+            style="background:linear-gradient(135deg,var(--accent),var(--lav-deep));box-shadow:0 8px 18px -8px rgba(70,60,110,.5)">🧑</span>
+      <div class="flex-1">
+        <div class="disp font-extrabold text-[19px] leading-none text-ink" data-i18n="ui.appearance">外觀設定</div>
+        <div class="text-[10.5px] font-bold tracking-[.2em] text-muted mt-1.5" data-i18n="chrome.appearance_sub">APPEARANCE · PASTEL BENTO</div>
+      </div>
+      <button onclick="toggleSettings(false)" aria-label="關閉" data-i18n-attr="aria-label:ui.close"
+        class="grid place-items-center w-9 h-9 rounded-pill bg-lavtint text-lavdeep text-[16px] font-extrabold shrink-0 transition-transform hover:-translate-y-0.5 active:translate-y-0">✕</button>
+    </div>
+
+    <!-- ===== SECTION 1 · STYLE ===== -->
+    <div class="relative rounded-blob p-4 sm:p-5 mb-3.5" style="background:var(--mint-tint)">
+      <span class="lab bg-card text-mintdeep"><span class="dot bg-mintdeep"></span><span data-i18n="ui.sec_style">STYLE · 風格</span></span>
+      <div id="styleList" class="grid grid-cols-1 gap-2 mt-4"></div>
+    </div>
+
+    <!-- ===== SECTION 2 · ACCENT ===== -->
+    <div class="relative rounded-blob p-4 sm:p-5 mb-3.5" style="background:var(--sky-tint)">
+      <span class="lab bg-card text-skydeep"><span class="dot bg-skydeep"></span><span data-i18n="ui.sec_accent">ACCENT · 主色</span></span>
+      <div id="accentSwatches" class="flex flex-wrap gap-2.5 mt-4"></div>
+    </div>
+
+    <!-- ===== SECTION 3 · BACKGROUND ===== -->
+    <div class="relative rounded-blob p-4 sm:p-5 mb-3.5" style="background:var(--peach-tint)">
+      <span class="lab bg-card text-peachdeep"><span class="dot bg-peachdeep"></span><span data-i18n="ui.sec_bg">BACKGROUND · 背景色</span></span>
+      <div id="bgSwatches" class="flex flex-wrap gap-2.5 mt-4"></div>
+    </div>
+
+    <!-- ===== SECTION 3b · MODE(淺/深/系統;膠囊)===== -->
+    <div class="relative rounded-blob p-4 sm:p-5 mb-3.5" style="background:var(--lav-tint)">
+      <span class="lab bg-card text-lavdeep"><span class="dot bg-lavdeep"></span><span data-i18n="ui.sec_mode">MODE · 模式</span></span>
+      <div class="seg-row">
+        <button type="button" data-set-mode="light" class="seg"><span class="em">☀️</span><span class="tc" data-i18n="ui.light">淺色</span></button>
+        <button type="button" data-set-mode="dark" class="seg"><span class="em">🌙</span><span class="tc" data-i18n="ui.dark">深色</span></button>
+        <button type="button" data-set-mode="system" class="seg"><span class="em">🌗</span><span class="tc" data-i18n="ui.system">跟隨系統</span></button>
+      </div>
+      <p class="tc text-[10.5px] leading-6 text-ink70 mt-3" data-i18n="ui.bg_hint">深色模式下以策展深色基底為準,背景色票僅作用於淺色</p>
+    </div>
+
+    <!-- ===== SECTION 3c · LANGUAGE(中文/English;膠囊)===== -->
+    <div class="relative rounded-blob p-4 sm:p-5 mb-3.5" style="background:var(--rose-tint)">
+      <span class="lab bg-card text-rosedeep"><span class="dot bg-rosedeep"></span><span data-i18n="ui.sec_lang">LANGUAGE · 語言</span></span>
+      <div class="seg-row">
+        <button type="button" data-set-lang="zh-Hant" class="seg"><span class="em">🇹🇼</span><span class="tc">繁體中文</span></button>
+        <button type="button" data-set-lang="en" class="seg"><span class="em">🇬🇧</span><span class="tc">English</span></button>
+      </div>
+    </div>
+
+    <!-- ===== SECTION 4 · EXPORT ===== -->
+    <div class="relative rounded-blob p-4 sm:p-5" style="background:var(--butter-tint)">
+      <span class="lab bg-card text-butterdeep"><span class="dot bg-butterdeep"></span><span data-i18n="ui.sec_export">EXPORT · 匯出</span></span>
+      <p class="tc text-[12.5px] leading-7 text-ink75 mt-3" data-i18n="ui.export_hint">將目前頁面(含此刻配色)匯出為單一自包含 .html,移除設定面板,保留分頁與全部內容。</p>
+      <button id="downloadBtn" type="button" title="匯出目前頁面為自包含 HTML(固定目前配色與深色/語言)" data-i18n-attr="title:ui.export_title"
+        class="mt-4 w-full rounded-pill px-5 py-3.5 flex items-center justify-center gap-2.5 text-white disp font-extrabold text-[15px] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        style="background:linear-gradient(135deg,var(--butter-deep),var(--peach-deep));box-shadow:0 10px 22px -10px rgba(70,60,110,.55)">
+        <span class="text-[18px] leading-none">⬇️</span><span data-i18n="ui.download">下載 HTML</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script id="tab-script">
+  /* ---- tab switching (kept in export whitelist) ---- */
+  window.curNav = 0;
+  function nav(i){
+    window.curNav = i;
+    document.querySelectorAll('.panel').forEach(function(p,idx){p.classList.toggle('hidden',idx!==i);});
+    document.querySelectorAll('.navbtn').forEach(function(b,idx){
+      var on = idx===i;
+      b.classList.toggle('on',on);
+      // resolve the per-tab accent (--on, a var()) to a concrete colour;
+      // inactive tabs use --card so they read correctly in dark mode.
+      var onColor = getComputedStyle(b).getPropertyValue('--on').trim() || 'var(--accent)';
+      b.style.background = on ? onColor : 'var(--card)';
+    });
+    if(window.scrollY>140) window.scrollTo({top:0,behavior:'smooth'});
+  }
+  window.nav = nav;
+  // keyboard: 1-4 number shortcuts + Esc -> overview
+  document.addEventListener('keydown',function(e){
+    if(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+    if(e.key==='Escape'){nav(0);return;}
+    if(['1','2','3','4'].includes(e.key)) nav(parseInt(e.key,10)-1);
+  });
+  nav(0); // default: 總覽
+</script>
+
+<!-- ============ per-page 設定(TW_CONFIG):本款專屬,不被 sync_engine.py 覆蓋 ============
+     style / defaultAccent / defaultBg / i18nChrome(本款 chrome.* + 混色地名 fragment + style.name)/ onApply。
+     共用內容字典與引擎在下方 TW-MAIN 標記區(由正本注入)。 -->
+<script>
+  window.TW_CONFIG = {
+    style: '14-pastel-bento',
+    defaultAccent: '#2F9E7E',   // 出廠 accent(色票「原色」與 reset 用)
+    defaultBg: '#FBF7F4',       // 出廠 light bg(原色顆粒 / light 還原用)
+    // 本款粉彩便當 chrome.* + 混色地名 fragment(rsum/day/nday)+ style.name
+    // (theme-engine §10:共用內容 nav/hero/stats/callout/quick/routes/gear/journal/ui.* 不放這,由正本提供)
+    i18nChrome: {
+      'zh-Hant': {
+        'ui.appearance':'外觀設定','ui.settings_panel':'設定面板','chrome.user_settings':'使用者設定',
+        // ---- 粉彩便當 chrome(本款外殼)----
+        'chrome.brand':'山徑手記','chrome.appearance_sub':'APPEARANCE · 粉彩便當',
+        'chrome.chip_days':'14 日','chrome.chip_ridges':'3 稜線','chrome.chip_km':'142 km',
+        'chrome.hero_lab':'高山縱走 · 2026','chrome.hero_t1':'高山縱走','chrome.hero_t2':'行記',
+        'chrome.best_season':'最佳季節','chrome.month':'月','chrome.km':'km',
+        'chrome.tag_rain':'避梅雨','chrome.tag_snow':'避初雪','chrome.tag_cold':'防寒流',
+        'chrome.lab_routes':'ROUTES · 路線','chrome.lab_dist':'DISTANCE · 總里程','chrome.lab_days':'DAYS · 天數',
+        'chrome.lab_quick':'QUICK GOTO · 快速前往','chrome.lab_summary':'SUMMARY · 路線概要',
+        'chrome.lab_daily':'DAILY · 每日重點','chrome.lab_stats':'STATS · 路線數據','chrome.lab_season':'SEASON · 最佳季節',
+        'chrome.lab_checklist':'CHECKLIST · 裝備清單','chrome.ready88':'8 / 8 已備',
+        'chrome.lab_load':'LOAD · 打包進度','chrome.ready_all':'8 / 8 項目已備齊',
+        'chrome.lab_seasonnote':'SEASON · 季節須知','chrome.lab_foreword':'FOREWORD · 前言',
+        'chrome.window':'適行窗口','chrome.window_v':'7–9 月','chrome.avoid':'避開','chrome.avoid_v':'梅雨 · 初雪',
+        'chrome.watch':'留意','chrome.watch_v':'入秋首波寒流',
+        'chrome.note_summary':'NOTE · 路線概要','chrome.note_daily':'NOTE · 每日重點','chrome.note_gear':'NOTE · 裝備清單',
+        'chrome.m_ridges':'條稜線','chrome.m_km':'km 含接駁','chrome.m_days':'天 含整裝',
+        'chrome.gear_inline':'60L 背包 · 三季睡袋(-5°C)· 輕量帳 · 濾水器 · 行動糧 5 日 · 頭燈備用電池 · 急救包 · 離線地圖',
+        // route-summary fragments(保留彩色地名)
+        'rsum.a':'本季由北段','rsum.qilai':'奇萊連峰','rsum.b':'入山,沿主稜南下接','rsum.nenggao':'能高安東軍',
+        'rsum.c':',最後由','rsum.nan3':'南三段','rsum.d':'出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。',
+        // daily mini-cards
+        'day.r1_name':'奇萊主北','day.r1_focus':'高度適應、看雲海日出',
+        'day.r2_name':'能高安東軍','day.r2_focus':'草原稜線、最長水線',
+        'day.r3_name':'丹大林道','day.r3_focus':'廢棄索道與獵徑',
+        'day.r4_name':'能高越嶺','day.r4_focus':'下山接駁、溫泉整裝',
+        // notes daily one-liners
+        'nday.r1':'奇萊主北 · 高度適應、看雲海日出','nday.r2':'能高安東軍 · 草原稜線、最長水線',
+        'nday.r3':'丹大林道 · 廢棄索道與獵徑','nday.r4':'能高越嶺 · 下山接駁、溫泉整裝',
+        'style.name':'粉彩便當'
+      },
+      'en': {
+        'ui.appearance':'Appearance','ui.settings_panel':'Settings panel','chrome.user_settings':'User settings',
+        'chrome.brand':'Trail Journal','chrome.appearance_sub':'APPEARANCE · PASTEL BENTO',
+        'chrome.chip_days':'14 days','chrome.chip_ridges':'3 ridges','chrome.chip_km':'142 km',
+        'chrome.hero_lab':'HIGH-MOUNTAIN TRAVERSE · 2026','chrome.hero_t1':'High-Mountain Traverse','chrome.hero_t2':'Field Log',
+        'chrome.best_season':'BEST SEASON','chrome.month':'mo','chrome.km':'km',
+        'chrome.tag_rain':'No plum rain','chrome.tag_snow':'No early snow','chrome.tag_cold':'Cold-front ready',
+        'chrome.lab_routes':'ROUTES','chrome.lab_dist':'DISTANCE','chrome.lab_days':'DAYS',
+        'chrome.lab_quick':'QUICK GOTO','chrome.lab_summary':'SUMMARY · Route Overview',
+        'chrome.lab_daily':'DAILY · Highlights','chrome.lab_stats':'STATS · Route Data','chrome.lab_season':'SEASON · Best Season',
+        'chrome.lab_checklist':'CHECKLIST · Gear','chrome.ready88':'8 / 8 packed',
+        'chrome.lab_load':'LOAD · Pack Progress','chrome.ready_all':'8 / 8 items packed',
+        'chrome.lab_seasonnote':'SEASON · Notes','chrome.lab_foreword':'FOREWORD',
+        'chrome.window':'Window','chrome.window_v':'Jul–Sep','chrome.avoid':'Avoid','chrome.avoid_v':'Plum rain · Early snow',
+        'chrome.watch':'Watch','chrome.watch_v':'First autumn cold front',
+        'chrome.note_summary':'NOTE · Route Overview','chrome.note_daily':'NOTE · Highlights','chrome.note_gear':'NOTE · Gear',
+        'chrome.m_ridges':'ridges','chrome.m_km':'km incl. shuttle','chrome.m_days':'days incl. packing',
+        'chrome.gear_inline':'60L backpack · 3-season bag (-5°C) · lightweight tent · water filter · 5 days trail food · headlamp spare batteries · first-aid kit · offline map',
+        'rsum.a':'This season enters via the northern ','rsum.qilai':'Qilai Range','rsum.b':', heading south along the main ridge to ','rsum.nenggao':'Nenggao-Andongjun',
+        'rsum.c':', then out via the ','rsum.nan3':'Nanthreesection','rsum.d':' onto the Nenggao Crossing Trail; mostly alpine arrow bamboo and fir forest, with water sources near campsites — plan resupply ahead.',
+        'day.r1_name':'Qilai Main-North','day.r1_focus':'Acclimatization, sea-of-clouds sunrise',
+        'day.r2_name':'Nenggao-Andongjun','day.r2_focus':'Grassland ridge, longest water leg',
+        'day.r3_name':'Danda Forest Road','day.r3_focus':'Abandoned cableway & hunting trails',
+        'day.r4_name':'Nenggao Crossing','day.r4_focus':'Descent shuttle, hot-spring resupply',
+        'nday.r1':'Qilai Main-North · acclimatization, sea-of-clouds sunrise','nday.r2':'Nenggao-Andongjun · grassland ridge, longest water leg',
+        'nday.r3':'Danda Forest Road · abandoned cableway & hunting trails','nday.r4':'Nenggao Crossing · descent shuttle, hot-spring resupply',
+        'style.name':'pastel bento'
+      }
+    },
+    // 切語言 / 載入後要重繪的「JS 動態文字」(theme-engine §10-5):
+    //   JS 渲染的風格清單名、accent/bg 色票標籤、分頁底色(--card 隨模式)、<title>。
+    onApply: function(){
+      try{
+        if (typeof renderStyles === 'function') renderStyles();
+        if (typeof renderAccents === 'function') renderAccents();
+        if (typeof renderBgs === 'function') renderBgs();
+        if (window.nav) window.nav(window.curNav || 0);   // 重算分頁底色(--card 隨模式)
+        document.title = (window.twLang && window.twLang()==='en')
+          ? 'Trail Journal — High-Mountain Traverse 2026 | Pastel Bento'
+          : '山徑手記 — 高山縱走 2026 行記｜粉彩便當盒';
+      }catch(e){}
+    }
+  };
+</script>
+
+<!-- ============================================================== -->
+<!-- SETTINGS UI — 匯出時整段移除(此 script 帶移除標記屬性)。          -->
+<!-- 只含本款 UI 邏輯(風格清單 / 色票 / 設定開關 / export);            -->
+<!-- store / mode / i18n 引擎與共用內容字典由正本注入(見下方 TW-MAIN)。  -->
+<!-- 本段只呼叫引擎對外 API:window.twT / twLang / patchStore /          -->
+<!-- twSetAccent / twSetBg / twEffDark。                              -->
+<!-- ============================================================== -->
+<script data-export-strip>
+  var THIS_STYLE = '14-pastel-bento';
+  // 出廠值固定取自 TW_CONFIG(不可由 computed 讀,深色時 --bg 是深色基底)
+  var ORIG_ACCENT = (window.TW_CONFIG && window.TW_CONFIG.defaultAccent) || '#2F9E7E';
+  var ORIG_BG     = (window.TW_CONFIG && window.TW_CONFIG.defaultBg)     || '#FBF7F4';
+  // 引擎對外 API 的薄包裝(沿用原有呼叫點名稱,減少改動面)
+  function curLang(){ return window.twLang ? window.twLang() : (document.documentElement.lang || 'zh-Hant'); }
+  function t(key){ return window.twT ? window.twT(key) : key; }
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem('timmy-web-stylelab'))||{}; }catch(e){ return {}; } }
+
+  // 9-style roster (this one flagged active)
+  var STYLES = [
+    {key:'00-editorial',       em:'📝', nm:'編輯手札',   en:'editorial'},
+    {key:'g09-mintcitrus',     em:'🍋', nm:'薄荷柑橘',   en:'mint citrus'},
+    {key:'16-soft-flat',       em:'🧊', nm:'清爽扁平',   en:'soft flat'},
+    {key:'11-glassmorphism',   em:'🪟', nm:'毛玻璃',     en:'glassmorphism'},
+    {key:'14-pastel-bento',    em:'🍱', nm:'粉彩便當',   en:'pastel bento'},
+    {key:'15-gradient-pop',    em:'🌈', nm:'鮮豔漸層',   en:'gradient pop'},
+    {key:'04-modern-broadsheet',em:'📰', nm:'彩色雜誌',  en:'broadsheet'},
+    {key:'02-blueprint-grid',  em:'📐', nm:'彩色藍圖',   en:'blueprint'},
+    {key:'06-terminal-light',  em:'💻', nm:'彩色 IDE',   en:'terminal light'},
+    {key:'01-neo-brutalist',   em:'🧱', nm:'撞色粗野派', en:'neo-brutalist'}
+  ];
+  var ACCENTS = ['#5B6CF0','#10B981','#F8765C','#F5A524','#EC4899','#14B8A6','#8B5CF6','#38BDF8'];
+  var BGS      = ['#FBF7F4','#FFFFFF','#FAF6F0','#E8F8F5','#EAF2FE','#EFEBFB','#FDEEE7'];
+
+  var root = document.documentElement, rootStyle = root.style;
+  var norm = function(c){ return (c||'').trim().toLowerCase(); };
+  var eq = function(a,b){ return norm(a)===norm(b); };
+
+  // 當前生效值:accent 可能被 inline 覆寫;bg 一律以 store 的 light bg 為準(深色不影響選擇)
+  var curAccent = (rootStyle.getPropertyValue('--accent').trim() || ORIG_ACCENT);
+  var curBg     = (loadStore().bg || ORIG_BG);
+
+  function syncURL(){
+    try{
+      var u = new URL(location.href);
+      u.searchParams.set('accent', curAccent);
+      u.searchParams.set('bg', curBg);
+      history.replaceState(null,'',u);
+    }catch(e){}
+  }
+  // accent / bg 實際套用交給正本(含 store 寫入、inline 與 dark 守衛、值顯示);本頁只更新本地狀態 + 重繪
+  function setAccent(c){
+    curAccent=c;
+    window.twSetAccent(c);          // 兩模式皆 inline 套用 + patchStore
+    syncURL(); renderAccents(); refreshStyleLinks();
+  }
+  window.setAccent = setAccent;
+  function setBg(c){
+    curBg=c;
+    window.twSetBg(c);             // 深色守衛由正本處理(§10 rule 4:dark 不寫 inline --bg);僅 light 即時可見
+    syncURL(); renderBgs(); refreshStyleLinks();
+  }
+  window.setBg = setBg;
+  function gotoStyle(key){
+    if(key===THIS_STYLE) return;
+    location.href = key + '.html?accent=' + encodeURIComponent(curAccent) + '&bg=' + encodeURIComponent(curBg);
+  }
+
+  // ---- STYLE list(粉彩 blob 列;依語言顯示名稱)----
+  function renderStyles(){
+    var box = document.getElementById('styleList'); if(!box) return;
+    box.innerHTML='';
+    STYLES.forEach(function(s){
+      var active = s.key===THIS_STYLE;
+      var el = document.createElement(active?'div':'a');
+      el.className = 'style-row'+(active?' active':'');
+      if(!active){ el.href = s.key+'.html?accent='+encodeURIComponent(curAccent)+'&bg='+encodeURIComponent(curBg); }
+      else { el.setAttribute('aria-current','true'); }
+      var label = curLang()==='en' ? s.en : s.nm;
+      el.innerHTML =
+        '<span class="em">'+s.em+'</span>'+
+        '<span class="min-w-0">'+
+          '<span class="nm disp font-extrabold text-[14.5px] text-ink block leading-tight">'+label+'</span>'+
+          '<span class="sub tc text-[11px] font-semibold text-muted block leading-tight mt-0.5">'+s.en+'</span>'+
+        '</span>'+
+        '<span class="tick text-[15px]">'+(active?'●':'→')+'</span>';
+      box.appendChild(el);
+    });
+  }
+  function refreshStyleLinks(){
+    document.querySelectorAll('#styleList a.style-row').forEach(function(a){
+      var key = a.getAttribute('href').split('.html')[0];
+      a.href = key+'.html?accent='+encodeURIComponent(curAccent)+'&bg='+encodeURIComponent(curBg);
+    });
+  }
+
+  // ---- swatch builder(原色置首,標 ★;aria-label 依語言)----
+  function buildSwatches(boxId, palette, origVal, getCur, onPick, isBg){
+    var box = document.getElementById(boxId); if(!box) return;
+    box.innerHTML='';
+    var list=[origVal].concat(palette.filter(function(c){return !eq(c,origVal);}));
+    var LBL = isBg ? (curLang()==='en'?'Background ':'背景色 ') : (curLang()==='en'?'Accent ':'主色 ');
+    var ORIGLBL = curLang()==='en'?' (default)':'(原色)', ORIGTT = curLang()==='en'?'default':'原色';
+    list.forEach(function(col,i){
+      var b = document.createElement('button');
+      b.type='button';
+      b.className = 'sw'+(isBg?' lightsw':'');
+      b.style.background = col;
+      b.title = col.toUpperCase()+(i===0?ORIGLBL:'');
+      b.setAttribute('aria-label', LBL+col.toUpperCase()+(i===0?ORIGLBL:''));
+      b.innerHTML = '<span class="ck">✓</span>';
+      if(eq(col,getCur())) b.classList.add('active');
+      b.onclick = function(){ onPick(col); };
+      if(i===0){ var tag=document.createElement('span'); tag.textContent='★'; tag.title=ORIGTT;
+        tag.style.cssText='position:absolute;top:-6px;right:-6px;font-size:11px;line-height:1;color:var(--butter-deep);text-shadow:0 1px 2px rgba(0,0,0,.25)';
+        b.appendChild(tag); }
+      box.appendChild(b);
+    });
+  }
+  function renderAccents(){ buildSwatches('accentSwatches', ACCENTS, ORIG_ACCENT, function(){return curAccent;}, setAccent, false); }
+  function renderBgs(){ buildSwatches('bgSwatches', BGS, ORIG_BG, function(){return curBg;}, setBg, true); }
+
+  // ---- open / close ----
+  function toggleSettings(force){
+    var ov = document.getElementById('settingsOverlay');
+    var open = (typeof force==='boolean') ? force : ov.classList.contains('hidden');
+    ov.classList.toggle('hidden', !open);
+    var btn = document.getElementById('userBtn');
+    if(btn) btn.setAttribute('aria-expanded', open?'true':'false');
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  window.toggleSettings = toggleSettings;
+
+  // ---- 載入:URL(?accent=&bg=)優先 → 寫入統一 store(透過正本 patchStore);移除舊單獨鍵(§10 rule 3) ----
+  (function initSettings(){
+    try{
+      var q=new URLSearchParams(location.search), qa=q.get('accent'), qb=q.get('bg'), s=loadStore();
+      if(qa){ curAccent=(qa.charAt(0)==='#'||qa.indexOf('(')>-1)?qa:'#'+qa; }
+      else if(s.accent){ curAccent=s.accent; }
+      if(qb){ curBg=(qb.charAt(0)==='#'||qb.indexOf('(')>-1)?qb:'#'+qb; }
+      else if(s.bg){ curBg=s.bg; }
+      window.patchStore({ accent:curAccent, bg:curBg, style:THIS_STYLE });
+      // pre-paint 已套用 accent(inline)與 light bg;此處確保 curAccent inline 生效
+      if(curAccent) rootStyle.setProperty('--accent', curAccent);
+      ['accent','bg','style'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    }catch(e){}
+  })();
+
+  renderStyles(); renderAccents(); renderBgs();
+
+  /* 主題引擎(mode + i18n)由正本 assets/tw-engine.js 提供(見下方 TW-MAIN 標記區):
+     - 統一 store=timmy-web-stylelab;dark 移除 inline --bg、light 寫回使用者 bg
+     - applyI18n 處理 data-i18n / data-i18n-html / data-i18n-attr,末尾呼叫 TW_CONFIG.onApply()
+       (本頁 onApply 已重繪 風格清單 / 色票 / 分頁底色 / <title>)
+     - [data-set-mode] / [data-set-lang] 監聽、mql change、twSetAccent/twSetBg 皆由正本提供 */
+
+  /* ===================== 下載 HTML(匯出自包含乾淨版;theme-engine §10 rule 6)=====================
+     (a) system 先解析成具體 light/dark 寫進 <html data-mode>;(b) 動態文字烘成當前語言;
+     (c) 注入的 :root{--bg} 只放 light bg,深色靠保留的 :root[data-mode=dark] 規則勝出。 */
+  function downloadHTML(){
+    var clone = document.documentElement.cloneNode(true);
+    // 移除 <html> inline style(動態 accent/bg),改由注入 <style> 固定
+    clone.removeAttribute('style');
+    // 移除設定面板 / 遮罩 + 使用者 icon([data-export-strip])
+    var ov = clone.querySelector('#settingsOverlay'); if(ov) ov.remove();
+    Array.prototype.slice.call(clone.querySelectorAll('[data-export-strip]')).forEach(function(el){ el.remove(); });
+    // 以 id / src 身分移除所有 <script>,僅保留 Tailwind CDN / 設定 / 分頁切換
+    // (TW_CONFIG、pre-paint、TW-MAIN 引擎皆無白名單 id/src,於此一併移除)
+    Array.prototype.slice.call(clone.querySelectorAll('script')).forEach(function(sc){
+      var keep = /cdn\.tailwindcss\.com/.test(sc.getAttribute('src')||'') || sc.id==='tw-config' || sc.id==='tab-script';
+      if(!keep) sc.remove();
+    });
+    // 移除引擎同步用的 TW 註解標記(TW-PREPAINT / TW-MAIN START/END)與其說明註解;
+    // 匯出檔自包含、不再同步,留著只是雜訊(以 comment 節點文字判定,僅清掉 TW 標記)。
+    (function stripTwComments(node){
+      var tw = document.createTreeWalker(node, NodeFilter.SHOW_COMMENT, null);
+      var dead = [], c;
+      while ((c = tw.nextNode())) {
+        var v = c.nodeValue || '';
+        if (/TW-(PREPAINT|MAIN):(START|END)/.test(v) ||
+            /assets\/tw-engine\.js|sync_engine\.py|TW_CONFIG/.test(v)) dead.push(c);
+      }
+      dead.forEach(function(n){ if (n.parentNode) n.parentNode.removeChild(n); });
+    })(clone);
+    // (a) 固定目前 mode / lang(system 已解析為 light/dark)
+    clone.setAttribute('data-mode', document.documentElement.dataset.mode || 'light');
+    clone.setAttribute('lang', curLang());
+    // (c) <head> 末注入 :root{--accent; light --bg};深色由既有規則(specificity 較高)勝出
+    var head = clone.querySelector('head');
+    if(head){ var st=document.createElement('style'); st.textContent=':root{--accent:'+curAccent+';--bg:'+curBg+'}'; head.appendChild(st); }
+    var html = '<!DOCTYPE html>\n'+clone.outerHTML;
+    var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    var url  = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = '山徑手記-bento.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    if(typeof toggleSettings==='function') toggleSettings(false);
+  }
+  window.downloadHTML = downloadHTML;
+
+  // wire the EXPORT button (markup no longer carries an inline onclick)
+  (function(){
+    var btn = document.getElementById('downloadBtn');
+    if(btn) btn.addEventListener('click', function(){ try{ downloadHTML(); }catch(e){} });
+  })();
+</script>
+
+<!-- ============ 通用主題引擎(mode + i18n + 共用 I18N 內容)============
+     由正本 assets/tw-engine.js 注入;改正本後跑 scripts/sync_engine.py 同步。
+     必須在上方 TW_CONFIG 與本款 UI 函式(renderStyles / renderAccents / renderBgs / nav)
+     之後載入(其 applyI18n 會透過 TW_CONFIG.onApply 呼叫它們)。本標記區之間勿手改。 -->
+<!-- TW-MAIN:START -->
+<script>
+/* 主引擎(theme-engine §7b / §10 / §11)。依賴 per-page 先定義 window.TW_CONFIG:
+     {
+       style:        '06-terminal-light',   // 本頁 key(= 同目錄 html 檔名,不含 .html)
+       defaultAccent:'#5B6CF0',             // 出廠 accent(色票「原色」與 reset 用,不可 computed)
+       defaultBg:    '#E7E1F7',             // 出廠 light bg(色票「原色」與 light 還原用)
+       i18nChrome: { 'zh-Hant':{…}, 'en':{…} },  // 本款 chrome.* / style.name(覆寫/補進共用 I18N)
+       onApply:      function(){…}          // 切語言/載入後要重繪的動態文字(breadcrumb、JS 風格清單、色票標籤…)
+     }
+   引擎對外提供:window.twSetAccent(hex) / window.twSetBg(hex)(含 dark 守衛)、
+   window.patchStore(obj)、window.__twApplyMode / window.__twApplyI18n。
+   各頁色票 / 風格切換 / reset handler 呼叫上述,勿自行重寫 store / mode 邏輯。 */
+(function(){
+  var el = document.documentElement, rootStyle = el.style;
+  var KEY = 'timmy-web-stylelab';
+  var mql = matchMedia('(prefers-color-scheme: dark)');
+  var CFG = window.TW_CONFIG || (window.TW_CONFIG = {});
+
+  /* ---- 統一 store(theme-engine §2)---- */
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function saveStore(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  function patchStore(o){ var s = loadStore(); Object.assign(s, o); saveStore(s); }
+  window.patchStore = patchStore;
+
+  /* ---- 出廠值(來自 per-page;不可由 computed 讀,深色時 --bg 是深色基底)---- */
+  function defAccent(){ return CFG.defaultAccent || '#000000'; }
+  function defBg(){ return CFG.defaultBg || '#ffffff'; }
+
+  /* ---- i18n 字典(theme-engine §5 / §10):共用內容 9 款一致;chrome.* / style.name 逐款由 i18nChrome 覆寫 ---- */
+  var I18N = {
+    'zh-Hant': {
+      // 分頁 nav(breadcrumb / 狀態列 doc 用)
+      'nav.overview':'總覽','nav.routes':'路線','nav.gear':'裝備','nav.journal':'隨筆',
+      // hero / 共用內容
+      'hero.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL','hero.title':'高山縱走 2026 行記',
+      'hero.lead':'三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。',
+      // stats
+      'stats.overview':'數據概覽','stats.season':'最佳季節',
+      'stats.routes_label':'路線','stats.routes_sub':'條經典稜線',
+      'stats.dist_label':'總里程','stats.dist_sub':'含接駁',
+      'stats.days_label':'天數','stats.days_sub':'含整裝日',
+      // callout 季節
+      'callout.season_tag':'⚠ SEASON · 重點','callout.season_lead':'最佳季節',
+      'callout.season_body':'7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      'callout.season_full':'最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      // quick links
+      'quick.title':'快速前往','quick.routes':'路線詳解','quick.supply':'補給點地圖',
+      'quick.weather':'天氣與水源','quick.permit':'申請與入山證',
+      // routes 內容
+      'routes.title':'路線','routes.summary_h':'路線概要',
+      'routes.summary_p':'本季由北段奇萊連峰入山,沿主稜南下接能高安東軍,最後由南三段出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。',
+      'routes.daily_h':'每日重點','routes.col_seg':'區段','routes.col_focus':'重點',
+      'routes.r1_seg':'D1–D3 奇萊主北','routes.r1_focus':'高度適應、看雲海日出',
+      'routes.r2_seg':'D4–D7 能高安東軍','routes.r2_focus':'草原稜線、最長水線',
+      'routes.r3_seg':'D8–D11 丹大林道','routes.r3_focus':'廢棄索道與獵徑',
+      'routes.r4_seg':'D12–D14 能高越嶺','routes.r4_focus':'下山接駁、溫泉整裝',
+      // gear 內容
+      'gear.title':'裝備','gear.list_h':'裝備清單',
+      'gear.i1':'60L 背包','gear.i2':'三季睡袋(-5°C)','gear.i3':'輕量帳','gear.i4':'濾水器',
+      'gear.i5':'行動糧 5 日','gear.i6':'頭燈備用電池','gear.i7':'急救包','gear.i8':'離線地圖',
+      // journal 內容
+      'journal.title':'隨筆','journal.season_p':'最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      // 通用 UI / 設定面板
+      'ui.footer_note':'個人山徑手記 · 內容若有異動以現場與官方公告為準。',
+      'ui.tabs_summary':'總覽 / 路線 / 裝備 / 隨筆',
+      'ui.prompt_hint':'主題 · 主色 · 背景 · 模式 · 語言',
+      'ui.sec_style':'STYLE · 風格','ui.sec_accent':'ACCENT · 主色','ui.sec_bg':'BACKGROUND · 背景色',
+      'ui.sec_mode':'MODE · 模式','ui.sec_lang':'LANGUAGE · 語言','ui.sec_export':'EXPORT · 下載',
+      'ui.bg_hint':'深色模式下以策展深色基底為準,背景色票僅作用於淺色',
+      'ui.light':'淺色','ui.dark':'深色','ui.system':'跟隨系統',
+      'ui.download':'下載 HTML','ui.export_title':'匯出目前頁面為自包含 HTML(固定目前配色與深色/語言)',
+      'ui.export_hint':'匯出目前頁面為單一檔案,固定目前配色與深色/語言狀態,移除設定面板與設定 script,保留分頁切換與全部內容。',
+      'ui.close':'關閉 (Esc)','ui.close_label':'關閉','ui.apply':'套用'
+    },
+    'en': {
+      'nav.overview':'Overview','nav.routes':'Routes','nav.gear':'Gear','nav.journal':'Journal',
+      'hero.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL','hero.title':'High-Mountain Traverse 2026 Field Log',
+      'hero.lead':'Three classic ridgelines, fourteen days on foot — this log gathers routes, resupply and trail notes.',
+      'stats.overview':'At a Glance','stats.season':'Best Season',
+      'stats.routes_label':'Routes','stats.routes_sub':'classic ridgelines',
+      'stats.dist_label':'Distance','stats.dist_sub':'incl. shuttle',
+      'stats.days_label':'Days','stats.days_sub':'incl. packing day',
+      'callout.season_tag':'⚠ SEASON · KEY','callout.season_lead':'Best season',
+      'callout.season_body':'Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'callout.season_full':'Best season Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'quick.title':'Quick Links','quick.routes':'Route details','quick.supply':'Resupply map',
+      'quick.weather':'Weather & water','quick.permit':'Permits & entry',
+      'routes.title':'Routes','routes.summary_h':'Route Overview',
+      'routes.summary_p':'This season enters via the Qilai Range to the north, heads south along the main ridge to Nenggao-Andongjun, then exits the Nanthreesection by the Nenggao Crossing Trail; the route runs mostly through alpine arrow bamboo and fir forest, with water sources clustered near campsites — plan resupply ahead.',
+      'routes.daily_h':'Daily Highlights','routes.col_seg':'Segment','routes.col_focus':'Highlights',
+      'routes.r1_seg':'D1–D3 Qilai Main-North','routes.r1_focus':'Acclimatization, sea-of-clouds sunrise',
+      'routes.r2_seg':'D4–D7 Nenggao-Andongjun','routes.r2_focus':'Grassland ridge, longest water leg',
+      'routes.r3_seg':'D8–D11 Danda Forest Road','routes.r3_focus':'Abandoned cableway and hunting trails',
+      'routes.r4_seg':'D12–D14 Nenggao Crossing','routes.r4_focus':'Descent shuttle, hot-spring resupply',
+      'gear.title':'Gear','gear.list_h':'Gear Checklist',
+      'gear.i1':'60L backpack','gear.i2':'3-season bag (-5°C)','gear.i3':'Lightweight tent','gear.i4':'Water filter',
+      'gear.i5':'5 days of trail food','gear.i6':'Headlamp spare batteries','gear.i7':'First-aid kit','gear.i8':'Offline map',
+      'journal.title':'Journal','journal.season_p':'Best season Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'ui.footer_note':'Personal trail journal · details subject to on-site and official notices.',
+      'ui.tabs_summary':'Overview / Routes / Gear / Journal',
+      'ui.prompt_hint':'theme · accent · background · mode · language',
+      'ui.sec_style':'STYLE','ui.sec_accent':'ACCENT','ui.sec_bg':'BACKGROUND',
+      'ui.sec_mode':'MODE','ui.sec_lang':'LANGUAGE','ui.sec_export':'EXPORT',
+      'ui.bg_hint':'In dark mode the curated dark base is used; background swatches apply to light mode only.',
+      'ui.light':'Light','ui.dark':'Dark','ui.system':'System',
+      'ui.download':'Download HTML','ui.export_title':'Export this page as a self-contained HTML (fixes current colors, mode & language)',
+      'ui.export_hint':'Export this page as a single file, fixing the current colors plus dark/language state, removing the settings panel and its scripts while keeping tab switching and all content.',
+      'ui.close':'Close (Esc)','ui.close_label':'Close','ui.apply':'Apply'
+    }
+  };
+
+  /* per-page chrome.* / style.name 併入(淺拷貝 merge,per-page 覆寫共用) */
+  (function mergeChrome(){
+    var c = CFG.i18nChrome || {};
+    ['zh-Hant','en'].forEach(function(lng){
+      if (c[lng]) for (var k in c[lng]) if (Object.prototype.hasOwnProperty.call(c[lng], k)) I18N[lng][k] = c[lng][k];
+    });
+  })();
+
+  function curLang(){ var s = loadStore(); return s.lang || el.lang || 'zh-Hant'; }
+  /* 對外查字典:缺 key 回中文,再缺回 key 本身(供 onApply 內動態文字用) */
+  window.twT = function(key){ var d = I18N[curLang()] || I18N['zh-Hant']; return d[key] != null ? d[key] : (I18N['zh-Hant'][key] != null ? I18N['zh-Hant'][key] : key); };
+  window.twLang = curLang;
+  window.twI18n = I18N;
+
+  /* ---- mode ---- */
+  function effDark(){ var m = loadStore().mode || 'light'; return m === 'dark' || (m === 'system' && mql.matches); }
+  function userBg(){ return loadStore().bg || defBg(); }
+  window.twEffDark = effDark;
+
+  function mark(sel, dataKey, val){
+    document.querySelectorAll(sel).forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset[dataKey] === val)); });
+  }
+
+  function applyMode(){
+    var dark = effDark(); el.dataset.mode = dark ? 'dark' : 'light';
+    if (dark){ rootStyle.removeProperty('--bg'); }        // 讓 :root[data-mode=dark]{--bg} 生效
+    else { var b = userBg(); if (b) rootStyle.setProperty('--bg', b); }
+    var mv = document.getElementById('modeVal'); if (mv) mv.textContent = loadStore().mode || 'light';
+    mark('[data-set-mode]', 'setMode', loadStore().mode || 'light');
+  }
+  window.__twApplyMode = applyMode;
+
+  /* ---- i18n:textContent + data-i18n-html(innerHTML)+ data-i18n-attr(屬性) ---- */
+  function applyI18n(){
+    var d = I18N[curLang()] || I18N['zh-Hant'];
+    document.querySelectorAll('[data-i18n]').forEach(function(n){
+      var k = n.getAttribute('data-i18n'); if (d[k] != null) n.textContent = d[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(n){
+      var k = n.getAttribute('data-i18n-html'); if (d[k] != null) n.innerHTML = d[k];
+    });
+    document.querySelectorAll('[data-i18n-attr]').forEach(function(n){
+      n.getAttribute('data-i18n-attr').split(',').forEach(function(pair){
+        var kv = pair.split(':'), attr = (kv[0] || '').trim(), key = (kv[1] || '').trim();
+        if (attr && d[key] != null) n.setAttribute(attr, d[key]);
+      });
+    });
+    el.lang = curLang();
+    var lv = document.getElementById('langVal'); if (lv) lv.textContent = curLang();
+    mark('[data-set-lang]', 'setLang', curLang());
+    // per-page 動態文字重繪(breadcrumb、JS 風格清單名、色票標籤、<title> 等)
+    if (typeof CFG.onApply === 'function'){ try{ CFG.onApply(); }catch(e){} }
+  }
+  window.__twApplyI18n = applyI18n;
+
+  /* ---- 對外:色票 / reset handler 呼叫(含 dark 守衛)---- */
+  // accent:兩模式皆 inline 套用;同步 store + #accentVal 顯示
+  window.twSetAccent = function(hex){
+    rootStyle.setProperty('--accent', hex);
+    patchStore({ accent: hex });
+    var v = document.getElementById('accentVal'); if (v) v.textContent = (hex || '').toUpperCase();
+  };
+  // bg:只有 light 才 inline(dark 交給 :root[data-mode=dark]{--bg};寫 inline 會破版);同步 store + #bgVal
+  window.twSetBg = function(hex){
+    patchStore({ bg: hex });
+    if (!effDark()) rootStyle.setProperty('--bg', hex);
+    var v = document.getElementById('bgVal'); if (v) v.textContent = (hex || '').toUpperCase();
+  };
+
+  /* ---- 事件:模式 / 語言切換;系統主題跟隨 ---- */
+  document.addEventListener('click', function(e){
+    var tm = e.target.closest('[data-set-mode]'); if (tm){ patchStore({ mode: tm.dataset.setMode }); applyMode(); return; }
+    var tl = e.target.closest('[data-set-lang]'); if (tl){ patchStore({ lang: tl.dataset.setLang }); applyI18n(); return; }
+  });
+  mql.addEventListener('change', function(){ if ((loadStore().mode || 'light') === 'system') applyMode(); });
+
+  /* ---- 初始套用 ---- */
+  applyMode();
+  applyI18n();
+})();
+</script>
+<!-- TW-MAIN:END -->
+</body>
+</html>

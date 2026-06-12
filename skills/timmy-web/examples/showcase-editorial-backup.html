@@ -1,0 +1,467 @@
+<!doctype html>
+<!--
+  timmy-web · 活風格指南 (living style guide / showcase)
+  ① 展示風格與元件 ② 設定/主題引擎示範(右上使用者 icon)③ 你日後調風格的試色場
+  改色/演進:改 <style> 裡的 CSS 變數(見 ../references/design-system.md)。直接用瀏覽器開啟即可。
+-->
+<html lang="zh-Hant" data-bg="cream" data-accent="navy" data-mode="light" data-fs="m">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>timmy-web · 風格樣張</title>
+  <meta name="theme-color" content="#1d3557" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { paper:'var(--c-paper)', surface:'var(--c-surface)', ink:'var(--c-ink)', muted:'var(--c-muted)',
+        accent:'var(--c-accent)', 'accent-soft':'var(--c-accent-soft)', gold:'var(--c-gold)',
+        highlight:'var(--c-highlight)', done:'var(--c-done)', line:'var(--c-line)', warn:'var(--c-warn)' },
+      fontFamily: { serif: ['"Noto Serif TC"','Georgia','"Times New Roman"','"PMingLiU"','"MingLiU"','serif'] },
+      borderRadius: { DEFAULT: '2px' }, maxWidth: { content:'760px', 'content-lg':'1100px', 'content-xl':'1280px' }, screens: { wide: '1440px' },
+    }}}
+  </script>
+  <style>
+    html { scroll-behavior: smooth; font-size: calc(16px * var(--fs-mult, 1)); }
+    :root{ --c-paper:#f4efe3; --c-surface:#fbf8f1; --c-ink:#23201a; --c-muted:#6f6757;
+      --c-gold:#9a7b4f; --c-highlight:#8a5224; --c-done:#3f6b3f; --c-line:#d9d0bd; --c-warn:#b23a2e;
+      --c-accent:#1d3557; --c-accent-soft:#e8ecf2; --fs-mult:1; }
+    [data-fs="s"]{ --fs-mult:.92 } [data-fs="m"]{ --fs-mult:1 } [data-fs="l"]{ --fs-mult:1.12 }
+    [data-bg="cream"] { --c-paper:#f4efe3; --c-surface:#fbf8f1 }
+    [data-bg="ivory"] { --c-paper:#f8f5ee; --c-surface:#fffdf9 }
+    [data-bg="snow"]  { --c-paper:#fbfaf6; --c-surface:#ffffff }
+    [data-bg="sand"]  { --c-paper:#ece1cc; --c-surface:#f6eede }
+    [data-bg="greige"]{ --c-paper:#e9e4d6; --c-surface:#f4efe2 }
+    [data-bg="stone"] { --c-paper:#eae7e0; --c-surface:#f4f1ec }
+    [data-bg="mist"]  { --c-paper:#eaecec; --c-surface:#f6f7f6 }
+    [data-accent="navy"]  { --c-accent:#1d3557; --c-accent-soft:#e8ecf2 }
+    [data-accent="teal"]  { --c-accent:#1f5560; --c-accent-soft:#e2edef }
+    [data-accent="forest"]{ --c-accent:#2f5840; --c-accent-soft:#e4ece6 }
+    [data-accent="olive"] { --c-accent:#5b5a2c; --c-accent-soft:#eceada }
+    [data-accent="gold"]  { --c-accent:#856226; --c-accent-soft:#efe7d7 }
+    [data-accent="rust"]  { --c-accent:#9c4a2a; --c-accent-soft:#f3e6de }
+    [data-accent="claret"]{ --c-accent:#7a2a33; --c-accent-soft:#f1e4e5 }
+    [data-accent="plum"]  { --c-accent:#5d3a5e; --c-accent-soft:#ece2ec }
+    [data-accent="slate"] { --c-accent:#3c4654; --c-accent-soft:#e8eaee }
+    [data-accent="ink"]   { --c-accent:#33312c; --c-accent-soft:#e9e6df }
+    [data-mode="dark"]{ --c-paper:#1b1916; --c-surface:#252220; --c-ink:#ece5d7; --c-muted:#a99f8d;
+      --c-gold:#c2a373; --c-highlight:#d18a4f; --c-done:#82a96d; --c-line:#39342c; --c-warn:#e0735f;
+      --c-accent:#7da7d9; --c-accent-soft:#222e3c; }
+    [data-mode="dark"][data-accent="navy"]  { --c-accent:#7da7d9; --c-accent-soft:#222e3c }
+    [data-mode="dark"][data-accent="teal"]  { --c-accent:#6fb6c2; --c-accent-soft:#1d2b2e }
+    [data-mode="dark"][data-accent="forest"]{ --c-accent:#8fc0a0; --c-accent-soft:#212d25 }
+    [data-mode="dark"][data-accent="olive"] { --c-accent:#c4be79; --c-accent-soft:#2a2920 }
+    [data-mode="dark"][data-accent="gold"]  { --c-accent:#d8b677; --c-accent-soft:#2f2719 }
+    [data-mode="dark"][data-accent="rust"]  { --c-accent:#e0926a; --c-accent-soft:#33231b }
+    [data-mode="dark"][data-accent="claret"]{ --c-accent:#d79aa0; --c-accent-soft:#332326 }
+    [data-mode="dark"][data-accent="plum"]  { --c-accent:#c89ac9; --c-accent-soft:#2c2230 }
+    [data-mode="dark"][data-accent="slate"] { --c-accent:#a3b3c6; --c-accent-soft:#262b33 }
+    [data-mode="dark"][data-accent="ink"]   { --c-accent:#cdc6b8; --c-accent-soft:#2a2823 }
+    .masthead{ border-bottom:3px double var(--c-accent) }
+    body{ transition: background-color .2s ease, color .2s ease }
+    .seg-btn[aria-pressed="true"]{ background:var(--c-accent-soft); color:var(--c-accent); font-weight:700 }
+    .settings-tab[aria-pressed="true"]{ background:var(--c-accent-soft); color:var(--c-accent); font-weight:600 }
+    .accent-sw[aria-pressed="true"]{ box-shadow:0 0 0 2px var(--c-paper), 0 0 0 4px var(--c-ink) }
+  </style>
+  <script>
+    (function(){ try{ var s=JSON.parse(localStorage.getItem('timmy-web-prefs')||'{}'), el=document.documentElement;
+      var m=s.mode||'light'; el.dataset.mode = m==='system' ? (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') : m;
+      el.dataset.bg=s.bg||'cream'; el.dataset.accent=s.accent||'navy'; el.dataset.fs=s.fs||'m'; if(s.lang) el.lang=s.lang; }catch(e){} })();
+  </script>
+<!-- ===== favicon · 山徑手記 羅盤方位玫瑰 (compass rose) · timmy-web-favicon =====
+     依本頁解析後的 --accent 自動著色(含 ?accent= / store 覆寫);編輯風金棕北針 + 暖紙底。
+     屬「示範內容」非主題引擎,故不進 tw-engine.js;放各頁 <head> 末(pre-paint 之後)讀已解析 accent。
+     匯出「下載 HTML」剝除 <script> 但保留執行期注入的 <link rel=icon>,故乾淨檔仍帶 favicon。 -->
+<script>
+(function(){
+  function mix(hex){ // accent 與黑混 30%,作描邊 / 環(淺色 accent 仍可辨識);回 #rrggbb
+    hex=(hex||'').trim().replace('#','');
+    if(hex.length===3) hex=hex.replace(/./g,'$&$&');
+    if(hex.length<6) return '#142537';
+    var n=parseInt(hex.slice(0,6),16);
+    function d(x){ x=Math.round(x*0.7); return (x<16?'0':'')+x.toString(16); }
+    return '#'+d((n>>16)&255)+d((n>>8)&255)+d(n&255);
+  }
+  function paint(){
+    var accent=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim()||'#1d3557',
+        deep=mix(accent), gold='#9a7b4f', paper='#f4efe3',
+        svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+          +'<rect x="1" y="1" width="30" height="30" rx="6.5" fill="'+paper+'"/>'
+          +'<circle cx="16" cy="16" r="11.2" fill="none" stroke="'+deep+'" stroke-width="1.1"/>'
+          +'<g transform="rotate(45 16 16)"><path d="M16 8 17.7 14.3 24 16 17.7 17.7 16 24 14.3 17.7 8 16 14.3 14.3Z" fill="'+gold+'" fill-opacity=".32"/></g>'
+          +'<path d="M16 3.5 18.5 13.5 28.5 16 18.5 18.5 16 28.5 13.5 18.5 3.5 16 13.5 13.5Z" fill="'+accent+'" stroke="'+deep+'" stroke-width=".7" stroke-linejoin="round"/>'
+          +'<path d="M16 3.5 18.5 13.5 13.5 13.5Z" fill="'+gold+'"/>'
+          +'<circle cx="16" cy="16" r="1.8" fill="'+paper+'" stroke="'+deep+'" stroke-width=".9"/>'
+          +'</svg>',
+        href='data:image/svg+xml,'+encodeURIComponent(svg),
+        link=document.querySelector('link[rel="icon"]');
+    if(!link){ link=document.createElement('link'); link.setAttribute('rel','icon'); document.head.appendChild(link); }
+    link.setAttribute('type','image/svg+xml'); link.setAttribute('href',href);
+  }
+  try{ paint(); }catch(e){}
+  // accent 變更即時重繪(設定面板 twSetAccent 於主引擎載入後才有);讓 live favicon 與匯出同步
+  window.addEventListener('load',function(){ try{
+    if(typeof window.twSetAccent==='function' && !window.__twFaviconHook){
+      window.__twFaviconHook=true; var orig=window.twSetAccent;
+      window.twSetAccent=function(){ var r=orig.apply(this,arguments); try{ paint(); }catch(e){} return r; };
+    }
+    paint();
+  }catch(e){} });
+})();
+</script>
+</head>
+
+<body class="bg-paper text-ink font-serif text-[1.0625rem] leading-[1.85]">
+
+  <header class="masthead bg-paper">
+    <div class="mx-auto max-w-content lg:max-w-content-lg wide:max-w-content-xl px-6 py-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+      <a href="#" class="flex flex-col leading-tight no-underline text-ink">
+        <span class="text-[1.4rem] font-bold tracking-[0.1em]">timmy-web</span>
+        <span class="text-[0.68rem] tracking-[0.16em] text-muted">EDITORIAL STYLE SYSTEM · SHOWCASE</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <nav class="flex flex-wrap gap-x-6 gap-y-1 text-[0.98rem]">
+          <a href="#palette" class="no-underline tracking-[0.05em] text-accent font-bold border-b-2 border-gold pb-0.5" data-i18n="nav.palette">色彩</a>
+          <a href="#type" class="no-underline tracking-[0.05em] text-muted hover:text-accent border-b-2 border-transparent hover:border-gold pb-0.5 transition-colors" data-i18n="nav.type">排版</a>
+          <a href="#components" class="no-underline tracking-[0.05em] text-muted hover:text-accent border-b-2 border-transparent hover:border-gold pb-0.5 transition-colors" data-i18n="nav.components">元件</a>
+        </nav>
+        <div class="relative">
+          <button id="userBtn" type="button" aria-label="使用者選單" aria-haspopup="true" aria-expanded="false"
+            class="flex items-center justify-center w-9 h-9 rounded-full border border-line text-ink hover:text-accent hover:border-accent transition-colors">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.2"></circle><path d="M5 19.5c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5"></path>
+            </svg>
+          </button>
+          <div id="userMenu" class="hidden absolute right-0 mt-2 w-60 bg-surface border border-line rounded z-40 p-3 text-[0.95rem]" style="box-shadow:0 6px 24px rgba(0,0,0,.12)">
+            <div class="flex items-center justify-between gap-2 py-1">
+              <span class="text-muted text-[0.85rem]" data-i18n="ui.mode">模式</span>
+              <div class="inline-flex border border-line rounded overflow-hidden">
+                <button type="button" class="seg-btn px-2.5 py-1 text-[0.85rem] text-muted" data-set-mode="light" data-i18n="ui.light">淺</button>
+                <button type="button" class="seg-btn px-2.5 py-1 text-[0.85rem] text-muted border-l border-line" data-set-mode="dark" data-i18n="ui.dark">深</button>
+                <button type="button" class="seg-btn px-2.5 py-1 text-[0.85rem] text-muted border-l border-line" data-set-mode="system" data-i18n="ui.system">系統</button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-2 py-1">
+              <span class="text-muted text-[0.85rem]" data-i18n="ui.language">語言</span>
+              <div class="inline-flex border border-line rounded overflow-hidden">
+                <button type="button" class="seg-btn px-2.5 py-1 text-[0.85rem] text-muted" data-set-lang="zh-Hant">中</button>
+                <button type="button" class="seg-btn px-2.5 py-1 text-[0.85rem] text-muted border-l border-line" data-set-lang="en">EN</button>
+              </div>
+            </div>
+            <div class="border-t border-line my-2"></div>
+            <button type="button" class="block w-full text-left px-1 py-1.5 text-ink hover:text-accent transition-colors" data-open-settings="appearance" data-i18n="ui.settings">設定…</button>
+            <button type="button" class="block w-full text-left px-1 py-1.5 text-ink hover:text-accent transition-colors" data-open-settings="changelog" data-i18n="ui.changelog">版本紀錄</button>
+            <button type="button" class="block w-full text-left px-1 py-1.5 text-ink hover:text-accent transition-colors" data-open-settings="about" data-i18n="ui.about">關於</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-content lg:max-w-content-lg wide:max-w-content-xl px-6 pt-10 pb-12">
+
+    <h1 class="text-[1.95rem] font-bold tracking-[0.04em] mb-1.5" data-i18n="demo.h1">編輯／手札風 風格樣張</h1>
+    <p class="text-muted italic mb-6 pb-5 border-b border-line" data-i18n="demo.lead">暖紙質地、襯線字、細線分層、深藏青骨幹配金棕點綴——這頁同時是樣張,也是試色場與設定示範。</p>
+
+    <div class="bg-surface border border-line rounded p-5 mb-2" style="border-left:3px solid var(--c-gold)">
+      <h3 class="text-[1rem] font-semibold mt-0 mb-1 text-accent" data-i18n="note.title">外觀與設定</h3>
+      <p class="m-0 text-[0.95rem]" data-i18n="note.body">點右上角的使用者 icon:可切換模式(淺/深/系統)與語言,並開啟「設定」(背景、主色、字級)與「版本紀錄」。選擇即時套用全頁並記住。</p>
+    </div>
+
+    <h2 id="palette" class="text-[1.3rem] font-semibold mt-9 mb-4 pb-1.5 border-b border-line" data-i18n="sec.palette">色彩 Palette</h2>
+    <p class="text-muted text-[0.9rem] mt-0 mb-3">以下為淺色基準色票(固定參考);背景與主色可在右上設定即時切換,深色模式會整組換算。</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16 border-b border-line" style="background:#f4efe3"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">paper</div><div class="text-muted text-[0.8rem]">#f4efe3 · 頁面底(可換)</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16 border-b border-line" style="background:#fbf8f1"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">surface</div><div class="text-muted text-[0.8rem]">#fbf8f1 · 卡片面</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#23201a"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">ink</div><div class="text-muted text-[0.8rem]">#23201a · 主文字</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#6f6757"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">muted</div><div class="text-muted text-[0.8rem]">#6f6757 · 次要</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#1d3557"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">accent</div><div class="text-muted text-[0.8rem]">#1d3557 · 主色(可換)</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16 border-b border-line" style="background:#e8ecf2"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">accent-soft</div><div class="text-muted text-[0.8rem]">#e8ecf2 · 主色淡</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#9a7b4f"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">gold</div><div class="text-muted text-[0.8rem]">#9a7b4f · 金棕</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#8a5224"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">highlight</div><div class="text-muted text-[0.8rem]">#8a5224 · 燒赭</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#3f6b3f"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">done</div><div class="text-muted text-[0.8rem]">#3f6b3f · 墨綠</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#d9d0bd"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">line</div><div class="text-muted text-[0.8rem]">#d9d0bd · 細線</div></div></div>
+      <div class="bg-surface border border-line rounded overflow-hidden"><div class="h-16" style="background:#b23a2e"></div><div class="p-2.5"><div class="font-bold text-[0.9rem]">warn</div><div class="text-muted text-[0.8rem]">#b23a2e · 警示</div></div></div>
+    </div>
+
+    <h2 id="type" class="text-[1.3rem] font-semibold mt-9 mb-4 pb-1.5 border-b border-line" data-i18n="sec.type">字體與排版 Typography</h2>
+    <div class="bg-surface border border-line rounded p-5 space-y-3">
+      <div class="text-[0.72rem] tracking-[0.16em] uppercase text-muted">大寫標籤 · LABEL / KICKER</div>
+      <div class="text-[1.95rem] font-bold tracking-[0.04em]">H1 標題 Noto Serif TC</div>
+      <div class="text-[1.3rem] font-semibold">H2 區段標題</div>
+      <div class="text-[1.2rem] font-semibold">H3 小節標題</div>
+      <p class="m-0">內文 17px / 行高 1.85。襯線字、寬鬆行距,讓長段落也耐讀;這是整套風格的閱讀基底。</p>
+      <p class="m-0 text-muted italic">斜體前言/註腳:編輯味的點睛。</p>
+      <p class="m-0 text-[0.9rem]"><span class="font-normal">400</span> · <span class="font-medium">500</span> · <span class="font-semibold">600</span> · <span class="font-bold">700</span> 字重</p>
+    </div>
+
+    <h2 id="components" class="text-[1.3rem] font-semibold mt-9 mb-4 pb-1.5 border-b border-line" data-i18n="sec.components">元件 Components</h2>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">徽章 Pills</h3>
+    <div class="flex flex-wrap gap-2 items-center">
+      <span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border rounded border-accent text-accent">預設</span>
+      <span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border rounded border-highlight text-highlight">重點</span>
+      <span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border rounded border-done text-done">完成</span>
+      <span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border rounded border-muted text-muted">待定</span>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">數據盒 Stat grid</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 border border-line rounded bg-surface divide-y sm:divide-y-0 sm:divide-x divide-line">
+      <div class="flex flex-col gap-1 text-center p-5"><span class="text-[0.72rem] tracking-[0.16em] uppercase text-muted">出發</span><span class="text-[1.75rem] font-bold text-accent">08/13</span><span class="text-[0.85rem] text-muted">臺北 → 布達佩斯</span></div>
+      <div class="flex flex-col gap-1 text-center p-5"><span class="text-[0.72rem] tracking-[0.16em] uppercase text-muted">研討會</span><span class="text-[1.75rem] font-bold text-accent">08/15–22</span><span class="text-[0.85rem] text-muted">克拉科夫</span></div>
+      <div class="flex flex-col gap-1 text-center p-5"><span class="text-[0.72rem] tracking-[0.16em] uppercase text-muted">返抵</span><span class="text-[1.75rem] font-bold text-accent">08/23</span><span class="text-[0.85rem] text-muted">自波蘭返程</span></div>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">卡片與左色條 Callout</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="bg-surface border border-line rounded p-5"><p class="m-0">基本卡片:面色 surface、細線框、圓角 2px。</p></div>
+      <div class="bg-surface border border-line rounded p-5" style="border-left:3px solid var(--c-highlight)"><span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border border-highlight text-highlight rounded">重點</span><p class="mt-2 mb-0 text-muted">左色條 callout:側欄點題手法。</p></div>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">箭頭快速連結 Quick links</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <a href="#" class="flex justify-between items-center no-underline font-semibold text-ink bg-surface border border-line rounded p-4 hover:border-accent hover:text-accent transition-colors">每日行程 <span class="text-gold">→</span></a>
+      <a href="#" class="flex justify-between items-center no-underline font-semibold text-ink bg-surface border border-line rounded p-4 hover:border-accent hover:text-accent transition-colors">官方網站 <span class="text-gold">↗</span></a>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">表格 Table</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse bg-surface border border-line rounded text-[0.9rem]">
+        <thead><tr>
+          <th class="text-left p-3 bg-paper text-muted text-[0.7rem] tracking-[0.12em] uppercase font-semibold border-b border-line whitespace-nowrap">時間</th>
+          <th class="text-left p-3 bg-paper text-muted text-[0.7rem] tracking-[0.12em] uppercase font-semibold border-b border-line">項目</th>
+          <th class="text-left p-3 bg-paper text-muted text-[0.7rem] tracking-[0.12em] uppercase font-semibold border-b border-line">狀態</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line align-top whitespace-nowrap font-bold text-accent">09:00</td><td class="p-3 border-b border-line align-top">開幕式</td><td class="p-3 border-b border-line align-top"><span class="text-done font-semibold">已確認</span></td></tr>
+          <tr><td class="p-3 align-top whitespace-nowrap font-bold text-accent">15:40</td><td class="p-3 align-top">海報發表</td><td class="p-3 align-top"><span class="text-highlight font-semibold">重點</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">鍵值清單 & 表單 KV / Form</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="bg-surface border border-line rounded p-5">
+        <dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 m-0">
+          <dt class="font-bold text-muted">航班</dt><dd class="m-0">BR061</dd>
+          <dt class="font-bold text-muted">時間</dt><dd class="m-0">23:55 → 06:30+1</dd>
+          <dt class="font-bold text-muted">座位</dt><dd class="m-0">42A / 42B</dd>
+        </dl>
+      </div>
+      <div class="bg-surface border border-line rounded p-5 flex flex-wrap gap-2 items-center">
+        <input type="text" class="font-serif border border-line rounded bg-white text-ink px-2.5 py-2 flex-1 min-w-[8rem]" placeholder="輸入金額…" />
+        <select class="font-serif border border-line rounded bg-white text-ink px-2.5 py-2"><option>PLN</option><option>TWD</option></select>
+        <button class="font-serif border border-line rounded bg-paper text-accent px-3 py-2 cursor-pointer hover:bg-accent-soft transition-colors">換算</button>
+      </div>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">清單 Lists</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <ul class="bg-surface border border-line rounded p-5 list-none m-0">
+        <li class="flex justify-between gap-3 py-2 border-b border-dotted border-line"><span>護照 / 簽證</span><span class="text-muted text-[0.85rem]">效期 6 個月</span></li>
+        <li class="flex justify-between gap-3 py-2 border-b border-dotted border-line"><span>機票</span><span class="text-muted text-[0.85rem]">已開票</span></li>
+        <li class="flex justify-between gap-3 py-2"><span>保險</span><span class="text-muted text-[0.85rem]">申根</span></li>
+      </ul>
+      <div class="bg-surface border border-line rounded p-5 space-y-2">
+        <label class="flex items-start gap-2 cursor-pointer leading-relaxed"><input type="checkbox" class="mt-1 w-[1.05rem] h-[1.05rem] shrink-0" checked /><span class="text-muted line-through">訂房</span></label>
+        <label class="flex items-start gap-2 cursor-pointer leading-relaxed"><input type="checkbox" class="mt-1 w-[1.05rem] h-[1.05rem] shrink-0" /><span>租車</span></label>
+        <label class="flex items-start gap-2 cursor-pointer leading-relaxed"><input type="checkbox" class="mt-1 w-[1.05rem] h-[1.05rem] shrink-0" /><span>列印登機證</span></label>
+      </div>
+    </div>
+
+    <h3 class="text-[1.2rem] font-semibold mt-6 mb-2">子分頁 Subtabs</h3>
+    <div class="flex flex-nowrap gap-1 overflow-x-auto border-b border-line mb-4" id="subtabs">
+      <button data-tab="a" class="subtab shrink-0 font-serif text-[0.95rem] tracking-[0.04em] text-accent font-bold bg-transparent border-0 border-b-2 border-gold px-3.5 py-2 cursor-pointer whitespace-nowrap">概覽</button>
+      <button data-tab="b" class="subtab shrink-0 font-serif text-[0.95rem] tracking-[0.04em] text-muted bg-transparent border-0 border-b-2 border-transparent px-3.5 py-2 cursor-pointer whitespace-nowrap hover:text-accent transition-colors">明細</button>
+      <button data-tab="c" class="subtab shrink-0 font-serif text-[0.95rem] tracking-[0.04em] text-muted bg-transparent border-0 border-b-2 border-transparent px-3.5 py-2 cursor-pointer whitespace-nowrap hover:text-accent transition-colors">地圖</button>
+    </div>
+    <section data-panel="a"><p class="m-0 text-muted">概覽分頁內容。</p></section>
+    <section data-panel="b" class="hidden"><p class="m-0 text-muted">明細分頁內容。</p></section>
+    <section data-panel="c" class="hidden"><p class="m-0 text-muted">地圖分頁內容。</p></section>
+
+  </main>
+
+  <footer class="text-center text-muted text-[0.85rem] italic px-4 pt-4 pb-12">
+    <span class="block w-[60px] h-px bg-gold mx-auto mb-4"></span>
+    <p class="m-0">timmy-web · 活風格指南 · 改 CSS 變數即全頁套用</p>
+  </footer>
+
+  <!-- 設定 modal(固定高度,切分頁不變大小) -->
+  <div id="settingsOverlay" class="hidden fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-4">
+    <div role="dialog" aria-modal="true" aria-label="設定" class="bg-paper border border-line rounded w-full max-w-[720px] flex flex-col overflow-hidden" style="box-shadow:0 12px 48px rgba(0,0,0,.28)">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-line">
+        <h2 class="text-[1.15rem] font-bold tracking-[0.04em] m-0" data-i18n="settings.title">設定</h2>
+        <button id="settingsClose" type="button" aria-label="關閉" class="w-8 h-8 flex items-center justify-center rounded text-muted hover:text-ink hover:bg-accent-soft transition-colors">✕</button>
+      </div>
+      <div class="flex flex-col sm:flex-row min-h-0" style="height:min(440px,72vh)">
+        <nav class="sm:w-44 shrink-0 border-b sm:border-b-0 sm:border-r border-line p-2 flex sm:flex-col gap-1 overflow-x-auto">
+          <button type="button" class="settings-tab text-left px-3 py-2 rounded text-muted whitespace-nowrap transition-colors" data-sec="appearance" data-i18n="settings.appearance">外觀</button>
+          <button type="button" class="settings-tab text-left px-3 py-2 rounded text-muted whitespace-nowrap transition-colors" data-sec="language" data-i18n="settings.language">語言</button>
+          <button type="button" class="settings-tab text-left px-3 py-2 rounded text-muted whitespace-nowrap transition-colors" data-sec="changelog" data-i18n="settings.changelog">版本紀錄</button>
+          <button type="button" class="settings-tab text-left px-3 py-2 rounded text-muted whitespace-nowrap transition-colors" data-sec="about" data-i18n="settings.about">關於</button>
+        </nav>
+        <div class="p-5 overflow-y-auto flex-1">
+          <section data-panel-sec="appearance" class="space-y-6">
+            <div>
+              <h3 class="text-[0.72rem] tracking-[0.16em] uppercase text-muted mb-2.5" data-i18n="settings.bg">背景</h3>
+              <div class="flex flex-wrap gap-3">
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="cream"  title="米白" style="background:#f4efe3"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="ivory"  title="象牙" style="background:#f8f5ee"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="snow"   title="雪白" style="background:#fbfaf6"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="sand"   title="暖砂" style="background:#ece1cc"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="greige" title="米灰" style="background:#e9e4d6"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="stone"  title="石灰" style="background:#eae7e0"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-bg="mist"   title="霧灰" style="background:#eaecec"></button>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-[0.72rem] tracking-[0.16em] uppercase text-muted mb-2.5" data-i18n="settings.accent">主色</h3>
+              <div class="flex flex-wrap gap-3">
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="navy"   title="藏青" style="background:#1d3557"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="teal"   title="靛青" style="background:#1f5560"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="forest" title="森綠" style="background:#2f5840"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="olive"  title="橄欖" style="background:#5b5a2c"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="gold"   title="金棕" style="background:#856226"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="rust"   title="鏽橘" style="background:#9c4a2a"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="claret" title="酒紅" style="background:#7a2a33"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="plum"   title="梅紫" style="background:#5d3a5e"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="slate"  title="墨灰" style="background:#3c4654"></button>
+                <button type="button" class="accent-sw w-9 h-9 rounded-full border border-line" data-set-accent="ink"    title="墨黑" style="background:#33312c"></button>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-[0.72rem] tracking-[0.16em] uppercase text-muted mb-2.5" data-i18n="settings.mode">模式</h3>
+              <div class="inline-flex border border-line rounded overflow-hidden">
+                <button type="button" class="seg-btn px-4 py-1.5 text-[0.9rem] text-muted" data-set-mode="light" data-i18n="ui.light">淺</button>
+                <button type="button" class="seg-btn px-4 py-1.5 text-[0.9rem] text-muted border-l border-line" data-set-mode="dark" data-i18n="ui.dark">深</button>
+                <button type="button" class="seg-btn px-4 py-1.5 text-[0.9rem] text-muted border-l border-line" data-set-mode="system" data-i18n="ui.system">系統</button>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-[0.72rem] tracking-[0.16em] uppercase text-muted mb-2.5" data-i18n="settings.fontsize">字級</h3>
+              <div class="inline-flex border border-line rounded overflow-hidden">
+                <button type="button" class="seg-btn px-4 py-1.5 text-[0.9rem] text-muted" data-set-fs="s">A</button>
+                <button type="button" class="seg-btn px-4 py-1.5 text-[0.9rem] text-muted border-l border-line" data-set-fs="m">A+</button>
+                <button type="button" class="seg-btn px-4 py-1.5 text-[0.9rem] text-muted border-l border-line" data-set-fs="l">A++</button>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-line">
+              <h3 class="text-[0.72rem] tracking-[0.16em] uppercase text-muted mb-2.5" data-i18n="settings.export">匯出</h3>
+              <button type="button" id="exportCss" class="font-serif border border-line rounded bg-paper text-accent px-3 py-2 cursor-pointer hover:bg-accent-soft transition-colors text-[0.9rem]" data-i18n="settings.exportcss">匯出設定檔 (.css)</button>
+              <p class="text-muted text-[0.8rem] mt-2 m-0" data-i18n="settings.exporthint">下載當前主題的 CSS 變數(含深色),開發者可直接引用。</p>
+            </div>
+          </section>
+          <section data-panel-sec="language" class="hidden space-y-2">
+            <h3 class="text-[0.72rem] tracking-[0.16em] uppercase text-muted mb-1" data-i18n="settings.language">語言</h3>
+            <button type="button" class="seg-btn block w-full text-left px-3 py-2 border border-line rounded text-ink" data-set-lang="zh-Hant">繁體中文</button>
+            <button type="button" class="seg-btn block w-full text-left px-3 py-2 border border-line rounded text-ink" data-set-lang="en">English</button>
+          </section>
+          <section data-panel-sec="changelog" class="hidden">
+            <ol class="list-none m-0 p-0 space-y-5">
+              <li class="pl-4" style="border-left:2px solid var(--c-line)">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border border-accent text-accent rounded">v1.1</span>
+                  <time class="text-muted text-[0.85rem]">2026-06-07</time>
+                </div>
+                <ul class="list-disc pl-5 m-0 text-[0.92rem] space-y-1"><li>新增使用者選單、深色模式、背景與強調色切換、字級、語言。</li></ul>
+              </li>
+              <li class="pl-4" style="border-left:2px solid var(--c-line)">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="inline-block text-[0.68rem] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 border border-muted text-muted rounded">v1.0</span>
+                  <time class="text-muted text-[0.85rem]">2026-06-01</time>
+                </div>
+                <ul class="list-disc pl-5 m-0 text-[0.92rem] space-y-1"><li>首版上線。</li></ul>
+              </li>
+            </ol>
+          </section>
+          <section data-panel-sec="about" class="hidden space-y-2 text-[0.95rem]">
+            <p class="m-0" data-i18n="about.body">由 timmy-web 編輯風設計系統打造。</p>
+            <a href="#" class="text-accent" data-i18n="about.link">原始碼 / 官網 ↗</a>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var KEY='timmy-web-prefs', el=document.documentElement;
+    var prefs=load();
+    function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } }
+    function save(){ try{ localStorage.setItem(KEY, JSON.stringify(prefs)); }catch(e){} }
+    var mql=matchMedia('(prefers-color-scheme: dark)');
+    function effMode(){ var m=prefs.mode||'light'; return m==='system' ? (mql.matches?'dark':'light') : m; }
+
+    var I18N={
+      'zh-Hant':{ 'ui.mode':'模式','ui.light':'淺','ui.dark':'深','ui.system':'系統','ui.language':'語言','ui.settings':'設定…','ui.changelog':'版本紀錄','ui.about':'關於',
+        'settings.title':'設定','settings.appearance':'外觀','settings.language':'語言','settings.changelog':'版本紀錄','settings.about':'關於','settings.bg':'背景','settings.accent':'主色','settings.mode':'模式','settings.fontsize':'字級','settings.export':'匯出','settings.exportcss':'匯出設定檔 (.css)','settings.exporthint':'下載當前主題的 CSS 變數(含深色),開發者可直接引用。',
+        'about.body':'由 timmy-web 編輯風設計系統打造。','about.link':'原始碼 / 官網 ↗',
+        'nav.palette':'色彩','nav.type':'排版','nav.components':'元件',
+        'demo.h1':'編輯／手札風 風格樣張','demo.lead':'暖紙質地、襯線字、細線分層、深藏青骨幹配金棕點綴——這頁同時是樣張,也是試色場與設定示範。',
+        'note.title':'外觀與設定','note.body':'點右上角的使用者 icon:可切換模式(淺/深/系統)與語言,並開啟「設定」(背景、主色、字級)與「版本紀錄」。選擇即時套用全頁並記住。',
+        'sec.palette':'色彩 Palette','sec.type':'字體與排版 Typography','sec.components':'元件 Components' },
+      'en':{ 'ui.mode':'Theme','ui.light':'Light','ui.dark':'Dark','ui.system':'System','ui.language':'Language','ui.settings':'Settings…','ui.changelog':'Changelog','ui.about':'About',
+        'settings.title':'Settings','settings.appearance':'Appearance','settings.language':'Language','settings.changelog':'Changelog','settings.about':'About','settings.bg':'Background','settings.accent':'Accent','settings.mode':'Mode','settings.fontsize':'Text size','settings.export':'Export','settings.exportcss':'Export theme (.css)','settings.exporthint':'Download the current theme as CSS variables (incl. dark) for direct use.',
+        'about.body':'Built with the timmy-web editorial design system.','about.link':'Source / Website ↗',
+        'nav.palette':'Color','nav.type':'Type','nav.components':'Components',
+        'demo.h1':'Editorial Style Showcase','demo.lead':'Warm paper, serif type, hairline dividers, deep-navy backbone with gold accents — both a showcase and a live theming playground.',
+        'note.title':'Appearance & Settings','note.body':'Use the user icon at the top-right to switch mode (light/dark/system) and language, and open Settings (background, accent, text size) and Changelog. Choices apply instantly and are remembered.',
+        'sec.palette':'Color Palette','sec.type':'Typography','sec.components':'Components' }
+    };
+    function applyI18n(){ var lang=prefs.lang||el.lang||'zh-Hant', dict=I18N[lang]||I18N['zh-Hant'];
+      document.querySelectorAll('[data-i18n]').forEach(function(n){ var k=n.getAttribute('data-i18n'); if(dict[k]!=null) n.textContent=dict[k]; }); }
+    function valFor(key){ return key==='setMode'?(prefs.mode||'light'):key==='setFs'?(prefs.fs||'m'):key==='setAccent'?(prefs.accent||'navy'):key==='setBg'?(prefs.bg||'cream'):(prefs.lang||'zh-Hant'); }
+    function setPressed(sel, key){ document.querySelectorAll(sel).forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset[key]===valFor(key))); }); }
+    function syncControls(){ setPressed('[data-set-mode]','setMode'); setPressed('[data-set-fs]','setFs'); setPressed('[data-set-accent]','setAccent'); setPressed('[data-set-bg]','setBg'); setPressed('[data-set-lang]','setLang'); }
+    function apply(){ el.dataset.mode=effMode(); el.dataset.bg=prefs.bg||'cream'; el.dataset.accent=prefs.accent||'navy'; el.dataset.fs=prefs.fs||'m'; el.lang=prefs.lang||el.lang||'zh-Hant'; syncControls(); applyI18n(); }
+
+    var menu=document.getElementById('userMenu'), userBtn=document.getElementById('userBtn'), overlay=document.getElementById('settingsOverlay');
+    function closeMenu(){ menu.classList.add('hidden'); userBtn.setAttribute('aria-expanded','false'); }
+    function showSec(sec){ document.querySelectorAll('[data-panel-sec]').forEach(function(p){ p.classList.toggle('hidden', p.dataset.panelSec!==sec); });
+      document.querySelectorAll('.settings-tab').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.sec===sec)); }); }
+    function openSettings(sec){ overlay.classList.remove('hidden'); showSec(sec||'appearance'); closeMenu(); }
+    function closeSettings(){ overlay.classList.add('hidden'); }
+
+    document.addEventListener('click', function(e){
+      var t=e.target.closest('[data-set-mode],[data-set-fs],[data-set-accent],[data-set-bg],[data-set-lang],[data-open-settings],[data-sec]');
+      if(t){
+        if(t.hasAttribute('data-set-mode')){ prefs.mode=t.dataset.setMode; }
+        else if(t.hasAttribute('data-set-fs')){ prefs.fs=t.dataset.setFs; }
+        else if(t.hasAttribute('data-set-accent')){ prefs.accent=t.dataset.setAccent; }
+        else if(t.hasAttribute('data-set-bg')){ prefs.bg=t.dataset.setBg; }
+        else if(t.hasAttribute('data-set-lang')){ prefs.lang=t.dataset.setLang; }
+        else if(t.hasAttribute('data-open-settings')){ openSettings(t.dataset.openSettings); return; }
+        else if(t.hasAttribute('data-sec')){ showSec(t.dataset.sec); return; }
+        save(); apply(); return;
+      }
+      if(e.target.closest('#userBtn')){ var willOpen=menu.classList.contains('hidden'); menu.classList.toggle('hidden'); userBtn.setAttribute('aria-expanded', String(willOpen)); return; }
+      if(!menu.classList.contains('hidden') && !e.target.closest('#userMenu')) closeMenu();
+    });
+    document.getElementById('settingsClose').addEventListener('click', closeSettings);
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) closeSettings(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeSettings(); closeMenu(); } });
+    mql.addEventListener('change', function(){ if((prefs.mode||'light')==='system') apply(); });
+
+    // 匯出設定檔 (.css):當前主題的 CSS 變數(含深色),供開發者直接引用。用隱藏探針讀取解析值,不影響當前畫面。
+    var TOKENS=['paper','surface','ink','muted','accent','accent-soft','gold','highlight','done','line','warn'];
+    function readTokens(bg,accent,mode){ var pr=document.createElement('div'); pr.style.display='none'; pr.dataset.bg=bg; pr.dataset.accent=accent; pr.dataset.mode=mode; document.body.appendChild(pr); var cs=getComputedStyle(pr),o={}; TOKENS.forEach(function(t){ o[t]=cs.getPropertyValue('--c-'+t).trim(); }); document.body.removeChild(pr); return o; }
+    function blk(o){ return TOKENS.map(function(t){ return '  --c-'+t+': '+o[t]+';'; }).join('\n'); }
+    function exportCss(){ var bg=prefs.bg||'cream', accent=prefs.accent||'navy', fs=prefs.fs||'m', L=readTokens(bg,accent,'light'), D=readTokens(bg,accent,'dark'), fm=({s:.92,m:1,l:1.12})[fs]||1;
+      var css='/* timmy-web theme  ·  bg:'+bg+'  accent:'+accent+' */\n/* 直接 <link> 或貼入專案;以 var(--c-accent) 等引用,或併入 tailwind.config */\n\n:root{\n'+blk(L)+'\n  --fs-mult: '+fm+';\n}\n\n@media (prefers-color-scheme: dark){\n  :root{\n'+blk(D)+'\n  }\n}\n\n[data-mode="dark"]{\n'+blk(D)+'\n}\n\nhtml{ font-size: calc(16px * var(--fs-mult, 1)); }\n';
+      var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([css],{type:'text/css'})); a.download='timmy-web-theme.css'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); }
+    var exBtn=document.getElementById('exportCss'); if(exBtn) exBtn.addEventListener('click', exportCss);
+
+    var tabs=document.getElementById('subtabs');
+    if(tabs){ tabs.addEventListener('click', function(e){ var btn=e.target.closest('.subtab'); if(!btn) return; var key=btn.dataset.tab;
+      tabs.querySelectorAll('.subtab').forEach(function(b){ var on=b===btn;
+        b.classList.toggle('text-accent', on); b.classList.toggle('font-bold', on); b.classList.toggle('border-gold', on);
+        b.classList.toggle('text-muted', !on); b.classList.toggle('border-transparent', !on); });
+      document.querySelectorAll('[data-panel]').forEach(function(p){ p.classList.toggle('hidden', p.dataset.panel!==key); }); }); }
+
+    apply();
+  })();
+  </script>
+</body>
+</html>

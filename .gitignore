@@ -1,0 +1,14 @@
+# 推理暫存 / 草稿(不 commit)
+.claude/temp/
+**/.claude/temp/
+
+# Python 快取
+**/__pycache__/
+*.pyc
+
+# install 備份(若落在 repo 內)
+*.bak-*
+
+# OS cruft
+.DS_Store
+Thumbs.db

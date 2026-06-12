@@ -1,0 +1,186 @@
+<!doctype html>
+<!--
+  timmy-web · 風格實驗室 (style lab)
+  在「外觀」面板選:風格(9 款)+ 主色 + 背景色 → 即時套用到預覽(iframe 載入 styles/<風格>.html?accent=&bg=)。
+  選擇存 localStorage,預設風格 = G09 薄荷柑橘。原本的編輯風 showcase 備份於 showcase-editorial-backup.html。
+  風格原始檔在 styles/(皆可由 ?accent=&bg= 外部調色)。
+-->
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>timmy-web · 風格實驗室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { ink:'#23201a', paper:'#f4efe3', line:'#d9d0bd', muted:'#6f6757', accent:'#1d3557' },
+      fontFamily: { serif:['"Noto Serif TC"','Georgia','serif'], sans:['"Plus Jakarta Sans"','system-ui','sans-serif'] } } } }
+  </script>
+  <style>
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+    .sw{ width:30px;height:30px;border-radius:9999px;border:1px solid rgba(0,0,0,.12);cursor:pointer;position:relative }
+    .sw[aria-pressed="true"]{ box-shadow:0 0 0 2px #fff,0 0 0 4px #23201a }
+    .stylecard[aria-pressed="true"]{ outline:2px solid #1d3557; outline-offset:2px }
+    #drawer{ transition:transform .25s ease }
+  </style>
+<!-- ===== favicon · 山徑手記 羅盤方位玫瑰 (compass rose) · timmy-web-favicon =====
+     依本頁解析後的 --accent 自動著色(含 ?accent= / store 覆寫);編輯風金棕北針 + 暖紙底。
+     屬「示範內容」非主題引擎,故不進 tw-engine.js;放各頁 <head> 末(pre-paint 之後)讀已解析 accent。
+     匯出「下載 HTML」剝除 <script> 但保留執行期注入的 <link rel=icon>,故乾淨檔仍帶 favicon。 -->
+<script>
+(function(){
+  function mix(hex){ // accent 與黑混 30%,作描邊 / 環(淺色 accent 仍可辨識);回 #rrggbb
+    hex=(hex||'').trim().replace('#','');
+    if(hex.length===3) hex=hex.replace(/./g,'$&$&');
+    if(hex.length<6) return '#142537';
+    var n=parseInt(hex.slice(0,6),16);
+    function d(x){ x=Math.round(x*0.7); return (x<16?'0':'')+x.toString(16); }
+    return '#'+d((n>>16)&255)+d((n>>8)&255)+d(n&255);
+  }
+  function paint(){
+    var accent=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim()||'#1d3557',
+        deep=mix(accent), gold='#9a7b4f', paper='#f4efe3',
+        svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+          +'<rect x="1" y="1" width="30" height="30" rx="6.5" fill="'+paper+'"/>'
+          +'<circle cx="16" cy="16" r="11.2" fill="none" stroke="'+deep+'" stroke-width="1.1"/>'
+          +'<g transform="rotate(45 16 16)"><path d="M16 8 17.7 14.3 24 16 17.7 17.7 16 24 14.3 17.7 8 16 14.3 14.3Z" fill="'+gold+'" fill-opacity=".32"/></g>'
+          +'<path d="M16 3.5 18.5 13.5 28.5 16 18.5 18.5 16 28.5 13.5 18.5 3.5 16 13.5 13.5Z" fill="'+accent+'" stroke="'+deep+'" stroke-width=".7" stroke-linejoin="round"/>'
+          +'<path d="M16 3.5 18.5 13.5 13.5 13.5Z" fill="'+gold+'"/>'
+          +'<circle cx="16" cy="16" r="1.8" fill="'+paper+'" stroke="'+deep+'" stroke-width=".9"/>'
+          +'</svg>',
+        href='data:image/svg+xml,'+encodeURIComponent(svg),
+        link=document.querySelector('link[rel="icon"]');
+    if(!link){ link=document.createElement('link'); link.setAttribute('rel','icon'); document.head.appendChild(link); }
+    link.setAttribute('type','image/svg+xml'); link.setAttribute('href',href);
+  }
+  try{ paint(); }catch(e){}
+  // accent 變更即時重繪(設定面板 twSetAccent 於主引擎載入後才有);讓 live favicon 與匯出同步
+  window.addEventListener('load',function(){ try{
+    if(typeof window.twSetAccent==='function' && !window.__twFaviconHook){
+      window.__twFaviconHook=true; var orig=window.twSetAccent;
+      window.twSetAccent=function(){ var r=orig.apply(this,arguments); try{ paint(); }catch(e){} return r; };
+    }
+    paint();
+  }catch(e){} });
+})();
+</script>
+</head>
+<body class="h-screen flex flex-col bg-[#ece7df] text-ink overflow-hidden">
+
+  <!-- toolbar -->
+  <header class="flex items-center gap-3 px-4 sm:px-5 h-14 bg-paper border-b-[3px] border-double border-accent shrink-0">
+    <span class="font-serif font-bold text-[1.15rem] tracking-[0.06em]">timmy-web</span>
+    <span class="text-muted text-[0.7rem] tracking-[0.16em] uppercase hidden sm:inline">風格實驗室 · STYLE LAB</span>
+    <span class="mx-2 text-line hidden sm:inline">|</span>
+    <span class="text-[0.9rem] text-muted hidden sm:inline">目前風格:<b id="curName" class="text-ink">編輯手札</b></span>
+    <div class="ml-auto flex items-center gap-2">
+      <button id="openTab" class="text-[0.85rem] px-3 py-1.5 rounded-lg border border-line bg-white hover:border-accent hover:text-accent transition-colors">開啟原頁 ↗</button>
+      <button id="toggle" class="text-[0.9rem] font-semibold px-3.5 py-1.5 rounded-lg bg-accent text-white hover:opacity-90 transition-opacity">外觀設定</button>
+    </div>
+  </header>
+
+  <!-- preview -->
+  <main class="relative flex-1 min-h-0 bg-[#ece7df]">
+    <iframe id="frame" class="w-full h-full border-0 bg-white" title="風格預覽"></iframe>
+  </main>
+
+  <!-- backdrop -->
+  <div id="backdrop" class="hidden fixed inset-0 bg-black/20 z-30"></div>
+
+  <!-- drawer: 外觀 -->
+  <aside id="drawer" class="fixed top-0 right-0 h-full w-[330px] max-w-[88vw] bg-white border-l border-line z-40 translate-x-full flex flex-col shadow-[-12px_0_40px_-18px_rgba(0,0,0,.3)]">
+    <div class="flex items-center justify-between px-5 h-14 border-b border-line shrink-0">
+      <h2 class="font-serif font-bold text-[1.1rem] tracking-[0.04em]">外觀</h2>
+      <button id="close" class="w-8 h-8 grid place-items-center rounded-lg text-muted hover:text-ink hover:bg-paper transition-colors">✕</button>
+    </div>
+    <div class="overflow-y-auto p-5 space-y-6">
+      <!-- 風格 -->
+      <section>
+        <h3 class="text-[0.7rem] tracking-[0.16em] uppercase text-muted mb-2.5">風格 Style</h3>
+        <div id="styleGrid" class="grid grid-cols-2 gap-2.5"></div>
+      </section>
+      <!-- 主色 -->
+      <section>
+        <h3 class="text-[0.7rem] tracking-[0.16em] uppercase text-muted mb-2.5">主色 Accent</h3>
+        <div id="accentRow" class="flex flex-wrap gap-2.5"></div>
+      </section>
+      <!-- 背景色 -->
+      <section>
+        <h3 class="text-[0.7rem] tracking-[0.16em] uppercase text-muted mb-2.5">背景色 Background</h3>
+        <div id="bgRow" class="flex flex-wrap gap-2.5"></div>
+      </section>
+      <p class="text-muted text-[0.78rem] leading-relaxed pt-2 border-t border-line">選「原色」= 用該風格的預設配色。選擇會即時套用並記住。</p>
+    </div>
+  </aside>
+
+  <script>
+    var STYLES = [
+      ['00-editorial','編輯手札'],
+      ['g09-mintcitrus','薄荷柑橘'], ['16-soft-flat','清爽扁平'], ['11-glassmorphism','毛玻璃'],
+      ['14-pastel-bento','粉彩便當'], ['15-gradient-pop','鮮豔漸層'], ['04-modern-broadsheet','彩色雜誌'],
+      ['02-blueprint-grid','彩色藍圖'], ['06-terminal-light','彩色 IDE'], ['01-neo-brutalist','撞色粗野派'],
+    ];
+    var ACCENTS = [
+      ['','原色'], ['#5B6CF0','靛藍'], ['#10B981','翡翠'], ['#F8765C','珊瑚'], ['#F5A524','琥珀'],
+      ['#EC4899','玫瑰'], ['#14B8A6','青綠'], ['#8B5CF6','紫羅蘭'], ['#38BDF8','天藍'],
+    ];
+    var BGS = [
+      ['','原色'], ['#FFFFFF','純白'], ['#FAF6F0','奶油'], ['#E8F8F5','薄荷'], ['#EAF2FE','天空'],
+      ['#EFEBFB','薰衣草'], ['#FDEEE7','蜜桃'], ['#EEF0F2','霧灰'],
+    ];
+    var KEY='timmy-web-stylelab';
+    var prefs = load(); function load(){ try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}} }
+    function save(){ try{localStorage.setItem(KEY,JSON.stringify(prefs))}catch(e){} }
+    if(!prefs.style) prefs.style='00-editorial';
+    if(prefs.accent==null) prefs.accent='';
+    if(prefs.bg==null) prefs.bg='';
+
+    var frame=document.getElementById('frame'), curName=document.getElementById('curName');
+    function nameOf(k){ for(var i=0;i<STYLES.length;i++) if(STYLES[i][0]===k) return STYLES[i][1]; return k; }
+    function apply(){
+      var q=[]; if(prefs.accent) q.push('accent='+encodeURIComponent(prefs.accent)); if(prefs.bg) q.push('bg='+encodeURIComponent(prefs.bg));
+      frame.src='styles/'+prefs.style+'.html'+(q.length?('?'+q.join('&')):'');
+      curName.textContent=nameOf(prefs.style);
+      // active states
+      document.querySelectorAll('.stylecard').forEach(function(b){ b.setAttribute('aria-pressed',String(b.dataset.k===prefs.style)); });
+      document.querySelectorAll('[data-accent]').forEach(function(b){ b.setAttribute('aria-pressed',String(b.dataset.accent===prefs.accent)); });
+      document.querySelectorAll('[data-bg]').forEach(function(b){ b.setAttribute('aria-pressed',String(b.dataset.bg===prefs.bg)); });
+    }
+
+    // render style grid
+    document.getElementById('styleGrid').innerHTML = STYLES.map(function(s){
+      return '<button class="stylecard text-left bg-paper border border-line rounded-lg overflow-hidden hover:border-accent transition-colors" data-k="'+s[0]+'">'
+        + '<img src="styles/thumbs/'+s[0]+'.png" alt="" loading="lazy" class="w-full h-16 object-cover object-top border-b border-line bg-white" />'
+        + '<span class="block px-2 py-1.5 text-[0.8rem] font-semibold">'+s[1]+'</span></button>';
+    }).join('');
+    // render swatches
+    function swatch(val,label,attr){
+      var bgcss = val ? ('background:'+val) : 'background:conic-gradient(#f8765c,#f5a524,#10b981,#5b6cf0,#8b5cf6,#f8765c)';
+      return '<button class="sw" '+attr+'="'+val+'" title="'+label+'" style="'+bgcss+'"></button>';
+    }
+    document.getElementById('accentRow').innerHTML = ACCENTS.map(function(a){return swatch(a[0],a[1],'data-accent')}).join('');
+    document.getElementById('bgRow').innerHTML = BGS.map(function(b){return swatch(b[0],b[1],'data-bg')}).join('');
+
+    // events
+    document.addEventListener('click', function(e){
+      var sc=e.target.closest('.stylecard'); if(sc){ prefs.style=sc.dataset.k; save(); apply(); return; }
+      var ac=e.target.closest('[data-accent]'); if(ac){ prefs.accent=ac.dataset.accent; save(); apply(); return; }
+      var bg=e.target.closest('[data-bg]'); if(bg){ prefs.bg=bg.dataset.bg; save(); apply(); return; }
+    });
+    var drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+    function openD(){ drawer.classList.remove('translate-x-full'); backdrop.classList.remove('hidden'); }
+    function closeD(){ drawer.classList.add('translate-x-full'); backdrop.classList.add('hidden'); }
+    document.getElementById('toggle').addEventListener('click', openD);
+    document.getElementById('close').addEventListener('click', closeD);
+    backdrop.addEventListener('click', closeD);
+    document.getElementById('openTab').addEventListener('click', function(){ window.open(frame.src,'_blank'); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeD(); });
+
+    apply();
+    openD();  // 首次開啟即顯示外觀面板讓你挑
+  </script>
+</body>
+</html>

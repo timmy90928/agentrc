@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山徑手記 — colorful IDE · 明亮編輯器預覽</title>
+<!-- ===== Pre-paint(theme-engine §7a):通用 pre-paint 由正本 assets/tw-engine.js 注入;
+     改正本後跑 scripts/sync_engine.py 同步。本標記區之間勿手改(會被覆蓋)。 ===== -->
+<!-- TW-PREPAINT:START -->
+<script>
+/* 通用 pre-paint(theme-engine §7a / §10-6):body 前定 data-mode / lang / accent。
+   只有 light 才寫 inline --bg(dark 留給 :root[data-mode=dark]{--bg} 規則,inline
+   specificity 最高會蓋過規則)。讀統一 store timmy-web-stylelab + URL ?accent/bg。
+   不需任何 per-page 設定 —— 9+1 款共用同一段。 */
+(function(){ try{
+  var el = document.documentElement,
+      s  = JSON.parse(localStorage.getItem('timmy-web-stylelab') || '{}'),
+      p  = new URLSearchParams(location.search),
+      m  = s.mode || 'light',
+      dark = (m === 'dark') || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  el.dataset.mode = dark ? 'dark' : 'light';
+  if (s.lang) el.lang = s.lang;
+  // hex 容錯:無 '#' 且非函式色(rgb()/color-mix())時補上 '#'
+  function norm(c){ return (c.charAt(0) === '#' || c.indexOf('(') > -1) ? c : '#' + c; }
+  var pa = p.get('accent');
+  if (s.accent) el.style.setProperty('--accent', s.accent);  // accent 兩模式皆 inline
+  if (pa)       el.style.setProperty('--accent', norm(pa));
+  // 只有 light 才寫 inline --bg;dark 交給 :root[data-mode="dark"]{--bg} 規則
+  if (!dark){ var bg = p.get('bg') || s.bg; if (bg) el.style.setProperty('--bg', norm(bg)); }
+}catch(e){} })();
+</script>
+<!-- TW-PREPAINT:END -->
+<style>
+  /* ===== 可由外部調色的兩個主變數 ===== */
+  :root{
+    --accent:#5B6CF0;   /* 主強調色:關鍵字 / 重點 / active 分頁 / 狀態列漸層 */
+    --bg:#E7E1F7;       /* 頁面 / 編輯器最外底色 */
+    /* 衍生色(由上述兩變數 color-mix 推導,改 --accent / --bg 即整體連動) */
+    --accent-2:color-mix(in srgb, var(--accent) 70%, #8B5CF6);     /* 漸層尾、次強調 */
+    --accent-soft:color-mix(in srgb, var(--accent) 14%, #fff);     /* 淡色 chip / active 檔列底 */
+    --accent-softer:color-mix(in srgb, var(--accent) 9%, #fff);    /* 表頭底 */
+    --accent-line:color-mix(in srgb, var(--accent) 26%, #fff);     /* selection 底 */
+    --bg-page:color-mix(in srgb, var(--bg) 55%, #fff);             /* 內層頁底(原 #EFEBFB) */
+    --panel:color-mix(in srgb, var(--bg) 22%, #fff);               /* 面板/側欄底 */
+    --surface:#FFFFFF;                                             /* 編輯器卡片面 */
+    --line:color-mix(in srgb, var(--bg) 34%, #fff);               /* 細線 */
+    --linesoft:color-mix(in srgb, var(--bg) 22%, #fff);           /* 更淡的線 */
+    --tab-off:color-mix(in srgb, var(--bg) 40%, #fff);            /* 非 active 分頁底 */
+    --tab-off-h:color-mix(in srgb, var(--bg) 26%, #fff);         /* 分頁 hover */
+    --scroll-track:color-mix(in srgb, var(--bg) 42%, #fff);
+    --scroll-thumb:color-mix(in srgb, var(--accent) 22%, #fff);
+    --scroll-thumb-h:color-mix(in srgb, var(--accent) 45%, #fff);
+    /* 文字基色(Tailwind ink/muted 指向這兩個變數,以利深色覆蓋) */
+    --ink:#25303B;                                                 /* 主文字 / 編輯器前景 */
+    --muted:#6B7280;                                               /* 次要文字 */
+    --tab-on-ink:#25303B;                                          /* active 分頁文字 */
+    --tab-off-ink:#8A86A6;                                         /* 非 active 分頁文字 */
+    --tab-off-ink-h:#6B7280;                                       /* 分頁 hover 文字 */
+    --com:#A9A4C2;                                                 /* 註解語法色 */
+    /* 季節 callout(淺底警示框;深色於 [data-mode=dark] 重定義) */
+    --season-bg:#FFF4F1; --season-line:#FBD9D0; --season-bar:#F8765C;
+  }
+  /* ===== 深色(IDE 偏冷藍黑基底;--accent 不動,僅重定義派生變數)===== */
+  :root[data-mode="dark"]{
+    --bg:#14131c;                                                  /* 最外底:冷藍黑 */
+    --bg-page:#1a1922;                                             /* 內層頁底 */
+    --surface:#1d1c27;                                             /* 編輯器卡片面 */
+    --panel:#17161f;                                               /* 面板 / 側欄 / 狀態條底 */
+    --line:#2b2a38;                                                /* 細線 */
+    --linesoft:#242331;                                            /* 更淡的線 */
+    --tab-off:#1a1923;                                             /* 非 active 分頁底 */
+    --tab-off-h:#222130;                                           /* 分頁 hover 底 */
+    --ink:#e7e5f0;                                                 /* 主文字:淺 */
+    --muted:#9d9ab4;                                               /* 次要文字:中淺灰 */
+    --tab-on-ink:#e7e5f0;                                          /* active 分頁文字 */
+    --tab-off-ink:#7f7c97;                                         /* 非 active 分頁文字 */
+    --tab-off-ink-h:#a8a5be;                                       /* 分頁 hover 文字 */
+    --com:#6f6c86;                                                 /* 註解(深底降亮) */
+    /* accent 派生:深底改 mix 向 accent(原為 mix 向 white) */
+    --accent-soft:color-mix(in srgb, var(--accent) 22%, #14131c);  /* 淡色 chip / active 檔列底 */
+    --accent-softer:color-mix(in srgb, var(--accent) 14%, #14131c);/* 表頭底 */
+    --accent-line:color-mix(in srgb, var(--accent) 40%, #14131c);  /* selection 底 */
+    --scroll-track:#1a1922;
+    --scroll-thumb:color-mix(in srgb, var(--accent) 34%, #14131c);
+    --scroll-thumb-h:color-mix(in srgb, var(--accent) 55%, #14131c);
+    /* 季節 callout 深色:暖色低彩度,維持警示語意 */
+    --season-bg:#2a1d1b; --season-line:#4a2e28; --season-bar:#F8765C;
+  }
+  html{background:var(--bg)}
+  body{-webkit-font-smoothing:antialiased;background:var(--bg)}
+  body{transition:background-color .2s ease,color .2s ease}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tw-config">tailwind.config={theme:{extend:{colors:{
+ surface:'var(--surface)',ink:'var(--ink)',muted:'var(--muted)',
+ emerald:'#10B981',coral:'#F8765C',violet:'#8B5CF6',amber:'#F5A524',rose:'#EC4899',teal:'#14B8A6'},
+ fontFamily:{mono:['"JetBrains Mono"','monospace'],sans:['"Plus Jakarta Sans"','"Noto Sans TC"','sans-serif'],tc:['"Noto Sans TC"','sans-serif'],serif:['"Noto Serif TC"','Georgia','serif']},
+ borderRadius:{xl:'14px','2xl':'20px'}}}}</script>
+<style>
+  /* 用變數驅動的「面/底/線」工具類(取代原本寫死的 Tailwind 色) */
+  .bg-bg{background:var(--bg-page)}
+  .bg-surface{background:var(--surface)}
+  .bg-panel{background:var(--panel)}
+  .border-line{border-color:var(--line)}
+  .border-linesoft{border-color:var(--linesoft)}
+  .text-line{color:var(--line)}
+  /* ---- 主強調色(由 --accent 控制) ---- */
+  .text-accent{color:var(--accent)}
+  .bg-accent{background:var(--accent)}
+  .border-accent{border-color:var(--accent)}
+  .bg-accent-soft{background:var(--accent-soft)}
+  .accent-dot{background:var(--accent)}
+  .hover\:border-accent:hover{border-color:var(--accent)}
+  .hover\:text-accent:hover{color:var(--accent)}
+  /* 鮮明語法色 — accent 關鍵字 · emerald 字串 · coral 數字 · violet 函式 */
+  .t-key{color:var(--accent)}.t-str{color:#10B981}.t-num{color:#F8765C}.t-fn{color:#8B5CF6}.t-tag{color:#EC4899}.t-com{color:var(--com)}
+  .pulse{animation:pl 2s ease-in-out infinite}@keyframes pl{0%,100%{opacity:1}50%{opacity:.45}}
+  .tab-on{background:var(--surface);color:var(--tab-on-ink)}
+  .tab-off{background:var(--tab-off);color:var(--tab-off-ink)}.tab-off:hover{background:var(--tab-off-h);color:var(--tab-off-ink-h)}
+  ::selection{background:var(--accent-line);color:var(--accent)}
+  *::-webkit-scrollbar{height:11px;width:11px}*::-webkit-scrollbar-track{background:var(--scroll-track)}
+  *::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:2px solid var(--scroll-track);border-radius:9px}*::-webkit-scrollbar-thumb:hover{background:var(--scroll-thumb-h)}
+  .mm{width:100%;height:4px;margin-bottom:3px;border-radius:3px;opacity:.7}
+  .mm-accent{background:var(--accent)}
+  /* 文件預覽排版(正常渲染文件,非 code) */
+  .doc h1{font-family:'Noto Serif TC',serif;font-weight:700;font-size:2rem;letter-spacing:.01em;line-height:1.3;color:var(--ink);margin:0 0 .4rem}
+  .doc h2{font-family:'Noto Serif TC',serif;font-weight:600;font-size:1.3rem;color:var(--ink);margin:2rem 0 .9rem;padding-bottom:.4rem;border-bottom:2px solid var(--line)}
+  .doc h2::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;background:linear-gradient(135deg,var(--accent),var(--accent-2));margin-right:.55rem;vertical-align:middle}
+  .doc p{font-family:'Noto Serif TC',serif;line-height:1.9;color:var(--ink);margin:.6rem 0}
+  .doc .lead{color:var(--muted);font-style:italic;font-size:1.05rem;margin:0 0 1.4rem;padding-bottom:1.1rem;border-bottom:2px solid var(--line)}
+  .doc strong{color:var(--accent);font-weight:700}
+  .softcard{box-shadow:0 10px 30px -14px color-mix(in srgb, var(--accent) 28%, transparent)}
+  /* 設定面板:模式/語言 命令列切換鈕(沿用 IDE 檔列視覺;選中=accent-soft 底 + accent 文字) */
+  .cmd-seg{color:var(--muted)}
+  .cmd-seg:hover{background:var(--accent-soft);color:var(--ink)}
+  .cmd-seg[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .cmd-seg[aria-pressed="true"] .cmd-dot{opacity:1}
+  .cmd-dot{opacity:0}
+</style>
+<!-- ===== favicon · 山徑手記 羅盤方位玫瑰 (compass rose) · timmy-web-favicon =====
+     依本頁解析後的 --accent 自動著色(含 ?accent= / store 覆寫);編輯風金棕北針 + 暖紙底。
+     屬「示範內容」非主題引擎,故不進 tw-engine.js;放各頁 <head> 末(pre-paint 之後)讀已解析 accent。
+     匯出「下載 HTML」剝除 <script> 但保留執行期注入的 <link rel=icon>,故乾淨檔仍帶 favicon。 -->
+<script>
+(function(){
+  function mix(hex){ // accent 與黑混 30%,作描邊 / 環(淺色 accent 仍可辨識);回 #rrggbb
+    hex=(hex||'').trim().replace('#','');
+    if(hex.length===3) hex=hex.replace(/./g,'$&$&');
+    if(hex.length<6) return '#142537';
+    var n=parseInt(hex.slice(0,6),16);
+    function d(x){ x=Math.round(x*0.7); return (x<16?'0':'')+x.toString(16); }
+    return '#'+d((n>>16)&255)+d((n>>8)&255)+d(n&255);
+  }
+  function paint(){
+    var accent=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim()||'#1d3557',
+        deep=mix(accent), gold='#9a7b4f', paper='#f4efe3',
+        svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+          +'<rect x="1" y="1" width="30" height="30" rx="6.5" fill="'+paper+'"/>'
+          +'<circle cx="16" cy="16" r="11.2" fill="none" stroke="'+deep+'" stroke-width="1.1"/>'
+          +'<g transform="rotate(45 16 16)"><path d="M16 8 17.7 14.3 24 16 17.7 17.7 16 24 14.3 17.7 8 16 14.3 14.3Z" fill="'+gold+'" fill-opacity=".32"/></g>'
+          +'<path d="M16 3.5 18.5 13.5 28.5 16 18.5 18.5 16 28.5 13.5 18.5 3.5 16 13.5 13.5Z" fill="'+accent+'" stroke="'+deep+'" stroke-width=".7" stroke-linejoin="round"/>'
+          +'<path d="M16 3.5 18.5 13.5 13.5 13.5Z" fill="'+gold+'"/>'
+          +'<circle cx="16" cy="16" r="1.8" fill="'+paper+'" stroke="'+deep+'" stroke-width=".9"/>'
+          +'</svg>',
+        href='data:image/svg+xml,'+encodeURIComponent(svg),
+        link=document.querySelector('link[rel="icon"]');
+    if(!link){ link=document.createElement('link'); link.setAttribute('rel','icon'); document.head.appendChild(link); }
+    link.setAttribute('type','image/svg+xml'); link.setAttribute('href',href);
+  }
+  try{ paint(); }catch(e){}
+  // accent 變更即時重繪(設定面板 twSetAccent 於主引擎載入後才有);讓 live favicon 與匯出同步
+  window.addEventListener('load',function(){ try{
+    if(typeof window.twSetAccent==='function' && !window.__twFaviconHook){
+      window.__twFaviconHook=true; var orig=window.twSetAccent;
+      window.twSetAccent=function(){ var r=orig.apply(this,arguments); try{ paint(); }catch(e){} return r; };
+    }
+    paint();
+  }catch(e){} });
+})();
+</script>
+</head>
+<body class="font-mono text-ink min-h-screen">
+
+<!-- 貼邊寬版:max-w-[1760px](超寬螢幕仍置中)+ 小 gutter;IDE chrome 在此容器內滿版 --><div class="max-w-[1760px] mx-auto px-2 sm:px-5 py-4 sm:py-8">
+  <div class="border border-line bg-surface rounded-2xl overflow-hidden" style="box-shadow:0 30px 70px -28px color-mix(in srgb, var(--accent) 45%, transparent)">
+
+    <!-- window title bar -->
+    <div class="flex items-center gap-2 px-3 sm:px-4 h-10 bg-panel border-b border-line select-none">
+      <span class="w-3 h-3 rounded-full" style="background:#F8765C"></span>
+      <span class="w-3 h-3 rounded-full" style="background:#F5A524"></span>
+      <span class="w-3 h-3 rounded-full" style="background:#10B981"></span>
+      <span class="ml-2 text-[11px] sm:text-xs text-muted truncate"><span class="text-ink font-semibold">trails-2026</span> — <span class="t-fn">field-journal</span></span>
+      <span class="ml-auto hidden sm:flex items-center gap-3 text-[11px] text-muted">
+        <span>UTF-8</span><span class="text-line">│</span><span class="t-key" data-i18n="chrome.md_preview">Markdown Preview</span><span class="text-line">│</span><span class="text-emerald"><span>●</span> <span data-i18n="chrome.workspace">workspace</span></span>
+      </span>
+      <!-- compact user/settings entry (always visible, esp. on mobile) -->
+      <button data-export-strip onclick="openSettings()" title="使用者與設定" data-i18n-attr="title:chrome.user_settings" aria-haspopup="dialog" aria-controls="settingsPanel" class="ml-auto sm:ml-3 grid place-items-center w-6 h-6 rounded-full bg-accent text-white text-[10px] font-bold leading-none hover:opacity-90 active:scale-95 transition" style="box-shadow:0 2px 6px color-mix(in srgb, var(--accent) 50%, transparent)">柑</button>
+    </div>
+
+    <!-- menu strip -->
+    <div class="hidden md:flex items-center gap-5 px-4 h-7 bg-surface border-b border-line text-[11px] text-muted select-none">
+      <span class="hover:text-ink cursor-default" data-i18n="chrome.menu_file">File</span><span class="hover:text-ink cursor-default" data-i18n="chrome.menu_edit">Edit</span>
+      <span class="hover:text-ink cursor-default" data-i18n="chrome.menu_view">View</span><span class="hover:text-ink cursor-default" data-i18n="chrome.menu_go">Go</span>
+      <span class="ml-auto text-[10px] tracking-[0.16em] text-accent font-semibold" style="opacity:.7" data-i18n="chrome.kicker">MOUNTAIN TRAILS · FIELD JOURNAL</span>
+      <button data-export-strip onclick="openSettings()" title="使用者與設定 (⌘,)" data-i18n-attr="title:chrome.user_settings_kbd" aria-haspopup="dialog" aria-controls="settingsPanel" class="ml-4 group flex items-center gap-1.5 rounded-md border border-line px-1.5 py-0.5 hover:border-accent hover:text-accent transition-colors">
+        <span class="grid place-items-center w-4 h-4 rounded-full bg-accent text-white text-[9px] font-bold leading-none group-hover:scale-105 transition-transform">柑</span>
+        <span class="text-[10.5px]" data-i18n="chrome.user">user</span><span class="text-line group-hover:text-accent">⚙</span>
+      </button>
+    </div>
+
+    <div class="flex">
+      <!-- activity bar -->
+      <div class="hidden sm:flex flex-col items-center w-12 bg-panel border-r border-line py-3 gap-5 text-muted select-none">
+        <span class="text-accent text-lg leading-none" title="explorer">▤</span>
+        <span class="hover:text-violet cursor-default leading-none" title="search">⌕</span>
+        <span class="hover:text-emerald cursor-default leading-none" title="source-control">⎇</span>
+        <span class="hover:text-coral cursor-default leading-none" title="preview">◳</span>
+        <button data-export-strip onclick="openSettings()" class="mt-auto hover:text-accent cursor-pointer leading-none text-lg" title="settings (⌘,)" aria-haspopup="dialog" aria-controls="settingsPanel">⚙</button>
+      </div>
+
+      <!-- sidebar: file tree -->
+      <aside class="hidden sm:block w-56 shrink-0 bg-panel border-r border-line text-[12.5px] select-none">
+        <div class="px-3 py-2 text-[11px] tracking-[0.18em] text-muted" data-i18n="chrome.explorer">EXPLORER</div>
+        <div class="px-3 pb-1 text-[11px] text-ink font-bold flex items-center gap-1"><span class="text-accent">▾</span> <span data-i18n="chrome.project">山徑手記 / TRAILS-2026</span></div>
+        <nav class="pb-3">
+          <div class="px-3 py-1 flex items-center gap-1 text-muted"><span class="text-accent">▾</span><span class="text-amber">📁</span><span class="tc">docs</span></div>
+          <button onclick="nav(0)" data-file="0" class="file w-full text-left pl-9 pr-3 py-1.5 flex items-center gap-2 rounded-r-lg text-ink bg-accent-soft"><span class="t-tag font-bold">M↓</span><span class="tc">overview.md</span><span class="ml-auto w-1.5 h-1.5 rounded-full accent-dot"></span></button>
+          <button onclick="nav(1)" data-file="1" class="file w-full text-left pl-9 pr-3 py-1.5 flex items-center gap-2 rounded-r-lg text-muted hover:bg-accent-soft"><span class="t-tag font-bold">M↓</span><span class="tc">routes.md</span></button>
+          <button onclick="nav(2)" data-file="2" class="file w-full text-left pl-9 pr-3 py-1.5 flex items-center gap-2 rounded-r-lg text-muted hover:bg-accent-soft"><span class="t-tag font-bold">M↓</span><span class="tc">gear.md</span></button>
+          <button onclick="nav(3)" data-file="3" class="file w-full text-left pl-9 pr-3 py-1.5 flex items-center gap-2 rounded-r-lg text-muted hover:bg-accent-soft"><span class="t-tag font-bold">M↓</span><span class="tc">journal.md</span></button>
+          <div class="px-3 py-1 mt-1 flex items-center gap-1 text-muted/70"><span>▸</span><span class="text-teal">📁</span><span class="tc">assets</span></div>
+        </nav>
+        <div class="border-t border-line px-3 py-2 text-[11px] text-muted">
+          <div class="flex items-center justify-between"><span class="tracking-widest" data-i18n="chrome.outline">OUTLINE</span><span class="text-accent">▾</span></div>
+          <div class="mt-1.5 space-y-1 text-ink">
+            <div class="tc flex items-center gap-1.5"><span class="text-violet">›</span><span data-i18n="stats.overview">數據概覽</span></div><div class="tc flex items-center gap-1.5"><span class="text-violet">›</span><span data-i18n="stats.season">最佳季節</span></div><div class="tc flex items-center gap-1.5"><span class="text-violet">›</span><span data-i18n="quick.title">快速前往</span></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- editor column -->
+      <div class="flex-1 min-w-0 bg-surface flex flex-col">
+        <!-- tabs -->
+        <div class="flex items-stretch border-b border-line overflow-x-auto select-none bg-panel">
+          <button onclick="nav(0)" data-tab="0" class="tab px-3 sm:px-4 py-2 text-[12.5px] border-r border-line flex items-center gap-2 whitespace-nowrap relative tab-on"><span class="t-tag font-bold text-[11px]">M↓</span><span class="tc">overview.md</span><span class="text-accent text-[10px]">●</span></button>
+          <button onclick="nav(1)" data-tab="1" class="tab px-3 sm:px-4 py-2 text-[12.5px] border-r border-line flex items-center gap-2 whitespace-nowrap relative tab-off"><span class="t-tag font-bold text-[11px]">M↓</span><span class="tc">routes.md</span></button>
+          <button onclick="nav(2)" data-tab="2" class="tab px-3 sm:px-4 py-2 text-[12.5px] border-r border-line flex items-center gap-2 whitespace-nowrap relative tab-off"><span class="t-tag font-bold text-[11px]">M↓</span><span class="tc">gear.md</span></button>
+          <button onclick="nav(3)" data-tab="3" class="tab px-3 sm:px-4 py-2 text-[12.5px] border-r border-line flex items-center gap-2 whitespace-nowrap relative tab-off"><span class="t-tag font-bold text-[11px]">M↓</span><span class="tc">journal.md</span></button>
+          <span class="ml-auto self-center px-3 text-[11px] text-muted hidden md:flex items-center gap-1"><span class="text-coral">◳</span> <span data-i18n="chrome.preview">Preview</span></span>
+        </div>
+
+        <!-- breadcrumb -->
+        <div class="flex items-center gap-1.5 px-3 sm:px-5 h-7 border-b border-line text-[11px] text-muted overflow-x-auto whitespace-nowrap select-none bg-surface">
+          <span>trails-2026</span><span class="text-line">›</span><span>docs</span><span class="text-line">›</span>
+          <span id="crumbFile" class="text-ink font-semibold">overview.md</span><span class="text-line">›</span><span id="crumbSym" class="t-fn">Preview</span>
+        </div>
+
+        <!-- content + minimap -->
+        <div class="flex">
+          <div class="flex-1 min-w-0">
+
+            <!-- ===== overview.md ===== -->
+            <section data-panel="0" class="panel doc px-5 sm:px-8 lg:px-10 py-8 max-w-none">
+              <div class="inline-block text-[0.66rem] tracking-[0.18em] uppercase text-accent font-mono font-semibold mb-3 bg-accent-soft rounded-full px-3 py-1" data-i18n="hero.kicker">MOUNTAIN TRAILS · FIELD JOURNAL</div>
+              <h1 data-i18n="hero.title">高山縱走 2026 行記</h1>
+              <p class="lead max-w-[72ch]" data-i18n="hero.lead">三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。</p>
+
+              <h2 data-i18n="stats.overview">數據概覽</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="rounded-xl bg-panel border border-line softcard p-4 text-center"><div class="text-[0.66rem] tracking-[0.16em] uppercase text-muted font-mono mb-1" data-i18n="stats.routes_label">路線</div><div class="font-serif text-[1.9rem] font-bold text-accent leading-none">3</div><div class="text-[0.82rem] text-muted mt-1" data-i18n="stats.routes_sub">條經典稜線</div></div>
+                <div class="rounded-xl bg-panel border border-line softcard p-4 text-center"><div class="text-[0.66rem] tracking-[0.16em] uppercase text-muted font-mono mb-1" data-i18n="stats.dist_label">總里程</div><div class="font-serif text-[1.9rem] font-bold text-emerald leading-none">142<span class="text-[1rem]"> km</span></div><div class="text-[0.82rem] text-muted mt-1" data-i18n="stats.dist_sub">含接駁</div></div>
+                <div class="rounded-xl bg-panel border border-line softcard p-4 text-center"><div class="text-[0.66rem] tracking-[0.16em] uppercase text-muted font-mono mb-1" data-i18n="stats.days_label">天數</div><div class="font-serif text-[1.9rem] font-bold text-violet leading-none">14</div><div class="text-[0.82rem] text-muted mt-1" data-i18n="stats.days_sub">含整裝日</div></div>
+              </div>
+
+              <h2 data-i18n="stats.season">最佳季節</h2>
+              <div class="rounded-xl p-4 max-w-[80ch]" style="background:var(--season-bg);border:1px solid var(--season-line);border-left:4px solid var(--season-bar)">
+                <div class="text-[0.66rem] tracking-[0.14em] uppercase text-coral font-mono font-semibold mb-1"><span data-i18n="callout.season_tag">⚠ SEASON · 重點</span></div>
+                <p class="m-0"><strong data-i18n="callout.season_lead">最佳季節</strong> <span data-i18n="callout.season_body">7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</span></p>
+              </div>
+
+              <h2 data-i18n="quick.title">快速前往</h2>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 font-tc">
+                <a href="#" class="flex items-center justify-between rounded-xl border border-line bg-panel px-4 py-3 no-underline text-ink hover:border-accent hover:text-accent transition-all"><span data-i18n="quick.routes">路線詳解</span> <span class="text-accent">→</span></a>
+                <a href="#" class="flex items-center justify-between rounded-xl border border-line bg-panel px-4 py-3 no-underline text-ink hover:border-emerald hover:text-emerald hover:shadow-[0_8px_20px_-12px_rgba(16,185,129,.5)] transition-all"><span data-i18n="quick.supply">補給點地圖</span> <span class="text-emerald">→</span></a>
+                <a href="#" class="flex items-center justify-between rounded-xl border border-line bg-panel px-4 py-3 no-underline text-ink hover:border-violet hover:text-violet hover:shadow-[0_8px_20px_-12px_rgba(139,92,246,.5)] transition-all"><span data-i18n="quick.weather">天氣與水源</span> <span class="text-violet">→</span></a>
+                <a href="#" class="flex items-center justify-between rounded-xl border border-line bg-panel px-4 py-3 no-underline text-ink hover:border-coral hover:text-coral hover:shadow-[0_8px_20px_-12px_rgba(248,118,92,.5)] transition-all"><span data-i18n="quick.permit">申請與入山證</span> <span class="text-coral">↗</span></a>
+              </div>
+            </section>
+
+            <!-- ===== routes.md ===== -->
+            <section data-panel="1" class="panel doc hidden px-5 sm:px-8 lg:px-10 py-8 max-w-none">
+              <h1 data-i18n="routes.title">路線</h1>
+              <h2 data-i18n="routes.summary_h">路線概要</h2>
+              <!-- 貼邊寬版:長純文字段落改多欄,避免單行過長(中文 [&>p]:text-justify 收齊欄寬) -->
+              <div class="columns-1 md:columns-2 xl:columns-3 gap-x-10 [&>p]:mt-0 [&>p]:text-justify">
+                <p data-i18n="routes.summary_p">本季由北段<strong>奇萊連峰</strong>入山,沿主稜南下接<strong>能高安東軍</strong>,最後由<strong>南三段</strong>出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。</p>
+              </div>
+              <h2 data-i18n="routes.daily_h">每日重點</h2>
+              <div class="rounded-xl overflow-hidden border border-line softcard">
+              <table class="w-full text-[0.95rem] font-tc border-collapse">
+                <thead><tr>
+                  <th class="text-left p-3 border-b border-line text-[0.7rem] tracking-[0.12em] uppercase text-accent font-mono font-semibold whitespace-nowrap" style="background:var(--accent-softer)" data-i18n="routes.col_seg">區段</th>
+                  <th class="text-left p-3 border-b border-line text-[0.7rem] tracking-[0.12em] uppercase text-accent font-mono font-semibold" style="background:var(--accent-softer)" data-i18n="routes.col_focus">重點</th>
+                </tr></thead>
+                <tbody>
+                  <tr class="bg-surface"><td class="p-3 border-b border-linesoft font-bold text-accent whitespace-nowrap" data-i18n="routes.r1_seg">D1–D3 奇萊主北</td><td class="p-3 border-b border-linesoft" data-i18n="routes.r1_focus">高度適應、看雲海日出</td></tr>
+                  <tr class="bg-panel"><td class="p-3 border-b border-linesoft font-bold text-emerald whitespace-nowrap" data-i18n="routes.r2_seg">D4–D7 能高安東軍</td><td class="p-3 border-b border-linesoft" data-i18n="routes.r2_focus">草原稜線、最長水線</td></tr>
+                  <tr class="bg-surface"><td class="p-3 border-b border-linesoft font-bold text-violet whitespace-nowrap" data-i18n="routes.r3_seg">D8–D11 丹大林道</td><td class="p-3 border-b border-linesoft" data-i18n="routes.r3_focus">廢棄索道與獵徑</td></tr>
+                  <tr class="bg-panel"><td class="p-3 font-bold text-coral whitespace-nowrap" data-i18n="routes.r4_seg">D12–D14 能高越嶺</td><td class="p-3" data-i18n="routes.r4_focus">下山接駁、溫泉整裝</td></tr>
+                </tbody>
+              </table>
+              </div>
+            </section>
+
+            <!-- ===== gear.md ===== -->
+            <section data-panel="2" class="panel doc hidden px-5 sm:px-8 lg:px-10 py-8 max-w-none">
+              <h1 data-i18n="gear.title">裝備</h1>
+              <h2 data-i18n="gear.list_h">裝備清單</h2>
+              <ul class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 list-none p-0 m-0 font-tc">
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i1">60L 背包</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i2">三季睡袋(-5°C)</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i3">輕量帳</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i4">濾水器</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i5">行動糧 5 日</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i6">頭燈備用電池</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i7">急救包</span></li>
+                <li class="flex items-center gap-2 py-2 border-b border-dotted border-line"><span class="text-emerald">✓</span> <span data-i18n="gear.i8">離線地圖</span></li>
+              </ul>
+            </section>
+
+            <!-- ===== journal.md ===== -->
+            <section data-panel="3" class="panel doc hidden px-5 sm:px-8 lg:px-10 py-8 max-w-none">
+              <h1 data-i18n="journal.title">隨筆</h1>
+              <p class="lead max-w-[72ch]" data-i18n="hero.lead">三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。</p>
+              <h2 data-i18n="stats.season">最佳季節</h2>
+              <p class="max-w-[72ch]" data-i18n="journal.season_p">最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</p>
+              <p class="text-[0.85rem] text-muted mt-8 pt-4 border-t border-line font-tc not-italic" data-i18n="ui.footer_note">個人山徑手記 · 內容若有異動以現場與官方公告為準。</p>
+            </section>
+
+          </div>
+
+          <!-- minimap (decorative) -->
+          <div class="hidden lg:block w-24 shrink-0 border-l border-line bg-panel py-3 px-2 select-none">
+            <div class="text-[9px] tracking-widest text-muted mb-2 text-center" data-i18n="chrome.minimap">MINIMAP</div>
+            <div class="space-y-0">
+              <div class="mm bg-ink" style="width:80%"></div><div class="mm bg-muted" style="width:60%"></div>
+              <div class="mm" style="width:100%;background:var(--line)"></div><div class="mm mm-accent" style="width:55%"></div>
+              <div class="mm mm-accent" style="width:50%"></div><div class="mm mm-accent" style="width:52%"></div>
+              <div class="mm" style="width:100%;background:var(--line)"></div><div class="mm bg-coral" style="width:66%"></div>
+              <div class="mm bg-muted" style="width:78%"></div><div class="mm" style="width:100%;background:var(--line)"></div>
+              <div class="mm bg-emerald" style="width:88%"></div><div class="mm bg-emerald" style="width:84%"></div>
+              <div class="mm bg-violet" style="width:80%"></div><div class="mm bg-violet" style="width:76%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- problems / output panel (chrome) -->
+        <div class="border-t border-line bg-panel">
+          <div class="flex items-center gap-4 px-3 sm:px-5 h-8 text-[11px] text-muted border-b border-line select-none">
+            <span class="text-ink border-b-2 border-accent py-1.5 -mb-px font-semibold" data-i18n="chrome.problems">PROBLEMS</span>
+            <span class="hover:text-ink cursor-default" data-i18n="chrome.output">OUTPUT</span>
+            <span class="ml-auto flex items-center gap-3"><span class="text-emerald" data-i18n="chrome.errors0">✓ 0 errors</span><span class="text-amber" data-i18n="chrome.hint1">▲ 1 hint</span></span>
+          </div>
+          <div class="px-3 sm:px-5 py-2.5 text-[12px] space-y-1">
+            <div class="flex items-start gap-2"><span class="text-amber">▲ hint</span><span class="tc text-ink" data-i18n="callout.season_full">最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。</span></div>
+            <div class="flex items-start gap-2 text-muted"><span class="t-str">✓ ok</span><span class="tc" data-i18n="chrome.gear_ok">裝備清單 8/8 已備齊。</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- status bar -->
+    <div class="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 h-8 text-white text-[11px] select-none overflow-x-auto whitespace-nowrap" style="background:linear-gradient(90deg,var(--accent),var(--accent-2))">
+      <span>⎇ main</span><span class="opacity-60">│</span>
+      <span class="pulse"><span>●</span> <span data-i18n="chrome.connected">connected</span></span><span class="opacity-60">│</span>
+      <span id="statDoc">overview.md</span><span class="opacity-60 hidden sm:inline">│</span>
+      <span class="hidden sm:inline" data-i18n="chrome.md_preview">Markdown Preview</span><span class="opacity-60 hidden md:inline">│</span>
+      <span class="hidden md:inline">UTF-8</span>
+      <span class="ml-auto flex items-center gap-3 sm:gap-4"><span class="hidden sm:inline">142 km</span><span class="opacity-60 hidden sm:inline">│</span><span class="font-semibold" data-i18n="chrome.brand_journal">山徑手記 · FIELD JOURNAL</span></span>
+    </div>
+  </div>
+
+  <p class="mt-4 text-[11px] sm:text-xs text-muted tc leading-relaxed px-1">
+    <span class="t-com">// </span><span data-i18n="ui.footer_note">個人山徑手記 · 內容若有異動以現場與官方公告為準。</span>
+    <span class="ml-2 text-line">— <span data-i18n="ui.tabs_summary">總覽 / 路線 / 裝備 / 隨筆</span></span>
+  </p>
+</div>
+
+<!-- =================== SETTINGS · IDE COMMAND PALETTE =================== -->
+<!-- 整面板沿用「彩色 IDE」風格:等寬字、編輯器面/底/線、同一 --accent/--bg 配色 -->
+<div id="settingsOverlay" onclick="if(event.target===this)closeSettings()"
+     class="fixed inset-0 z-50 hidden items-start justify-center px-3 sm:px-4 pt-[8vh] pb-6 overflow-y-auto"
+     style="background:color-mix(in srgb, var(--bg) 60%, rgba(20,18,40,.55));backdrop-filter:blur(2px)">
+
+  <div id="settingsPanel" role="dialog" aria-modal="true" aria-label="設定命令面板"
+       class="font-mono w-full max-w-[680px] bg-surface border border-line rounded-2xl overflow-hidden"
+       style="box-shadow:0 40px 90px -30px color-mix(in srgb, var(--accent) 55%, transparent)">
+
+    <!-- palette title bar (window chrome) -->
+    <div class="flex items-center gap-2 px-3 sm:px-4 h-10 bg-panel border-b border-line select-none">
+      <span class="w-3 h-3 rounded-full" style="background:#F8765C"></span>
+      <span class="w-3 h-3 rounded-full" style="background:#F5A524"></span>
+      <span class="w-3 h-3 rounded-full" style="background:#10B981"></span>
+      <span class="ml-2 text-[11px] sm:text-xs text-muted truncate"><span class="text-accent">⚙</span> <span class="text-ink font-semibold">settings</span> — <span class="t-fn">command palette</span></span>
+      <button id="settingsClose" onclick="closeSettings()" title="關閉 (Esc)" data-i18n-attr="title:ui.close" class="ml-auto grid place-items-center w-6 h-6 rounded-md border border-line text-muted hover:border-coral hover:text-coral transition-colors text-[13px] leading-none">✕</button>
+    </div>
+
+    <!-- prompt line, IDE 命令輸入感 -->
+    <div class="flex items-center gap-2 px-3 sm:px-4 h-9 border-b border-line bg-surface text-[12.5px] select-none">
+      <span class="t-key">&gt;</span>
+      <span class="text-ink">settings.preferences</span>
+      <span class="t-com"><span>// </span><span data-i18n="ui.prompt_hint">主題 · 主色 · 背景</span></span>
+      <span class="ml-auto inline-flex w-1.5 h-4 bg-accent pulse" aria-hidden="true"></span>
+    </div>
+
+    <div class="max-h-[68vh] overflow-y-auto">
+
+      <!-- ===== 1) 風格 styles ===== -->
+      <section class="border-b border-line">
+        <div class="flex items-center gap-2 px-3 sm:px-5 py-2 bg-panel border-b border-line text-[11px] tracking-[0.16em] text-muted select-none">
+          <span class="text-accent">▾</span><span class="t-tag font-bold">M↓</span><span data-i18n="ui.sec_style">STYLE · 風格</span>
+          <span class="ml-auto text-[10px] text-line normal-case tracking-normal t-com">9 themes</span>
+        </div>
+        <div id="styleList" class="py-1.5 text-[12.5px]"></div>
+      </section>
+
+      <!-- ===== 2) 主色 accent ===== -->
+      <section class="border-b border-line">
+        <div class="flex items-center gap-2 px-3 sm:px-5 py-2 bg-panel border-b border-line text-[11px] tracking-[0.16em] text-muted select-none">
+          <span class="text-accent">▾</span><span class="t-fn">●</span><span data-i18n="ui.sec_accent">ACCENT · 主色</span>
+          <code class="ml-auto text-[11px] tracking-normal normal-case"><span class="t-com">--accent:</span> <span id="accentVal" class="t-num">#5B6CF0</span></code>
+        </div>
+        <div id="accentSwatches" class="flex flex-wrap gap-2.5 px-3 sm:px-5 py-3.5"></div>
+      </section>
+
+      <!-- ===== 3) 背景色 background ===== -->
+      <section class="border-b border-line">
+        <div class="flex items-center gap-2 px-3 sm:px-5 py-2 bg-panel border-b border-line text-[11px] tracking-[0.16em] text-muted select-none">
+          <span class="text-accent">▾</span><span class="text-emerald">◳</span><span data-i18n="ui.sec_bg">BACKGROUND · 背景色</span>
+          <code class="ml-auto text-[11px] tracking-normal normal-case"><span class="t-com">--bg:</span> <span id="bgVal" class="t-num">#E7E1F7</span></code>
+        </div>
+        <div id="bgSwatches" class="flex flex-wrap gap-2.5 px-3 sm:px-5 py-3.5"></div>
+        <p class="px-3 sm:px-5 pb-3 -mt-1 text-[10.5px] text-muted leading-relaxed t-com"><span>// </span><span data-i18n="ui.bg_hint">深色模式下以策展深色基底為準,背景色票僅作用於淺色</span></p>
+      </section>
+
+      <!-- ===== 3b) 模式 mode(淺/深/系統;沿用命令列檔列視覺)===== -->
+      <section class="border-b border-line">
+        <div class="flex items-center gap-2 px-3 sm:px-5 py-2 bg-panel border-b border-line text-[11px] tracking-[0.16em] text-muted select-none">
+          <span class="text-accent">▾</span><span class="t-fn">◑</span><span data-i18n="ui.sec_mode">MODE · 模式</span>
+          <code class="ml-auto text-[11px] tracking-normal normal-case"><span class="t-com">data-mode:</span> <span id="modeVal" class="t-num">light</span></code>
+        </div>
+        <div class="py-1.5 text-[12.5px]">
+          <button type="button" data-set-mode="light" class="cmd-seg group w-full text-left pl-4 pr-3 sm:pl-5 py-2 flex items-center gap-2.5 rounded-r-lg cursor-pointer transition-colors focus:outline-none">
+            <span class="t-com text-[11px] w-7 shrink-0">01</span><span class="t-key">☀</span><span class="tc" data-i18n="ui.light">淺色</span>
+            <span class="t-com text-[11px] hidden sm:inline">--mode light</span><span class="cmd-dot ml-auto text-accent transition-opacity">●</span>
+          </button>
+          <button type="button" data-set-mode="dark" class="cmd-seg group w-full text-left pl-4 pr-3 sm:pl-5 py-2 flex items-center gap-2.5 rounded-r-lg cursor-pointer transition-colors focus:outline-none">
+            <span class="t-com text-[11px] w-7 shrink-0">02</span><span class="t-key">☾</span><span class="tc" data-i18n="ui.dark">深色</span>
+            <span class="t-com text-[11px] hidden sm:inline">--mode dark</span><span class="cmd-dot ml-auto text-accent transition-opacity">●</span>
+          </button>
+          <button type="button" data-set-mode="system" class="cmd-seg group w-full text-left pl-4 pr-3 sm:pl-5 py-2 flex items-center gap-2.5 rounded-r-lg cursor-pointer transition-colors focus:outline-none">
+            <span class="t-com text-[11px] w-7 shrink-0">03</span><span class="t-key">⚙</span><span class="tc" data-i18n="ui.system">跟隨系統</span>
+            <span class="t-com text-[11px] hidden sm:inline">--mode system</span><span class="cmd-dot ml-auto text-accent transition-opacity">●</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== 3c) 語言 language(中文/English;沿用命令列檔列視覺)===== -->
+      <section class="border-b border-line">
+        <div class="flex items-center gap-2 px-3 sm:px-5 py-2 bg-panel border-b border-line text-[11px] tracking-[0.16em] text-muted select-none">
+          <span class="text-accent">▾</span><span class="t-fn">⌘</span><span data-i18n="ui.sec_lang">LANGUAGE · 語言</span>
+          <code class="ml-auto text-[11px] tracking-normal normal-case"><span class="t-com">html lang:</span> <span id="langVal" class="t-num">zh-Hant</span></code>
+        </div>
+        <div class="py-1.5 text-[12.5px]">
+          <button type="button" data-set-lang="zh-Hant" class="cmd-seg group w-full text-left pl-4 pr-3 sm:pl-5 py-2 flex items-center gap-2.5 rounded-r-lg cursor-pointer transition-colors focus:outline-none">
+            <span class="t-com text-[11px] w-7 shrink-0">01</span><span class="t-tag font-bold text-[11px]">文</span><span class="tc">繁體中文</span>
+            <span class="t-com text-[11px] hidden sm:inline">zh-Hant</span><span class="cmd-dot ml-auto text-accent transition-opacity">●</span>
+          </button>
+          <button type="button" data-set-lang="en" class="cmd-seg group w-full text-left pl-4 pr-3 sm:pl-5 py-2 flex items-center gap-2.5 rounded-r-lg cursor-pointer transition-colors focus:outline-none">
+            <span class="t-com text-[11px] w-7 shrink-0">02</span><span class="t-tag font-bold text-[11px]">EN</span><span class="tc">English</span>
+            <span class="t-com text-[11px] hidden sm:inline">en</span><span class="cmd-dot ml-auto text-accent transition-opacity">●</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== 4) 下載 HTML export(匯出自包含乾淨版,沿用彩色 IDE 風)===== -->
+      <section>
+        <div class="flex items-center gap-2 px-3 sm:px-5 py-2 bg-panel border-b border-line text-[11px] tracking-[0.16em] text-muted select-none">
+          <span class="text-accent">▾</span><span class="t-fn">⌁</span><span data-i18n="ui.sec_export">EXPORT · 下載</span>
+          <span class="ml-auto text-[10px] text-line normal-case tracking-normal t-com">self-contained .html</span>
+        </div>
+        <!-- 命令項:沿用檔列/命令列樣式(等寬字、accent-soft hover、行內語法色) -->
+        <div class="py-1.5 text-[12.5px]">
+          <button id="downloadBtn" type="button" title="匯出目前頁面為自包含 HTML(固定目前配色)" data-i18n-attr="title:ui.export_title"
+                  class="group w-full text-left pl-4 pr-3 sm:pl-5 py-2 flex items-center gap-2.5 rounded-r-lg text-muted hover:bg-accent-soft hover:text-ink cursor-pointer transition-colors focus:outline-none focus-visible:bg-accent-soft">
+            <span class="t-com text-[11px] w-7 shrink-0">04</span>
+            <span class="grid place-items-center w-5 h-5 rounded-md bg-accent text-white shrink-0" style="box-shadow:0 2px 6px color-mix(in srgb, var(--accent) 50%, transparent)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
+            </span>
+            <span class="t-key">$</span><span class="tc" data-i18n="ui.download">下載 HTML</span>
+            <span class="t-com text-[11px] hidden sm:inline">export --inline ./山徑手記-ide.html</span>
+            <span class="ml-auto text-accent opacity-0 group-hover:opacity-100 transition-opacity">↓</span>
+          </button>
+        </div>
+        <p class="px-4 sm:px-5 pb-3 -mt-0.5 text-[11px] text-muted leading-relaxed">
+          <span class="t-com">// </span><span data-i18n="ui.export_hint">匯出目前頁面為單一檔案,固定目前配色與深色/語言狀態,移除設定面板與設定 script,保留分頁切換與全部內容。</span>
+        </p>
+      </section>
+    </div>
+
+    <!-- status bar (palette 底,沿用主狀態列漸層) -->
+    <div class="flex items-center gap-3 px-3 sm:px-4 h-8 text-white text-[11px] select-none overflow-x-auto whitespace-nowrap" style="background:linear-gradient(90deg,var(--accent),var(--accent-2))">
+      <span>⎇ preferences</span><span class="opacity-60">│</span>
+      <span class="hidden sm:inline">06-terminal-light · <span data-i18n="style.name">彩色 IDE</span></span>
+      <span class="ml-auto flex items-center gap-3"><span class="opacity-80 hidden sm:inline"><span>↵ </span><span data-i18n="ui.apply">套用</span></span><span class="opacity-60 hidden sm:inline">│</span><span class="font-semibold"><span>Esc </span><span data-i18n="ui.close_label">關閉</span></span></span>
+    </div>
+  </div>
+</div>
+<!-- ================= /SETTINGS · IDE COMMAND PALETTE ================= -->
+
+<!-- ============ per-page 設定(TW_CONFIG):本款專屬,不被 sync_engine.py 覆蓋 ============
+     style / defaultAccent / defaultBg / i18nChrome(本款 chrome.* + style.name)/ onApply。
+     共用內容字典與引擎在下方 TW-MAIN 標記區(由正本注入)。 -->
+<script>
+  window.TW_CONFIG = {
+    style: '06-terminal-light',
+    defaultAccent: '#5B6CF0',   // 出廠 accent(色票「原色」與 reset 用)
+    defaultBg: '#E7E1F7',       // 出廠 light bg(色票「原色」與 light 還原用)
+    // 本款 IDE chrome.* 與 style.name(theme-engine §10:共用內容不放這,只放外殼字)
+    i18nChrome: {
+      'zh-Hant': {
+        'chrome.md_preview':'Markdown 預覽','chrome.workspace':'工作區','chrome.user_settings':'使用者與設定',
+        'chrome.user_settings_kbd':'使用者與設定 (⌘,)','chrome.menu_file':'檔案','chrome.menu_edit':'編輯',
+        'chrome.menu_view':'檢視','chrome.menu_go':'前往','chrome.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL',
+        'chrome.user':'使用者','chrome.explorer':'檔案總管','chrome.project':'山徑手記 / TRAILS-2026',
+        'chrome.outline':'大綱','chrome.preview':'預覽','chrome.minimap':'縮圖',
+        'chrome.problems':'問題','chrome.output':'輸出','chrome.errors0':'✓ 0 個錯誤','chrome.hint1':'▲ 1 個提示',
+        'chrome.gear_ok':'裝備清單 8/8 已備齊。','chrome.connected':'已連線','chrome.brand_journal':'山徑手記 · FIELD JOURNAL',
+        'style.name':'彩色 IDE'
+      },
+      'en': {
+        'chrome.md_preview':'Markdown Preview','chrome.workspace':'workspace','chrome.user_settings':'User & settings',
+        'chrome.user_settings_kbd':'User & settings (⌘,)','chrome.menu_file':'File','chrome.menu_edit':'Edit',
+        'chrome.menu_view':'View','chrome.menu_go':'Go','chrome.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL',
+        'chrome.user':'user','chrome.explorer':'EXPLORER','chrome.project':'Trail Journal / TRAILS-2026',
+        'chrome.outline':'OUTLINE','chrome.preview':'Preview','chrome.minimap':'MINIMAP',
+        'chrome.problems':'PROBLEMS','chrome.output':'OUTPUT','chrome.errors0':'✓ 0 errors','chrome.hint1':'▲ 1 hint',
+        'chrome.gear_ok':'Gear checklist 8/8 ready.','chrome.connected':'connected','chrome.brand_journal':'Trail Journal · FIELD JOURNAL',
+        'style.name':'colorful IDE'
+      }
+    },
+    // 切語言 / 載入後要重繪的「JS 動態文字」(theme-engine §10-5):
+    //   breadcrumb sym(依語言)、JS 渲染的風格清單名、accent/bg 色票標籤、<title>。
+    onApply: function(){
+      try{
+        if (typeof nav === 'function') nav(curNav);                 // breadcrumb + 狀態列 doc(sym 依語言)
+        var sl = document.getElementById('styleList');
+        if (typeof renderStyles === 'function' && sl && sl.children.length) renderStyles();
+        if (typeof renderAccents === 'function') renderAccents();   // 色票標籤(主色/Accent…)
+        if (typeof renderBgs === 'function') renderBgs();           // 色票標籤(背景/Background…)
+        document.title = (window.twLang && window.twLang()==='en')
+          ? 'Mountain Trails — colorful IDE · light editor preview'
+          : '山徑手記 — colorful IDE · 明亮編輯器預覽';
+      }catch(e){}
+    }
+  };
+</script>
+<script>
+  /* ================= 本款 UI 邏輯(分頁 / 設定面板 / 色票 / export) =================
+     store / mode / i18n 引擎與共用內容字典由正本 assets/tw-engine.js 注入(見下方 TW-MAIN)。
+     本段只呼叫引擎對外 API:window.twT / twLang / patchStore / twSetAccent / twSetBg / twEffDark。 */
+  // 引擎對外 API 的薄包裝(沿用原有呼叫點名稱,減少改動面)
+  function curLang(){ return window.twLang ? window.twLang() : (document.documentElement.lang || 'zh-Hant'); }
+  function t(key){ return window.twT ? window.twT(key) : key; }
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem('timmy-web-stylelab'))||{}; }catch(e){ return {}; } }
+
+  // 分頁 meta:file/doc 為檔名(語言中性);sym 於 nav 時依語言組合
+  const meta = [
+    {file:'overview.md', symKey:'nav.overview', doc:'overview.md'},
+    {file:'routes.md',   symKey:'nav.routes',   doc:'routes.md'},
+    {file:'gear.md',     symKey:'nav.gear',     doc:'gear.md'},
+    {file:'journal.md',  symKey:'nav.journal',  doc:'journal.md'},
+  ];
+  let curNav = 0;
+  function nav(i){
+    curNav = i;
+    document.querySelectorAll('.panel').forEach((p,idx)=>p.classList.toggle('hidden',idx!==i));
+    document.querySelectorAll('.tab').forEach((b,idx)=>{ const on=idx===i; b.classList.toggle('tab-on',on); b.classList.toggle('tab-off',!on); });
+    document.querySelectorAll('.file').forEach((b,idx)=>{ const on=idx===i; b.classList.toggle('text-ink',on); b.classList.toggle('text-muted',!on); b.classList.toggle('bg-accent-soft',on); });
+    const m=meta[i];
+    document.getElementById('crumbFile').textContent=m.file;
+    document.getElementById('crumbSym').textContent=t(m.symKey)+' · '+t('chrome.preview');
+    document.getElementById('statDoc').textContent=m.doc;
+  }
+  /* ================= SETTINGS · 風格 / 主色 / 背景 ================= */
+  const THIS_STYLE = '06-terminal-light';
+  // 九款風格(本款標 active);key 對應同目錄 html 檔名
+  const STYLES = [
+    {key:'00-editorial',       name:'編輯手札',  en:'editorial',       mark:'00'},
+    {key:'g09-mintcitrus',     name:'薄荷柑橘',  en:'mint citrus',     mark:'g09'},
+    {key:'16-soft-flat',       name:'清爽扁平',  en:'soft flat',       mark:'16'},
+    {key:'11-glassmorphism',   name:'毛玻璃',    en:'glassmorphism',   mark:'11'},
+    {key:'14-pastel-bento',    name:'粉彩便當',  en:'pastel bento',    mark:'14'},
+    {key:'15-gradient-pop',    name:'鮮豔漸層',  en:'gradient pop',    mark:'15'},
+    {key:'04-modern-broadsheet',name:'彩色雜誌', en:'modern broadsheet',mark:'04'},
+    {key:'02-blueprint-grid',  name:'彩色藍圖',  en:'blueprint grid',  mark:'02'},
+    {key:'06-terminal-light',  name:'彩色 IDE',  en:'colorful IDE',    mark:'06'},
+    {key:'01-neo-brutalist',   name:'撞色粗野派',en:'neo-brutalist',   mark:'01'},
+  ];
+  // swatch 第一顆=原色(由 CSS 預設變數讀回),其餘為指定色票
+  const ACCENTS = ['#5B6CF0','#10B981','#F8765C','#F5A524','#EC4899','#14B8A6','#8B5CF6','#38BDF8'];
+  const BGS     = ['#FFFFFF','#FAF6F0','#E8F8F5','#EAF2FE','#EFEBFB','#FDEEE7','#EEF0F2'];
+
+  const rootStyle = document.documentElement.style;
+  // 「原色」固定取自 TW_CONFIG 出廠值(不可由 computed 讀,深色時 --bg 會是深色基底、或被 inline 覆寫)
+  const ORIG_ACCENT = (window.TW_CONFIG && window.TW_CONFIG.defaultAccent) || '#5B6CF0';
+  const ORIG_BG     = (window.TW_CONFIG && window.TW_CONFIG.defaultBg)     || '#E7E1F7';
+
+  // 當前生效值(accent 可能被 inline 覆寫;bg 一律以 store 的 light bg 為準,深色不影響選擇)
+  let curAccent = (rootStyle.getPropertyValue('--accent').trim() || ORIG_ACCENT);
+  let curBg     = (loadStore().bg || ORIG_BG);
+
+  const norm = c => (c||'').trim().toLowerCase();
+  const eq = (a,b) => norm(a)===norm(b);
+
+  function syncUrl(){
+    try{
+      const u = new URL(location.href);
+      u.searchParams.set('accent', curAccent);
+      u.searchParams.set('bg', curBg);
+      history.replaceState(null,'',u);
+    }catch(e){}
+  }
+  // accent / bg 實際套用交給正本(含 store 寫入、inline 與 dark 守衛、值顯示);本頁只更新本地狀態 + 重繪色票勾選
+  function setAccent(c){
+    curAccent = c;
+    window.twSetAccent(c);
+    markActive('accentSwatches', curAccent); syncUrl();
+  }
+  function setBg(c){
+    curBg = c;
+    window.twSetBg(c);   // dark 守衛由正本處理:深色不寫 inline --bg
+    markActive('bgSwatches', curBg); syncUrl();
+  }
+  function gotoStyle(key){
+    if(key===THIS_STYLE) return;
+    location.href = key + '.html?accent=' + encodeURIComponent(curAccent) + '&bg=' + encodeURIComponent(curBg);
+  }
+
+  // ----- 渲染風格清單(IDE 檔列樣式) -----
+  function renderStyles(){
+    const wrap=document.getElementById('styleList'); if(!wrap) return;
+    wrap.innerHTML='';
+    STYLES.forEach(s=>{
+      const on = s.key===THIS_STYLE;
+      const b=document.createElement('button');
+      b.type='button';
+      b.onclick=()=>gotoStyle(s.key);
+      b.setAttribute('role','option');
+      b.setAttribute('aria-selected', on?'true':'false');
+      b.className='w-full text-left pl-4 pr-3 sm:pl-5 py-1.5 flex items-center gap-2.5 rounded-r-lg transition-colors '
+        + (on ? 'text-ink bg-accent-soft cursor-default' : 'text-muted hover:bg-accent-soft hover:text-ink cursor-pointer');
+      const label = (curLang()==='en') ? s.en : s.name;
+      b.innerHTML =
+        '<span class="t-com text-[11px] w-7 shrink-0">'+s.mark+'</span>'
+       +'<span class="t-tag font-bold text-[11px]">M↓</span>'
+       +'<span class="tc">'+label+'</span>'
+       +'<span class="t-com text-[11px] hidden sm:inline">'+s.en+'.html</span>'
+       +(on
+          ? '<span class="ml-auto inline-flex items-center gap-1.5 text-[10px] tracking-[0.14em] text-accent font-semibold">ACTIVE <span class="w-1.5 h-1.5 rounded-full accent-dot"></span></span>'
+          : '<span class="ml-auto text-accent opacity-0 group-hover:opacity-100">→</span>');
+      if(!on) b.classList.add('group');
+      wrap.appendChild(b);
+    });
+  }
+
+  // ----- 渲染色票 -----
+  function chip(color, isActive, onClick, label){
+    const b=document.createElement('button');
+    b.type='button'; b.title=label; b.setAttribute('aria-label',label); b.onclick=onClick;
+    b.className='relative grid place-items-center w-8 h-8 rounded-lg border transition-transform hover:scale-110 '
+      + (isActive ? 'border-ink' : 'border-line');
+    b.style.background=color;
+    b.style.boxShadow = isActive ? '0 0 0 2px var(--surface),0 0 0 4px var(--accent)' : '0 2px 6px rgba(0,0,0,.10)';
+    b.innerHTML = isActive ? '<span class="text-white text-[12px] leading-none" style="text-shadow:0 1px 2px rgba(0,0,0,.45)">✓</span>' : '';
+    return b;
+  }
+  function renderAccents(){
+    const wrap=document.getElementById('accentSwatches'); if(!wrap) return; wrap.innerHTML='';
+    // 原色置首(可能與指定色票重複,標 ★ 提示)
+    const list=[ORIG_ACCENT, ...ACCENTS.filter(c=>!eq(c,ORIG_ACCENT))];
+    const ACLBL = curLang()==='en'?'Accent ':'主色 ', ORIGLBL = curLang()==='en'?' (default)':'(原色)', ORIGTT = curLang()==='en'?'default':'原色';
+    list.forEach((c,i)=>{
+      const b=chip(c, eq(c,curAccent), ()=>setAccent(c), ACLBL+c.toUpperCase()+(i===0?ORIGLBL:''));
+      if(i===0){ const tag=document.createElement('span'); tag.className='absolute -top-1.5 -right-1.5 text-amber text-[10px] leading-none'; tag.textContent='★'; tag.title=ORIGTT; b.appendChild(tag); b.classList.add('relative'); }
+      wrap.appendChild(b);
+    });
+  }
+  function renderBgs(){
+    const wrap=document.getElementById('bgSwatches'); if(!wrap) return; wrap.innerHTML='';
+    const list=[ORIG_BG, ...BGS.filter(c=>!eq(c,ORIG_BG))];
+    const BGLBL = curLang()==='en'?'Background ':'背景 ', ORIGLBL = curLang()==='en'?' (default)':'(原色)', ORIGTT = curLang()==='en'?'default':'原色';
+    list.forEach((c,i)=>{
+      const b=chip(c, eq(c,curBg), ()=>setBg(c), BGLBL+c.toUpperCase()+(i===0?ORIGLBL:''));
+      if(i===0){ const tag=document.createElement('span'); tag.className='absolute -top-1.5 -right-1.5 text-amber text-[10px] leading-none'; tag.textContent='★'; tag.title=ORIGTT; b.appendChild(tag); b.classList.add('relative'); }
+      wrap.appendChild(b);
+    });
+  }
+  function markActive(wrapId, val){
+    const wrap=document.getElementById(wrapId); if(!wrap) return;
+    // 重繪以更新勾選狀態(最穩妥)
+    if(wrapId==='accentSwatches') renderAccents(); else renderBgs();
+  }
+
+  // ----- 開關面板 -----
+  let lastFocus=null;
+  function openSettings(){
+    lastFocus=document.activeElement;
+    renderStyles(); renderAccents(); renderBgs();
+    const av=document.getElementById('accentVal'); if(av) av.textContent=curAccent.toUpperCase();
+    const bv=document.getElementById('bgVal'); if(bv) bv.textContent=curBg.toUpperCase();
+    const ov=document.getElementById('settingsOverlay');
+    ov.classList.remove('hidden'); ov.classList.add('flex');
+    const closeBtn=document.getElementById('settingsClose'); if(closeBtn) closeBtn.focus();
+  }
+  function closeSettings(){
+    const ov=document.getElementById('settingsOverlay');
+    ov.classList.add('hidden'); ov.classList.remove('flex');
+    if(lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function settingsOpen(){ return !document.getElementById('settingsOverlay').classList.contains('hidden'); }
+  window.openSettings=openSettings; window.closeSettings=closeSettings;
+
+  // ----- 載入:URL(?accent=&bg=)優先 → 寫入統一 store(透過正本 patchStore);移除舊單獨鍵 -----
+  (function initSettings(){
+    try{
+      const q=new URLSearchParams(location.search);
+      const qa=q.get('accent'), qb=q.get('bg');
+      const s=loadStore();
+      if(qa){ curAccent=(qa.charAt(0)==='#'||qa.indexOf('(')>-1)?qa:'#'+qa; }
+      else if(s.accent){ curAccent=s.accent; }
+      if(qb){ curBg=(qb.charAt(0)==='#'||qb.indexOf('(')>-1)?qb:'#'+qb; }
+      else if(s.bg){ curBg=s.bg; }
+      window.patchStore({ accent:curAccent, bg:curBg, style:THIS_STYLE });
+      // pre-paint 已套用 accent(inline)與 light bg;此處確保 curAccent inline 生效
+      if(curAccent) rootStyle.setProperty('--accent', curAccent);
+      // 清除舊版散用的單獨鍵
+      ['accent','bg','style'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    }catch(e){}
+  })();
+
+  document.addEventListener('keydown',e=>{
+    // ⌘, / Ctrl+, 開啟設定
+    if((e.metaKey||e.ctrlKey) && e.key===','){ e.preventDefault(); settingsOpen()?closeSettings():openSettings(); return; }
+    if(e.key==='Escape'){ if(settingsOpen()){ closeSettings(); return; } nav(0); return; }
+    // 面板開啟 / 正在輸入時,不觸發分頁切換
+    if(settingsOpen()) return;
+    const t=e.target; if(t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    if(['1','2','3','4'].includes(e.key) && !e.metaKey && !e.ctrlKey) nav(parseInt(e.key)-1);
+  });
+
+  /* ===================== 下載 HTML(匯出自包含乾淨版)=====================
+     - 複製整份 document,移除 <html> inline style,並於 <head> 末注入
+       <style>:root{--accent;--bg}</style> 把目前配色固定
+     - 移除設定面板 / 遮罩(#settingsOverlay)、使用者 / 設定 icon([data-export-strip])
+     - 以 id / src 身分移除所有 <script>,僅保留 Tailwind CDN、tailwind 設定(#tw-config)、
+       分頁切換 script(#tab-script);不依內容字串比對
+     - 補回「僅檔案分頁切換」script(#tab-script:nav + meta + 1–4 / Esc),保留全部內容
+     - Blob + a[download],檔名 山徑手記-ide.html                                 */
+  function exportMeta(){
+    // 把目前語言的 sym 烘進匯出檔(匯出檔不含 i18n 引擎,故 sym 需為已翻譯字串)
+    return meta.map(function(m){ return {file:m.file, sym:t(m.symKey)+' · '+t('chrome.preview'), doc:m.doc}; });
+  }
+  function buildTabScript(){ return '(function(){' +
+    'var meta=' + JSON.stringify(exportMeta()) + ';' +
+    'function nav(i){' +
+      'document.querySelectorAll(".panel").forEach(function(p,idx){p.classList.toggle("hidden",idx!==i);});' +
+      'document.querySelectorAll(".tab").forEach(function(b,idx){var on=idx===i;b.classList.toggle("tab-on",on);b.classList.toggle("tab-off",!on);});' +
+      'document.querySelectorAll(".file").forEach(function(b,idx){var on=idx===i;b.classList.toggle("text-ink",on);b.classList.toggle("text-muted",!on);b.classList.toggle("bg-accent-soft",on);});' +
+      'var m=meta[i];if(!m)return;' +
+      'var cf=document.getElementById("crumbFile");if(cf)cf.textContent=m.file;' +
+      'var csym=document.getElementById("crumbSym");if(csym)csym.textContent=m.sym;' +
+      'var sd=document.getElementById("statDoc");if(sd)sd.textContent=m.doc;' +
+    '}' +
+    'window.nav=nav;' +
+    'document.addEventListener("keydown",function(e){' +
+      'if(e.key==="Escape"){nav(0);return;}' +
+      'var t=e.target;if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.isContentEditable))return;' +
+      'if(["1","2","3","4"].indexOf(e.key)>-1&&!e.metaKey&&!e.ctrlKey)nav(parseInt(e.key,10)-1);' +
+    '});' +
+    'nav(0);' +
+    '})();'; }
+
+  function buildCleanHtml(){
+    // 1) 複製整份 <html>
+    var clone = document.documentElement.cloneNode(true);
+
+    // 2) 移除 clone <html> 上的 inline style(載入時 setAccent/setBg 寫入的動態值),
+    //    配色改由步驟 4 注入的 <style> 固定,避免 inline 殘留覆寫注入樣式。
+    clone.removeAttribute('style');
+
+    // 3) 移除設定面板 / 遮罩(#settingsOverlay)與使用者 / 設定 icon([data-export-strip])。
+    //    皆以 DOM 身分(id / 屬性選擇器)定位,非比對節點文字內容。
+    var ov = clone.querySelector('#settingsOverlay'); if(ov){ ov.remove(); }
+    Array.prototype.slice.call(clone.querySelectorAll('[data-export-strip]')).forEach(function(el){ el.remove(); });
+
+    // 4) 移除 clone 內所有 <script>,僅以「身分」保留三者:
+    //    - Tailwind CDN(src 命中 cdn.tailwindcss.com)
+    //    - Tailwind 設定(id="tw-config")
+    //    - 分頁切換 script(id="tab-script",於下方補回)
+    //    用 id / src 判斷而非比對內容,避免匯出程式碼自身含 "tailwind.config" 字串被誤判保留。
+    Array.prototype.slice.call(clone.querySelectorAll('script')).forEach(function(sc){
+      var isTailwindCdn = /cdn\.tailwindcss\.com/.test(sc.getAttribute('src') || '');
+      var isTailwindCfg = sc.id === 'tw-config';
+      var isTabScript   = sc.id === 'tab-script';
+      if(!isTailwindCdn && !isTailwindCfg && !isTabScript){ sc.remove(); }
+    });
+
+    // 4c) 移除引擎同步用的 TW 註解標記(TW-PREPAINT / TW-MAIN START/END)與其前的說明註解。
+    //     匯出檔自包含、不再同步,留著只是雜訊;以 comment 節點文字判定,僅清掉 TW 標記。
+    (function stripTwComments(root){
+      var tw = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT, null);
+      var dead = [], c;
+      while ((c = tw.nextNode())) {
+        var v = c.nodeValue || '';
+        if (/TW-(PREPAINT|MAIN):(START|END)/.test(v) ||
+            /assets\/tw-engine\.js|sync_engine\.py|TW_CONFIG/.test(v)) dead.push(c);
+      }
+      dead.forEach(function(n){ if (n.parentNode) n.parentNode.removeChild(n); });
+    })(clone);
+
+    // 4b) 固定目前 mode / lang 到 <html> 屬性(system 已於引擎解析為 light/dark;深色基底由既有 CSS 規則處理)。
+    //     匯出檔不含 pre-paint / 引擎,故配色與語言完全由屬性 + CSS + 注入 <style> 決定。
+    clone.setAttribute('data-mode', document.documentElement.dataset.mode || 'light');
+    clone.setAttribute('lang', curLang());
+
+    // 5) 於 <head> 末插入 <style>,把目前 --accent 與 light --bg 固定進 :root(覆寫預設配色變數);
+    //    深色時 :root[data-mode="dark"]{--bg} 規則 specificity 較高,仍以策展深色基底為準。
+    var head = clone.querySelector('head');
+    if(head){
+      var st = document.createElement('style');
+      st.textContent = ':root{--accent:' + curAccent + ';--bg:' + curBg + '}';
+      head.appendChild(st);
+    }
+
+    // 6) 補回「僅分頁切換」script(id="tab-script")於 body 末,不依賴任何已移除元素;sym 已依目前語言烘入。
+    var body = clone.querySelector('body');
+    if(body){
+      var s = document.createElement('script');
+      s.id = 'tab-script';
+      s.textContent = buildTabScript();
+      body.appendChild(s);
+    }
+
+    return '<!DOCTYPE html>\n' + clone.outerHTML;
+  }
+
+  /* 主題引擎(mode + i18n)由正本 assets/tw-engine.js 提供(見下方 TW-MAIN 標記區):
+     - 統一 store=timmy-web-stylelab;dark 移除 inline --bg、light 寫回使用者 bg
+     - applyI18n 處理 data-i18n / data-i18n-html / data-i18n-attr,末尾呼叫 TW_CONFIG.onApply()
+       (本頁 onApply 已重繪 breadcrumb / 風格清單 / 色票標籤 / <title>)
+     - [data-set-mode] / [data-set-lang] 監聽、mql change、twSetAccent/twSetBg 皆由正本提供 */
+
+  (function(){
+    var btn = document.getElementById('downloadBtn');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      try{
+        var html = buildCleanHtml();
+        var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement('a');
+        a.href = url; a.download = '山徑手記-ide.html';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+        if(typeof closeSettings === 'function') closeSettings();
+      }catch(e){}
+    });
+  })();
+
+  nav(0);
+</script>
+
+<!-- ============ 通用主題引擎(mode + i18n + 共用 I18N 內容)============
+     由正本 assets/tw-engine.js 注入;改正本後跑 scripts/sync_engine.py 同步。
+     必須在上方 TW_CONFIG 與本款 UI 函式(nav / renderStyles / renderAccents / renderBgs)
+     之後載入(其 applyI18n 會透過 TW_CONFIG.onApply 呼叫它們)。本標記區之間勿手改。 -->
+<!-- TW-MAIN:START -->
+<script>
+/* 主引擎(theme-engine §7b / §10 / §11)。依賴 per-page 先定義 window.TW_CONFIG:
+     {
+       style:        '06-terminal-light',   // 本頁 key(= 同目錄 html 檔名,不含 .html)
+       defaultAccent:'#5B6CF0',             // 出廠 accent(色票「原色」與 reset 用,不可 computed)
+       defaultBg:    '#E7E1F7',             // 出廠 light bg(色票「原色」與 light 還原用)
+       i18nChrome: { 'zh-Hant':{…}, 'en':{…} },  // 本款 chrome.* / style.name(覆寫/補進共用 I18N)
+       onApply:      function(){…}          // 切語言/載入後要重繪的動態文字(breadcrumb、JS 風格清單、色票標籤…)
+     }
+   引擎對外提供:window.twSetAccent(hex) / window.twSetBg(hex)(含 dark 守衛)、
+   window.patchStore(obj)、window.__twApplyMode / window.__twApplyI18n。
+   各頁色票 / 風格切換 / reset handler 呼叫上述,勿自行重寫 store / mode 邏輯。 */
+(function(){
+  var el = document.documentElement, rootStyle = el.style;
+  var KEY = 'timmy-web-stylelab';
+  var mql = matchMedia('(prefers-color-scheme: dark)');
+  var CFG = window.TW_CONFIG || (window.TW_CONFIG = {});
+
+  /* ---- 統一 store(theme-engine §2)---- */
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function saveStore(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  function patchStore(o){ var s = loadStore(); Object.assign(s, o); saveStore(s); }
+  window.patchStore = patchStore;
+
+  /* ---- 出廠值(來自 per-page;不可由 computed 讀,深色時 --bg 是深色基底)---- */
+  function defAccent(){ return CFG.defaultAccent || '#000000'; }
+  function defBg(){ return CFG.defaultBg || '#ffffff'; }
+
+  /* ---- i18n 字典(theme-engine §5 / §10):共用內容 9 款一致;chrome.* / style.name 逐款由 i18nChrome 覆寫 ---- */
+  var I18N = {
+    'zh-Hant': {
+      // 分頁 nav(breadcrumb / 狀態列 doc 用)
+      'nav.overview':'總覽','nav.routes':'路線','nav.gear':'裝備','nav.journal':'隨筆',
+      // hero / 共用內容
+      'hero.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL','hero.title':'高山縱走 2026 行記',
+      'hero.lead':'三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。',
+      // stats
+      'stats.overview':'數據概覽','stats.season':'最佳季節',
+      'stats.routes_label':'路線','stats.routes_sub':'條經典稜線',
+      'stats.dist_label':'總里程','stats.dist_sub':'含接駁',
+      'stats.days_label':'天數','stats.days_sub':'含整裝日',
+      // callout 季節
+      'callout.season_tag':'⚠ SEASON · 重點','callout.season_lead':'最佳季節',
+      'callout.season_body':'7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      'callout.season_full':'最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      // quick links
+      'quick.title':'快速前往','quick.routes':'路線詳解','quick.supply':'補給點地圖',
+      'quick.weather':'天氣與水源','quick.permit':'申請與入山證',
+      // routes 內容
+      'routes.title':'路線','routes.summary_h':'路線概要',
+      'routes.summary_p':'本季由北段奇萊連峰入山,沿主稜南下接能高安東軍,最後由南三段出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。',
+      'routes.daily_h':'每日重點','routes.col_seg':'區段','routes.col_focus':'重點',
+      'routes.r1_seg':'D1–D3 奇萊主北','routes.r1_focus':'高度適應、看雲海日出',
+      'routes.r2_seg':'D4–D7 能高安東軍','routes.r2_focus':'草原稜線、最長水線',
+      'routes.r3_seg':'D8–D11 丹大林道','routes.r3_focus':'廢棄索道與獵徑',
+      'routes.r4_seg':'D12–D14 能高越嶺','routes.r4_focus':'下山接駁、溫泉整裝',
+      // gear 內容
+      'gear.title':'裝備','gear.list_h':'裝備清單',
+      'gear.i1':'60L 背包','gear.i2':'三季睡袋(-5°C)','gear.i3':'輕量帳','gear.i4':'濾水器',
+      'gear.i5':'行動糧 5 日','gear.i6':'頭燈備用電池','gear.i7':'急救包','gear.i8':'離線地圖',
+      // journal 內容
+      'journal.title':'隨筆','journal.season_p':'最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      // 通用 UI / 設定面板
+      'ui.footer_note':'個人山徑手記 · 內容若有異動以現場與官方公告為準。',
+      'ui.tabs_summary':'總覽 / 路線 / 裝備 / 隨筆',
+      'ui.prompt_hint':'主題 · 主色 · 背景 · 模式 · 語言',
+      'ui.sec_style':'STYLE · 風格','ui.sec_accent':'ACCENT · 主色','ui.sec_bg':'BACKGROUND · 背景色',
+      'ui.sec_mode':'MODE · 模式','ui.sec_lang':'LANGUAGE · 語言','ui.sec_export':'EXPORT · 下載',
+      'ui.bg_hint':'深色模式下以策展深色基底為準,背景色票僅作用於淺色',
+      'ui.light':'淺色','ui.dark':'深色','ui.system':'跟隨系統',
+      'ui.download':'下載 HTML','ui.export_title':'匯出目前頁面為自包含 HTML(固定目前配色與深色/語言)',
+      'ui.export_hint':'匯出目前頁面為單一檔案,固定目前配色與深色/語言狀態,移除設定面板與設定 script,保留分頁切換與全部內容。',
+      'ui.close':'關閉 (Esc)','ui.close_label':'關閉','ui.apply':'套用'
+    },
+    'en': {
+      'nav.overview':'Overview','nav.routes':'Routes','nav.gear':'Gear','nav.journal':'Journal',
+      'hero.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL','hero.title':'High-Mountain Traverse 2026 Field Log',
+      'hero.lead':'Three classic ridgelines, fourteen days on foot — this log gathers routes, resupply and trail notes.',
+      'stats.overview':'At a Glance','stats.season':'Best Season',
+      'stats.routes_label':'Routes','stats.routes_sub':'classic ridgelines',
+      'stats.dist_label':'Distance','stats.dist_sub':'incl. shuttle',
+      'stats.days_label':'Days','stats.days_sub':'incl. packing day',
+      'callout.season_tag':'⚠ SEASON · KEY','callout.season_lead':'Best season',
+      'callout.season_body':'Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'callout.season_full':'Best season Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'quick.title':'Quick Links','quick.routes':'Route details','quick.supply':'Resupply map',
+      'quick.weather':'Weather & water','quick.permit':'Permits & entry',
+      'routes.title':'Routes','routes.summary_h':'Route Overview',
+      'routes.summary_p':'This season enters via the Qilai Range to the north, heads south along the main ridge to Nenggao-Andongjun, then exits the Nanthreesection by the Nenggao Crossing Trail; the route runs mostly through alpine arrow bamboo and fir forest, with water sources clustered near campsites — plan resupply ahead.',
+      'routes.daily_h':'Daily Highlights','routes.col_seg':'Segment','routes.col_focus':'Highlights',
+      'routes.r1_seg':'D1–D3 Qilai Main-North','routes.r1_focus':'Acclimatization, sea-of-clouds sunrise',
+      'routes.r2_seg':'D4–D7 Nenggao-Andongjun','routes.r2_focus':'Grassland ridge, longest water leg',
+      'routes.r3_seg':'D8–D11 Danda Forest Road','routes.r3_focus':'Abandoned cableway and hunting trails',
+      'routes.r4_seg':'D12–D14 Nenggao Crossing','routes.r4_focus':'Descent shuttle, hot-spring resupply',
+      'gear.title':'Gear','gear.list_h':'Gear Checklist',
+      'gear.i1':'60L backpack','gear.i2':'3-season bag (-5°C)','gear.i3':'Lightweight tent','gear.i4':'Water filter',
+      'gear.i5':'5 days of trail food','gear.i6':'Headlamp spare batteries','gear.i7':'First-aid kit','gear.i8':'Offline map',
+      'journal.title':'Journal','journal.season_p':'Best season Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'ui.footer_note':'Personal trail journal · details subject to on-site and official notices.',
+      'ui.tabs_summary':'Overview / Routes / Gear / Journal',
+      'ui.prompt_hint':'theme · accent · background · mode · language',
+      'ui.sec_style':'STYLE','ui.sec_accent':'ACCENT','ui.sec_bg':'BACKGROUND',
+      'ui.sec_mode':'MODE','ui.sec_lang':'LANGUAGE','ui.sec_export':'EXPORT',
+      'ui.bg_hint':'In dark mode the curated dark base is used; background swatches apply to light mode only.',
+      'ui.light':'Light','ui.dark':'Dark','ui.system':'System',
+      'ui.download':'Download HTML','ui.export_title':'Export this page as a self-contained HTML (fixes current colors, mode & language)',
+      'ui.export_hint':'Export this page as a single file, fixing the current colors plus dark/language state, removing the settings panel and its scripts while keeping tab switching and all content.',
+      'ui.close':'Close (Esc)','ui.close_label':'Close','ui.apply':'Apply'
+    }
+  };
+
+  /* per-page chrome.* / style.name 併入(淺拷貝 merge,per-page 覆寫共用) */
+  (function mergeChrome(){
+    var c = CFG.i18nChrome || {};
+    ['zh-Hant','en'].forEach(function(lng){
+      if (c[lng]) for (var k in c[lng]) if (Object.prototype.hasOwnProperty.call(c[lng], k)) I18N[lng][k] = c[lng][k];
+    });
+  })();
+
+  function curLang(){ var s = loadStore(); return s.lang || el.lang || 'zh-Hant'; }
+  /* 對外查字典:缺 key 回中文,再缺回 key 本身(供 onApply 內動態文字用) */
+  window.twT = function(key){ var d = I18N[curLang()] || I18N['zh-Hant']; return d[key] != null ? d[key] : (I18N['zh-Hant'][key] != null ? I18N['zh-Hant'][key] : key); };
+  window.twLang = curLang;
+  window.twI18n = I18N;
+
+  /* ---- mode ---- */
+  function effDark(){ var m = loadStore().mode || 'light'; return m === 'dark' || (m === 'system' && mql.matches); }
+  function userBg(){ return loadStore().bg || defBg(); }
+  window.twEffDark = effDark;
+
+  function mark(sel, dataKey, val){
+    document.querySelectorAll(sel).forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset[dataKey] === val)); });
+  }
+
+  function applyMode(){
+    var dark = effDark(); el.dataset.mode = dark ? 'dark' : 'light';
+    if (dark){ rootStyle.removeProperty('--bg'); }        // 讓 :root[data-mode=dark]{--bg} 生效
+    else { var b = userBg(); if (b) rootStyle.setProperty('--bg', b); }
+    var mv = document.getElementById('modeVal'); if (mv) mv.textContent = loadStore().mode || 'light';
+    mark('[data-set-mode]', 'setMode', loadStore().mode || 'light');
+  }
+  window.__twApplyMode = applyMode;
+
+  /* ---- i18n:textContent + data-i18n-html(innerHTML)+ data-i18n-attr(屬性) ---- */
+  function applyI18n(){
+    var d = I18N[curLang()] || I18N['zh-Hant'];
+    document.querySelectorAll('[data-i18n]').forEach(function(n){
+      var k = n.getAttribute('data-i18n'); if (d[k] != null) n.textContent = d[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(n){
+      var k = n.getAttribute('data-i18n-html'); if (d[k] != null) n.innerHTML = d[k];
+    });
+    document.querySelectorAll('[data-i18n-attr]').forEach(function(n){
+      n.getAttribute('data-i18n-attr').split(',').forEach(function(pair){
+        var kv = pair.split(':'), attr = (kv[0] || '').trim(), key = (kv[1] || '').trim();
+        if (attr && d[key] != null) n.setAttribute(attr, d[key]);
+      });
+    });
+    el.lang = curLang();
+    var lv = document.getElementById('langVal'); if (lv) lv.textContent = curLang();
+    mark('[data-set-lang]', 'setLang', curLang());
+    // per-page 動態文字重繪(breadcrumb、JS 風格清單名、色票標籤、<title> 等)
+    if (typeof CFG.onApply === 'function'){ try{ CFG.onApply(); }catch(e){} }
+  }
+  window.__twApplyI18n = applyI18n;
+
+  /* ---- 對外:色票 / reset handler 呼叫(含 dark 守衛)---- */
+  // accent:兩模式皆 inline 套用;同步 store + #accentVal 顯示
+  window.twSetAccent = function(hex){
+    rootStyle.setProperty('--accent', hex);
+    patchStore({ accent: hex });
+    var v = document.getElementById('accentVal'); if (v) v.textContent = (hex || '').toUpperCase();
+  };
+  // bg:只有 light 才 inline(dark 交給 :root[data-mode=dark]{--bg};寫 inline 會破版);同步 store + #bgVal
+  window.twSetBg = function(hex){
+    patchStore({ bg: hex });
+    if (!effDark()) rootStyle.setProperty('--bg', hex);
+    var v = document.getElementById('bgVal'); if (v) v.textContent = (hex || '').toUpperCase();
+  };
+
+  /* ---- 事件:模式 / 語言切換;系統主題跟隨 ---- */
+  document.addEventListener('click', function(e){
+    var tm = e.target.closest('[data-set-mode]'); if (tm){ patchStore({ mode: tm.dataset.setMode }); applyMode(); return; }
+    var tl = e.target.closest('[data-set-lang]'); if (tl){ patchStore({ lang: tl.dataset.setLang }); applyI18n(); return; }
+  });
+  mql.addEventListener('change', function(){ if ((loadStore().mode || 'light') === 'system') applyMode(); });
+
+  /* ---- 初始套用 ---- */
+  applyMode();
+  applyI18n();
+})();
+</script>
+<!-- TW-MAIN:END -->
+</body>
+</html>

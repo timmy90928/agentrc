@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山徑手記 · 高山縱走 2026 行記</title>
+<!-- ===== Pre-paint(theme-engine §7a):通用 pre-paint 由正本 assets/tw-engine.js 注入;
+     改正本後跑 scripts/sync_engine.py 同步。本標記區之間勿手改(會被覆蓋)。 ===== -->
+<!-- TW-PREPAINT:START -->
+<script>
+/* 通用 pre-paint(theme-engine §7a / §10-6):body 前定 data-mode / lang / accent。
+   只有 light 才寫 inline --bg(dark 留給 :root[data-mode=dark]{--bg} 規則,inline
+   specificity 最高會蓋過規則)。讀統一 store timmy-web-stylelab + URL ?accent/bg。
+   不需任何 per-page 設定 —— 9+1 款共用同一段。 */
+(function(){ try{
+  var el = document.documentElement,
+      s  = JSON.parse(localStorage.getItem('timmy-web-stylelab') || '{}'),
+      p  = new URLSearchParams(location.search),
+      m  = s.mode || 'light',
+      dark = (m === 'dark') || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  el.dataset.mode = dark ? 'dark' : 'light';
+  if (s.lang) el.lang = s.lang;
+  // hex 容錯:無 '#' 且非函式色(rgb()/color-mix())時補上 '#'
+  function norm(c){ return (c.charAt(0) === '#' || c.indexOf('(') > -1) ? c : '#' + c; }
+  var pa = p.get('accent');
+  if (s.accent) el.style.setProperty('--accent', s.accent);  // accent 兩模式皆 inline
+  if (pa)       el.style.setProperty('--accent', norm(pa));
+  // 只有 light 才寫 inline --bg;dark 交給 :root[data-mode="dark"]{--bg} 規則
+  if (!dark){ var bg = p.get('bg') || s.bg; if (bg) el.style.setProperty('--bg', norm(bg)); }
+}catch(e){} })();
+</script>
+<!-- TW-PREPAINT:END -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script id="tw-config">
+tailwind.config={theme:{extend:{
+ colors:{charcoal:'rgb(var(--ink) / <alpha-value>)'},
+ fontFamily:{sans:['Outfit','Noto Sans TC','sans-serif'],zh:['Noto Sans TC','sans-serif']},
+ borderRadius:{'4xl':'2rem'}
+}}}
+</script>
+<style>
+ :root{
+  /* === 可由外部調色的兩個基準變數 === */
+  --accent:#5B6CF0;   /* 主強調色(預設=原主色 indigo) */
+  --bg:#f4f3ff;       /* 背景基底(預設=原底色) */
+
+  /* === 由 --accent / --bg 以 color-mix 推導的調色盤 === */
+  /* 五個彩色光暈:皆以 --accent 與 --bg 調和,讓選色後整個玻璃氛圍跟著變 */
+  --blob-1: color-mix(in srgb, var(--accent) 82%, var(--bg));
+  --blob-2: color-mix(in srgb, var(--accent) 60%, white 18%);
+  --blob-3: color-mix(in srgb, var(--accent) 50%, var(--bg) 30%);
+  --blob-4: color-mix(in srgb, var(--accent) 70%, black 6%);
+  --blob-5: color-mix(in srgb, var(--accent) 38%, var(--bg) 40%);
+
+  /* 由 --accent 推導出的「次強調」階梯(原本 rose/teal/violet/amber 的角色),
+     全部向 --accent 靠攏,使整體仍隨主色協調位移 */
+  --c-1: var(--accent);                                            /* 原 indigo */
+  --c-2: color-mix(in srgb, var(--accent) 55%, #14B8A6);           /* 原 teal 向主色靠 */
+  --c-3: color-mix(in srgb, var(--accent) 45%, #EC4899);           /* 原 rose 向主色靠 */
+  --c-4: color-mix(in srgb, var(--accent) 60%, #8B5CF6);           /* 原 violet 向主色靠 */
+  --c-5: color-mix(in srgb, var(--accent) 55%, #F5A524);           /* 原 amber 向主色靠 */
+
+  /* 強調色的深/淺版(文字、邊線、陰影用) */
+  --accent-ink:  color-mix(in srgb, var(--accent) 78%, #25303B);   /* 文字用較沉的主色 */
+  --accent-soft: color-mix(in srgb, var(--accent) 22%, white);     /* 淺色襯底 */
+
+  /* 文字基色:RGB 通道格式,讓 Tailwind charcoal=rgb(var(--ink)/<alpha>) 的 text-charcoal/NN 透明度變體正常運作 */
+  --ink:37 48 59;                                                  /* 主文字 #25303B */
+  --muted:107 114 128;                                             /* 次要文字 #6B7280(備用) */
+
+  /* === 毛玻璃面板色票系列(theme-engine §4 重點)===
+     light:向白 mix(高白半透明);dark 段改向深霧藍黑基底 mix + accent 染色 */
+  --glass-bg:        rgba(255,255,255,.45);   /* 主玻璃面 */
+  --glass-bg-soft:   rgba(255,255,255,.34);   /* 次玻璃面 */
+  --glass-bg-chip:   rgba(255,255,255,.40);   /* 玻璃膠囊 / chip */
+  --glass-bg-strong: rgba(255,255,255,.62);   /* active 列底 */
+  --glass-bg-tab:    rgba(255,255,255,.70);   /* active 分頁底 */
+  --glass-border:    rgba(255,255,255,.60);   /* 面板邊框微光 */
+  --glass-border-soft:rgba(255,255,255,.55);  /* 次面板邊框 */
+  --glass-hi:        rgba(255,255,255,.70);   /* inset 頂部高光 */
+  --glass-hi-strong: rgba(255,255,255,.80);   /* 較強 inset 高光 */
+  --glass-divider:   rgba(255,255,255,.40);   /* 頁尾分隔線 */
+  --sw-ring:         rgba(255,255,255,.90);   /* 色票勾選內點 */
+  --sw-shadow:       rgba(40,40,79,.45);      /* 色票陰影 */
+
+  /* 玻璃面板的色調陰影(隨主色) */
+  --glass-shadow: color-mix(in srgb, var(--accent) 34%, #28284f);
+ }
+
+ /* ===== 深色(毛玻璃:深霧藍黑基底;--accent 不動,玻璃面板深色半透明)===== */
+ :root[data-mode="dark"]{
+  --bg:#12141a;                                                    /* 最外底:深霧藍黑 */
+
+  /* 文字:轉淺,維持 WCAG AA 內文對比(RGB 通道格式) */
+  --ink:232 234 242;                                               /* 主文字:淺 #e8eaf2 */
+  --muted:164 168 186;                                             /* 次要文字 #a4a8ba */
+
+  /* 光暈:深底下降亮度與透明度由 .blob opacity 控制;這裡讓 blob 向深基底靠,避免過曝 */
+  --blob-1: color-mix(in srgb, var(--accent) 60%, var(--bg));
+  --blob-2: color-mix(in srgb, var(--accent) 48%, var(--bg));
+  --blob-3: color-mix(in srgb, var(--accent) 40%, var(--bg));
+  --blob-4: color-mix(in srgb, var(--accent) 52%, #05070b);
+  --blob-5: color-mix(in srgb, var(--accent) 34%, var(--bg));
+
+  /* 次強調階梯:深底提亮(混入淺色),確保 chip/圖示在深玻璃上仍鮮明 */
+  --c-1: color-mix(in srgb, var(--accent) 82%, #e8eaf2);
+  --c-2: color-mix(in srgb, var(--accent) 50%, #2dd4bf);
+  --c-3: color-mix(in srgb, var(--accent) 46%, #f472b6);
+  --c-4: color-mix(in srgb, var(--accent) 58%, #a78bfa);
+  --c-5: color-mix(in srgb, var(--accent) 50%, #fbbf6b);
+
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, #12141a);
+
+  /* 玻璃面板深色化:由「向白 mix」改「深基底半透明 + 微量 accent 染色」,維持 blur 與邊框微光 */
+  --glass-bg:        color-mix(in srgb, var(--accent) 10%, rgba(30,33,44,.62));
+  --glass-bg-soft:   color-mix(in srgb, var(--accent) 8%,  rgba(28,31,41,.52));
+  --glass-bg-chip:   color-mix(in srgb, var(--accent) 9%,  rgba(33,36,48,.55));
+  --glass-bg-strong: color-mix(in srgb, var(--accent) 14%, rgba(40,44,58,.72));
+  --glass-bg-tab:    color-mix(in srgb, var(--accent) 16%, rgba(44,48,63,.80));
+  --glass-border:    color-mix(in srgb, var(--accent) 22%, rgba(255,255,255,.14));  /* 邊框微光帶 accent */
+  --glass-border-soft:color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,.10));
+  --glass-hi:        rgba(255,255,255,.10);                        /* inset 高光大幅降白 */
+  --glass-hi-strong: rgba(255,255,255,.14);
+  --glass-divider:   rgba(255,255,255,.12);
+  --sw-ring:         rgba(255,255,255,.92);
+  --sw-shadow:       rgba(0,0,0,.55);
+
+  /* 陰影:加深、提 accent 發光感 */
+  --glass-shadow: color-mix(in srgb, var(--accent) 46%, #05060a);
+ }
+
+ html{background:var(--bg);}
+ body{font-family:'Outfit','Noto Sans TC',sans-serif;background:var(--bg);transition:background-color .25s ease,color .25s ease;}
+
+ /* 鮮豔模糊漸層背景 —— 底色與光暈皆引用變數 */
+ .aurora{position:fixed;inset:0;overflow:hidden;z-index:-1;background:var(--bg);}
+ .blob{position:absolute;border-radius:9999px;filter:blur(90px);opacity:.7;}
+ .b1{width:46vw;height:46vw;background:var(--blob-1);top:-12vw;left:-8vw;}
+ .b2{width:42vw;height:42vw;background:var(--blob-2);top:18vw;right:-12vw;opacity:.6;}
+ .b3{width:48vw;height:48vw;background:var(--blob-3);bottom:-16vw;left:14vw;opacity:.55;}
+ .b4{width:30vw;height:30vw;background:var(--blob-4);bottom:6vw;right:8vw;opacity:.5;}
+ .b5{width:26vw;height:26vw;background:var(--blob-5);top:40vw;left:-6vw;opacity:.4;}
+ /* 深色:光暈整體降亮、降透明度,避免深底過曝 */
+ :root[data-mode="dark"] .blob{opacity:.42;}
+ :root[data-mode="dark"] .b2{opacity:.36;}
+ :root[data-mode="dark"] .b3{opacity:.32;}
+ :root[data-mode="dark"] .b4{opacity:.34;}
+ :root[data-mode="dark"] .b5{opacity:.26;}
+
+ /* 毛玻璃 —— 面/邊/高光皆走變數;陰影帶主色調 */
+ .glass{background:var(--glass-bg);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid var(--glass-border);box-shadow:0 12px 40px -14px color-mix(in srgb,var(--glass-shadow) 60%,transparent),inset 0 1px 0 var(--glass-hi);}
+ .glass-soft{background:var(--glass-bg-soft);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid var(--glass-border-soft);box-shadow:0 8px 28px -16px color-mix(in srgb,var(--glass-shadow) 55%,transparent),inset 0 1px 0 var(--glass-hi);}
+ .glass-chip{background:var(--glass-bg-chip);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);}
+ .hover-float{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;}
+ .hover-float:hover{transform:translateY(-5px);box-shadow:0 22px 48px -16px color-mix(in srgb,var(--glass-shadow) 70%,transparent),inset 0 1px 0 var(--glass-hi-strong);}
+ .panel{animation:fade .5s ease both;}
+ @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+ .tab-on{background:var(--glass-bg-tab)!important;color:rgb(var(--ink))!important;box-shadow:0 6px 18px -8px color-mix(in srgb,var(--accent) 55%,transparent),inset 0 1px 0 var(--glass-hi-strong);}
+
+ /* 設定面板:右側滑入 + 遮罩淡入 */
+ #settingsOverlay:not(.hidden) #settingsBackdrop{animation:fade .3s ease both;}
+ #settingsOverlay:not(.hidden) #settingsPanel{animation:slideIn .42s cubic-bezier(.2,.8,.2,1) both;}
+ @keyframes slideIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+
+ /* 風格清單列 */
+ .style-row{width:100%;display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:1rem;text-align:left;font-weight:600;font-size:.875rem;color:rgb(var(--ink));transition:transform .25s,box-shadow .25s;cursor:pointer;}
+ .style-row:hover{transform:translateY(-2px);}
+ .style-row .dot{width:1.5rem;height:1.5rem;border-radius:.6rem;flex:none;box-shadow:inset 0 1px 0 var(--glass-hi);}
+ .style-row .meta{line-height:1.15;}
+ .style-row .en{font-size:.66rem;font-weight:600;letter-spacing:.04em;color:rgb(var(--ink) / .5);}
+ .style-row.active{background:var(--glass-bg-strong);box-shadow:0 6px 18px -10px color-mix(in srgb,var(--accent) 60%,transparent),inset 0 1px 0 var(--glass-hi-strong);cursor:default;}
+ .style-row .badge{margin-left:auto;font-size:.62rem;font-weight:700;letter-spacing:.06em;color:var(--accent);background:var(--glass-bg-soft);border:1px solid var(--glass-border-soft);padding:.12rem .5rem;border-radius:9999px;}
+
+ /* 色票 swatch */
+ .sw{width:2.1rem;height:2.1rem;border-radius:9999px;border:1px solid var(--glass-border);box-shadow:0 4px 12px -6px var(--sw-shadow),inset 0 1px 0 var(--glass-hi);cursor:pointer;transition:transform .2s;position:relative;}
+ .sw:hover{transform:scale(1.12);}
+ .sw.active{outline:2.5px solid var(--accent);outline-offset:2px;}
+ .sw.active::after{content:"";position:absolute;inset:0;margin:auto;width:.7rem;height:.7rem;border-radius:9999px;background:var(--sw-ring);box-shadow:0 0 0 1px var(--sw-shadow);}
+ ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 38%,transparent);border-radius:9px}
+
+ /* 由變數推導的著色工具類(取代原本固定的 text-indigo2 等) */
+ .t-accent{color:var(--accent);}
+ .t-c1{color:var(--c-1);}.t-c2{color:var(--c-2);}.t-c3{color:var(--c-3);}.t-c4{color:var(--c-4);}.t-c5{color:var(--c-5);}
+ .bg-c1{background:var(--c-1);}.bg-c2{background:var(--c-2);}.bg-c3{background:var(--c-3);}.bg-c4{background:var(--c-4);}.bg-c5{background:var(--c-5);}
+
+ /* 模式 / 語言 玻璃膠囊分段(MODE / LANGUAGE) */
+ .seg-wrap{display:inline-flex;gap:.35rem;padding:.3rem;border-radius:1rem;background:var(--glass-bg-chip);border:1px solid var(--glass-border);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+ .seg{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border-radius:.75rem;font-size:.8rem;font-weight:600;color:rgb(var(--ink) / .62);cursor:pointer;transition:background .2s,color .2s,box-shadow .2s,transform .2s;white-space:nowrap;}
+ .seg:hover{color:rgb(var(--ink));transform:translateY(-1px);}
+ .seg[aria-pressed="true"]{background:var(--glass-bg-tab);color:rgb(var(--ink));box-shadow:0 6px 16px -10px color-mix(in srgb,var(--accent) 60%,transparent),inset 0 1px 0 var(--glass-hi-strong);}
+ .seg[aria-pressed="true"] .seg-dot{opacity:1;}
+ .seg-dot{width:.45rem;height:.45rem;border-radius:9999px;background:var(--accent);opacity:0;transition:opacity .2s;}
+</style>
+<!-- ===== favicon · 山徑手記 羅盤方位玫瑰 (compass rose) · timmy-web-favicon =====
+     依本頁解析後的 --accent 自動著色(含 ?accent= / store 覆寫);編輯風金棕北針 + 暖紙底。
+     屬「示範內容」非主題引擎,故不進 tw-engine.js;放各頁 <head> 末(pre-paint 之後)讀已解析 accent。
+     匯出「下載 HTML」剝除 <script> 但保留執行期注入的 <link rel=icon>,故乾淨檔仍帶 favicon。 -->
+<script>
+(function(){
+  function mix(hex){ // accent 與黑混 30%,作描邊 / 環(淺色 accent 仍可辨識);回 #rrggbb
+    hex=(hex||'').trim().replace('#','');
+    if(hex.length===3) hex=hex.replace(/./g,'$&$&');
+    if(hex.length<6) return '#142537';
+    var n=parseInt(hex.slice(0,6),16);
+    function d(x){ x=Math.round(x*0.7); return (x<16?'0':'')+x.toString(16); }
+    return '#'+d((n>>16)&255)+d((n>>8)&255)+d(n&255);
+  }
+  function paint(){
+    var accent=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim()||'#1d3557',
+        deep=mix(accent), gold='#9a7b4f', paper='#f4efe3',
+        svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+          +'<rect x="1" y="1" width="30" height="30" rx="6.5" fill="'+paper+'"/>'
+          +'<circle cx="16" cy="16" r="11.2" fill="none" stroke="'+deep+'" stroke-width="1.1"/>'
+          +'<g transform="rotate(45 16 16)"><path d="M16 8 17.7 14.3 24 16 17.7 17.7 16 24 14.3 17.7 8 16 14.3 14.3Z" fill="'+gold+'" fill-opacity=".32"/></g>'
+          +'<path d="M16 3.5 18.5 13.5 28.5 16 18.5 18.5 16 28.5 13.5 18.5 3.5 16 13.5 13.5Z" fill="'+accent+'" stroke="'+deep+'" stroke-width=".7" stroke-linejoin="round"/>'
+          +'<path d="M16 3.5 18.5 13.5 13.5 13.5Z" fill="'+gold+'"/>'
+          +'<circle cx="16" cy="16" r="1.8" fill="'+paper+'" stroke="'+deep+'" stroke-width=".9"/>'
+          +'</svg>',
+        href='data:image/svg+xml,'+encodeURIComponent(svg),
+        link=document.querySelector('link[rel="icon"]');
+    if(!link){ link=document.createElement('link'); link.setAttribute('rel','icon'); document.head.appendChild(link); }
+    link.setAttribute('type','image/svg+xml'); link.setAttribute('href',href);
+  }
+  try{ paint(); }catch(e){}
+  // accent 變更即時重繪(設定面板 twSetAccent 於主引擎載入後才有);讓 live favicon 與匯出同步
+  window.addEventListener('load',function(){ try{
+    if(typeof window.twSetAccent==='function' && !window.__twFaviconHook){
+      window.__twFaviconHook=true; var orig=window.twSetAccent;
+      window.twSetAccent=function(){ var r=orig.apply(this,arguments); try{ paint(); }catch(e){} return r; };
+    }
+    paint();
+  }catch(e){} });
+})();
+</script>
+</head>
+<body class="text-charcoal min-h-screen font-zh">
+
+<div class="aurora">
+ <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div>
+</div>
+
+<!-- 貼邊寬版:max-w-[1760px](超寬螢幕仍置中,避免過寬)+ 小 gutter px-4 sm:px-6 lg:px-10。 -->
+<div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
+
+ <!-- 頂部導覽 / 品牌 -->
+ <header class="glass rounded-4xl px-5 sm:px-8 py-4 sm:py-5 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 sticky top-4 z-20">
+  <div class="flex items-center gap-3 shrink-0">
+   <div class="w-11 h-11 rounded-2xl grid place-items-center text-white font-bold text-lg shadow-lg" style="background:linear-gradient(135deg,var(--c-1),var(--c-4) 55%,var(--c-2));box-shadow:0 10px 24px -8px color-mix(in srgb,var(--accent) 45%,transparent)">山</div>
+   <div class="leading-tight">
+    <div class="text-lg font-bold tracking-tight" data-i18n="chrome.brand">山徑手記</div>
+    <div class="text-[10px] font-semibold tracking-[.22em] text-charcoal/55" data-i18n="hero.kicker">MOUNTAIN TRAILS · FIELD JOURNAL</div>
+   </div>
+  </div>
+  <!-- tabs -->
+  <nav class="glass-chip rounded-2xl p-1.5 flex gap-1 md:ml-auto overflow-x-auto" role="tablist" aria-label="主導覽" data-i18n-attr="aria-label:chrome.nav_aria">
+   <button data-tab="overview" class="tab-btn whitespace-nowrap px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold text-charcoal/60 transition" role="tab" data-i18n="nav.overview">總覽</button>
+   <button data-tab="route"    class="tab-btn whitespace-nowrap px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold text-charcoal/60 transition" role="tab" data-i18n="nav.routes">路線</button>
+   <button data-tab="gear"     class="tab-btn whitespace-nowrap px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold text-charcoal/60 transition" role="tab" data-i18n="nav.gear">裝備</button>
+   <button data-tab="notes"    class="tab-btn whitespace-nowrap px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold text-charcoal/60 transition" role="tab" data-i18n="nav.journal">隨筆</button>
+  </nav>
+  <!-- 使用者 icon → 開啟設定面板 -->
+  <button id="userBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="使用者設定" data-i18n-attr="aria-label:chrome.user_settings"
+   class="glass-chip hover-float shrink-0 w-11 h-11 rounded-2xl grid place-items-center text-charcoal/75 hover:text-charcoal transition md:ml-1">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+    <circle cx="12" cy="8" r="3.4"></circle><path d="M4.5 19.5a7.5 7.5 0 0 1 15 0"></path>
+   </svg>
+  </button>
+ </header>
+
+ <main class="mt-6 sm:mt-8">
+
+  <!-- ============ 總覽 ============ -->
+  <section id="overview" class="tab-panel panel" role="tabpanel">
+   <div class="glass rounded-4xl overflow-hidden">
+    <!-- hero -->
+    <div class="relative px-6 sm:px-12 pt-10 sm:pt-16 pb-8 sm:pb-12">
+     <div class="absolute top-6 right-6 w-40 h-40 rounded-full blur-2xl" style="background:linear-gradient(135deg,color-mix(in srgb,var(--c-3) 60%,transparent),color-mix(in srgb,var(--c-5) 50%,transparent))"></div>
+     <span class="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide t-accent">
+      <span class="w-2 h-2 rounded-full bg-c2 animate-pulse"></span><span data-i18n="chrome.season_badge">SEASON 2026</span>
+     </span>
+     <h1 class="mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+      <span data-i18n="hero.title_a">高山縱走</span><br><span class="bg-clip-text text-transparent" style="background-image:linear-gradient(90deg,var(--c-1),var(--c-4),var(--c-2))" data-i18n="hero.title_b">2026 行記</span>
+     </h1>
+     <p class="mt-5 max-w-2xl text-base sm:text-lg text-charcoal/70 leading-relaxed" data-i18n="hero.lead">
+      三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。
+     </p>
+    </div>
+
+    <!-- 數據 3 項 -->
+    <div class="px-6 sm:px-12 pb-4 grid sm:grid-cols-3 gap-4">
+     <div class="glass-soft hover-float rounded-3xl p-5">
+      <div class="text-5xl font-extrabold t-c1">3</div>
+      <div class="mt-1 text-sm font-semibold" data-i18n="stats.routes_sub">條經典稜線</div>
+      <div class="text-xs text-charcoal/55" data-i18n="stats.routes_label">路線</div>
+     </div>
+     <div class="glass-soft hover-float rounded-3xl p-5">
+      <div class="text-5xl font-extrabold t-c2">142<span class="text-2xl"> km</span></div>
+      <div class="mt-1 text-sm font-semibold" data-i18n="stats.dist_sub">含接駁</div>
+      <div class="text-xs text-charcoal/55" data-i18n="stats.dist_label">總里程</div>
+     </div>
+     <div class="glass-soft hover-float rounded-3xl p-5">
+      <div class="text-5xl font-extrabold t-c3">14</div>
+      <div class="mt-1 text-sm font-semibold" data-i18n="stats.days_sub">含整裝日</div>
+      <div class="text-xs text-charcoal/55" data-i18n="stats.days_label">天數</div>
+     </div>
+    </div>
+
+    <!-- 最佳季節 + 快速前往 -->
+    <div class="px-6 sm:px-12 pb-10 pt-4 grid md:grid-cols-2 gap-4">
+     <div class="rounded-3xl p-6 text-white relative overflow-hidden" style="background:linear-gradient(135deg,var(--c-1),var(--c-4) 55%,var(--c-3));box-shadow:0 16px 40px -16px color-mix(in srgb,var(--accent) 60%,transparent)">
+      <div class="text-xs font-bold tracking-[.2em] text-white/80" data-i18n="chrome.best_season">BEST SEASON</div>
+      <div class="mt-2 text-2xl font-bold" data-i18n="callout.season_lead">最佳季節</div>
+      <p class="mt-2 text-white/90 leading-relaxed text-sm sm:text-base">
+       <b class="text-white" data-i18n="chrome.season_months">7–9 月</b><span data-i18n="chrome.season_rest">,避開梅雨與初雪;入秋後留意首波寒流。</span>
+      </p>
+     </div>
+     <div class="glass-soft rounded-3xl p-6">
+      <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="chrome.quick_links">QUICK LINKS</div>
+      <div class="mt-1 text-lg font-bold mb-3" data-i18n="quick.title">快速前往</div>
+      <div class="grid sm:grid-cols-2 gap-2.5">
+       <a href="#" class="glass-chip hover-float rounded-2xl px-4 py-3 text-sm font-semibold flex items-center justify-between"><span data-i18n="quick.routes">路線詳解</span><span class="t-c1">→</span></a>
+       <a href="#" class="glass-chip hover-float rounded-2xl px-4 py-3 text-sm font-semibold flex items-center justify-between"><span data-i18n="quick.supply">補給點地圖</span><span class="t-c2">→</span></a>
+       <a href="#" class="glass-chip hover-float rounded-2xl px-4 py-3 text-sm font-semibold flex items-center justify-between"><span data-i18n="quick.weather">天氣與水源</span><span class="t-c3">→</span></a>
+       <a href="#" class="glass-chip hover-float rounded-2xl px-4 py-3 text-sm font-semibold flex items-center justify-between"><span data-i18n="quick.permit">申請與入山證</span><span class="t-c4">↗</span></a>
+      </div>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- ============ 路線 ============ -->
+  <section id="route" class="tab-panel panel hidden" role="tabpanel">
+   <div class="grid lg:grid-cols-5 gap-5">
+    <!-- 路線概要 -->
+    <div class="glass rounded-4xl p-7 sm:p-9 lg:col-span-2">
+     <span class="glass-chip inline-block rounded-full px-3 py-1 text-xs font-bold t-c1" data-i18n="chrome.route_overview">OVERVIEW</span>
+     <h2 class="mt-3 text-2xl font-bold" data-i18n="routes.summary_h">路線概要</h2>
+     <p class="mt-4 text-charcoal/75 leading-loose" data-i18n="routes.summary_p">
+      本季由北段<b class="t-c1">奇萊連峰</b>入山,沿主稜南下接<b class="t-c2">能高安東軍</b>,最後由<b class="t-c3">南三段</b>出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。
+     </p>
+     <div class="mt-6 h-40 rounded-3xl relative overflow-hidden" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--glass-bg)),color-mix(in srgb,var(--c-2) 14%,var(--glass-bg-soft)));border:1px solid var(--glass-border-soft)">
+      <div class="absolute inset-0 opacity-80">
+       <svg viewBox="0 0 400 160" preserveAspectRatio="none" class="w-full h-full">
+        <polyline points="0,130 70,90 130,110 200,50 270,80 330,30 400,60" fill="none" stroke="var(--c-1)" stroke-width="3" stroke-linecap="round"/>
+        <polyline points="0,140 70,120 130,128 200,95 270,108 330,80 400,100" fill="none" stroke="var(--c-2)" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        <circle cx="200" cy="50" r="5" fill="var(--c-3)"/>
+       </svg>
+      </div>
+      <span class="absolute bottom-3 left-4 text-xs font-semibold text-charcoal/50" data-i18n="chrome.ridge_caption">稜線示意 · 高山箭竹與冷杉林</span>
+     </div>
+    </div>
+
+    <!-- 每日重點 D1–D14 -->
+    <div class="glass rounded-4xl p-7 sm:p-9 lg:col-span-3">
+     <span class="glass-chip inline-block rounded-full px-3 py-1 text-xs font-bold t-c3" data-i18n="chrome.day_by_day">DAY BY DAY</span>
+     <h2 class="mt-3 text-2xl font-bold" data-i18n="routes.daily_h">每日重點</h2>
+     <div class="mt-5 space-y-3">
+      <div class="glass-soft hover-float rounded-3xl p-5 flex gap-4 items-start">
+       <span class="shrink-0 px-3 py-1.5 rounded-xl bg-c1 text-white text-xs font-bold">D1–D3</span>
+       <div><div class="font-bold" data-i18n="chrome.r1_name">奇萊主北</div><div class="text-sm text-charcoal/65" data-i18n="routes.r1_focus">高度適應、看雲海日出</div></div>
+      </div>
+      <div class="glass-soft hover-float rounded-3xl p-5 flex gap-4 items-start">
+       <span class="shrink-0 px-3 py-1.5 rounded-xl bg-c2 text-white text-xs font-bold">D4–D7</span>
+       <div><div class="font-bold" data-i18n="chrome.r2_name">能高安東軍</div><div class="text-sm text-charcoal/65" data-i18n="routes.r2_focus">草原稜線、最長水線</div></div>
+      </div>
+      <div class="glass-soft hover-float rounded-3xl p-5 flex gap-4 items-start">
+       <span class="shrink-0 px-3 py-1.5 rounded-xl bg-c4 text-white text-xs font-bold">D8–D11</span>
+       <div><div class="font-bold" data-i18n="chrome.r3_name">丹大林道</div><div class="text-sm text-charcoal/65" data-i18n="routes.r3_focus">廢棄索道與獵徑</div></div>
+      </div>
+      <div class="glass-soft hover-float rounded-3xl p-5 flex gap-4 items-start">
+       <span class="shrink-0 px-3 py-1.5 rounded-xl bg-c3 text-white text-xs font-bold">D12–D14</span>
+       <div><div class="font-bold" data-i18n="chrome.r4_name">能高越嶺</div><div class="text-sm text-charcoal/65" data-i18n="routes.r4_focus">下山接駁、溫泉整裝</div></div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- ============ 裝備 ============ -->
+  <section id="gear" class="tab-panel panel hidden" role="tabpanel">
+   <div class="glass rounded-4xl p-7 sm:p-10">
+    <span class="glass-chip inline-block rounded-full px-3 py-1 text-xs font-bold t-c2" data-i18n="chrome.checklist">CHECKLIST</span>
+    <h2 class="mt-3 text-2xl font-bold" data-i18n="gear.list_h">裝備清單</h2>
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-1),var(--c-4))"></div><div class="font-semibold" data-i18n="gear.i1">60L 背包</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-2),var(--c-1))"></div><div class="font-semibold" data-i18n="gear.i2">三季睡袋(-5°C)</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-3),var(--c-5))"></div><div class="font-semibold" data-i18n="gear.i3">輕量帳</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-4),var(--c-3))"></div><div class="font-semibold" data-i18n="gear.i4">濾水器</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-5),var(--c-2))"></div><div class="font-semibold" data-i18n="gear.i5">行動糧 5 日</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-1),var(--c-2))"></div><div class="font-semibold" data-i18n="gear.i6">頭燈備用電池</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-3),var(--c-4))"></div><div class="font-semibold" data-i18n="gear.i7">急救包</div></div>
+     <div class="glass-soft hover-float rounded-3xl p-5"><div class="w-10 h-10 rounded-2xl mb-3" style="background:linear-gradient(135deg,var(--c-2),var(--c-5))"></div><div class="font-semibold" data-i18n="gear.i8">離線地圖</div></div>
+    </div>
+   </div>
+  </section>
+
+  <!-- ============ 隨筆 ============ -->
+  <section id="notes" class="tab-panel panel hidden" role="tabpanel">
+   <div class="glass rounded-4xl p-7 sm:p-12">
+    <span class="glass-chip inline-block rounded-full px-3 py-1 text-xs font-bold t-c4" data-i18n="chrome.field_notes">FIELD NOTES</span>
+    <h2 class="mt-3 text-2xl font-bold" data-i18n="journal.title">隨筆</h2>
+    <div class="mt-6 grid md:grid-cols-3 gap-4">
+     <div class="glass-soft rounded-3xl p-6"><div class="text-3xl">☁️</div><p class="mt-3 text-sm text-charcoal/70 leading-relaxed" data-i18n="chrome.note1">奇萊主北 · 高度適應、看雲海日出。</p></div>
+     <div class="glass-soft rounded-3xl p-6"><div class="text-3xl">🌾</div><p class="mt-3 text-sm text-charcoal/70 leading-relaxed" data-i18n="chrome.note2">能高安東軍 · 草原稜線、最長水線。</p></div>
+     <div class="glass-soft rounded-3xl p-6"><div class="text-3xl">♨️</div><p class="mt-3 text-sm text-charcoal/70 leading-relaxed" data-i18n="chrome.note3">能高越嶺 · 下山接駁、溫泉整裝。</p></div>
+    </div>
+    <!-- 頁尾 -->
+    <footer class="mt-10 pt-6 flex flex-col sm:flex-row sm:items-center gap-3 justify-between" style="border-top:1px solid var(--glass-divider)">
+     <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl grid place-items-center text-white text-sm font-bold" style="background:linear-gradient(135deg,var(--c-1),var(--c-2))">山</div>
+      <span class="text-sm font-semibold" data-i18n="chrome.brand_personal">個人山徑手記</span>
+     </div>
+     <p class="text-xs text-charcoal/55" data-i18n="chrome.footer_disclaimer">內容若有異動以現場與官方公告為準。</p>
+    </footer>
+   </div>
+  </section>
+
+ </main>
+</div>
+
+<!-- ============ 設定面板(毛玻璃本頁風格) ============ -->
+<div id="settingsOverlay" class="fixed inset-0 z-50 hidden">
+ <!-- 柔光遮罩(半透明 + 模糊,延續玻璃氛圍) -->
+ <div id="settingsBackdrop" class="absolute inset-0" style="background:color-mix(in srgb,var(--glass-shadow) 30%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);"></div>
+
+ <!-- 玻璃卡:右側滑出 -->
+ <div id="settingsPanel" role="dialog" aria-modal="true" aria-label="外觀設定"
+  class="glass absolute right-0 top-0 h-full w-full max-w-md rounded-l-4xl sm:rounded-l-4xl flex flex-col">
+
+  <!-- 面板抬頭 -->
+  <div class="flex items-center gap-3 px-6 sm:px-7 pt-6 pb-4 shrink-0">
+   <span class="w-10 h-10 rounded-2xl grid place-items-center text-white shadow-lg shrink-0" style="background:linear-gradient(135deg,var(--c-1),var(--c-4) 55%,var(--c-2));box-shadow:0 10px 24px -8px color-mix(in srgb,var(--accent) 45%,transparent)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="8" r="3.4"></circle><path d="M4.5 19.5a7.5 7.5 0 0 1 15 0"></path></svg>
+   </span>
+   <div class="leading-tight">
+    <div class="text-lg font-bold tracking-tight" data-i18n="ui.appearance">外觀設定</div>
+    <div class="text-[10px] font-semibold tracking-[.22em] text-charcoal/55" data-i18n="ui.appearance_sub">APPEARANCE · THEME</div>
+   </div>
+   <button id="settingsClose" type="button" aria-label="關閉設定" data-i18n-attr="aria-label:ui.close"
+    class="glass-chip hover-float ml-auto w-9 h-9 rounded-xl grid place-items-center text-charcoal/70 hover:text-charcoal transition">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="w-4.5 h-4.5"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+   </button>
+  </div>
+
+  <!-- 捲動內容 -->
+  <div class="px-6 sm:px-7 pb-7 overflow-y-auto grow space-y-7">
+
+   <!-- 1) 風格 -->
+   <section>
+    <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="ui.sec_style">STYLE</div>
+    <div class="mt-1 text-sm font-bold mb-3" data-i18n="ui.sec_style_zh">風格</div>
+    <div id="styleList" class="space-y-2"></div>
+   </section>
+
+   <!-- 2) 主色 -->
+   <section>
+    <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="ui.sec_accent">ACCENT</div>
+    <div class="mt-1 text-sm font-bold mb-3" data-i18n="ui.sec_accent_zh">主色</div>
+    <div id="accentSwatches" class="flex flex-wrap gap-2.5"></div>
+   </section>
+
+   <!-- 3) 背景色 -->
+   <section>
+    <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="ui.sec_bg">BACKGROUND</div>
+    <div class="mt-1 text-sm font-bold mb-3" data-i18n="ui.sec_bg_zh">背景色</div>
+    <div id="bgSwatches" class="flex flex-wrap gap-2.5"></div>
+    <p class="mt-2 text-xs text-charcoal/50 leading-relaxed" data-i18n="ui.bg_hint">深色模式下以策展深色基底為準,背景色票僅作用於淺色。</p>
+   </section>
+
+   <!-- 3b) 模式 mode(淺/深/系統;玻璃膠囊分段)-->
+   <section>
+    <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="ui.sec_mode">MODE</div>
+    <div class="mt-1 text-sm font-bold mb-3" data-i18n="ui.sec_mode_zh">模式</div>
+    <div class="seg-wrap" role="group" aria-label="顯示模式" data-i18n-attr="aria-label:ui.sec_mode_zh">
+     <button type="button" data-set-mode="light" class="seg"><span aria-hidden="true">☀</span><span data-i18n="ui.light">淺色</span><span class="seg-dot" aria-hidden="true"></span></button>
+     <button type="button" data-set-mode="dark" class="seg"><span aria-hidden="true">☾</span><span data-i18n="ui.dark">深色</span><span class="seg-dot" aria-hidden="true"></span></button>
+     <button type="button" data-set-mode="system" class="seg"><span aria-hidden="true">⚙</span><span data-i18n="ui.system">跟隨系統</span><span class="seg-dot" aria-hidden="true"></span></button>
+    </div>
+   </section>
+
+   <!-- 3c) 語言 language(中文/English;玻璃膠囊分段)-->
+   <section>
+    <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="ui.sec_lang">LANGUAGE</div>
+    <div class="mt-1 text-sm font-bold mb-3" data-i18n="ui.sec_lang_zh">語言</div>
+    <div class="seg-wrap" role="group" aria-label="介面語言" data-i18n-attr="aria-label:ui.sec_lang_zh">
+     <button type="button" data-set-lang="zh-Hant" class="seg"><span class="text-xs font-extrabold">文</span><span>繁體中文</span><span class="seg-dot" aria-hidden="true"></span></button>
+     <button type="button" data-set-lang="en" class="seg"><span class="text-xs font-extrabold">EN</span><span>English</span><span class="seg-dot" aria-hidden="true"></span></button>
+    </div>
+   </section>
+
+   <!-- 4) 匯出 -->
+   <section>
+    <div class="text-xs font-bold tracking-[.2em] text-charcoal/55" data-i18n="ui.sec_export">EXPORT</div>
+    <div class="mt-1 text-sm font-bold mb-3" data-i18n="ui.sec_export_zh">匯出</div>
+    <button id="downloadBtn" type="button"
+     class="glass hover-float w-full rounded-2xl px-5 py-3.5 flex items-center justify-center gap-2.5 text-sm font-bold text-charcoal/85 hover:text-charcoal transition">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 19.5h16"></path></svg>
+     <span data-i18n="ui.download">下載 HTML</span>
+    </button>
+    <p class="mt-2 text-xs text-charcoal/50 leading-relaxed" data-i18n="ui.export_hint">匯出目前配色與深色/語言狀態的乾淨版單檔頁面(不含設定面板)。</p>
+   </section>
+
+  </div>
+ </div>
+</div>
+
+<script id="tab-script">
+(function(){
+ const btns=document.querySelectorAll('.tab-btn');
+ const panels=document.querySelectorAll('.tab-panel');
+ function show(id){
+  panels.forEach(p=>p.classList.toggle('hidden',p.id!==id));
+  // re-trigger fade animation
+  const active=document.getElementById(id);
+  if(active){active.classList.remove('panel');void active.offsetWidth;active.classList.add('panel');}
+  btns.forEach(b=>{const on=b.dataset.tab===id;b.classList.toggle('tab-on',on);b.setAttribute('aria-selected',on);});
+ }
+ btns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+ show('overview'); // 預設總覽
+})();
+</script>
+
+<!-- ============ per-page 設定(TW_CONFIG):本款專屬,不被 sync_engine.py 覆蓋 ============
+     style / defaultAccent / defaultBg / i18nChrome(本款 chrome.* + style.name + 本款 ui.* 外殼字)/ onApply。
+     共用內容字典與引擎在下方 TW-MAIN 標記區(由正本注入)。 -->
+<script>
+  window.TW_CONFIG = {
+    style: '11-glassmorphism',
+    defaultAccent: '#5B6CF0',   // 出廠 accent(色票「原色」與 reset 用)
+    defaultBg: '#f4f3ff',       // 出廠 light bg(色票「原色」與 light 還原用)
+    // 本款毛玻璃 chrome.* / style.name + 本款專屬 ui.* 外殼字(theme-engine §10:共用內容不放這,只放外殼字)。
+    // 註:ui.sec_* 因本款設計成「EN 大寫小標 + 中文小標兩行」,故覆寫共用的「STYLE · 風格」為純大寫;另補各 *_zh。
+    i18nChrome: {
+      'zh-Hant': {
+        // 本款設定面板外殼(分段小標兩行制 + JS 動態標籤)
+        'ui.sec_style':'STYLE','ui.sec_style_zh':'風格','ui.sec_accent':'ACCENT','ui.sec_accent_zh':'主色',
+        'ui.sec_bg':'BACKGROUND','ui.sec_bg_zh':'背景色','ui.sec_mode':'MODE','ui.sec_mode_zh':'模式',
+        'ui.sec_lang':'LANGUAGE','ui.sec_lang_zh':'語言','ui.sec_export':'EXPORT','ui.sec_export_zh':'匯出',
+        'ui.appearance':'外觀設定','ui.appearance_sub':'APPEARANCE · THEME',
+        'ui.close':'關閉設定',
+        'ui.default':'原色','ui.default_suffix':'(原色)','ui.accent_label':'主色','ui.bg_label':'背景','ui.color_label':'色彩','ui.current':'目前',
+        // 毛玻璃 chrome(本款專屬)
+        'chrome.brand':'山徑手記','chrome.nav_aria':'主導覽','chrome.user_settings':'使用者設定',
+        'chrome.season_badge':'SEASON 2026','hero.title_a':'高山縱走','hero.title_b':'2026 行記',
+        'chrome.best_season':'BEST SEASON','chrome.season_months':'7–9 月','chrome.season_rest':',避開梅雨與初雪;入秋後留意首波寒流。',
+        'chrome.quick_links':'QUICK LINKS','chrome.route_overview':'OVERVIEW','chrome.ridge_caption':'稜線示意 · 高山箭竹與冷杉林',
+        'chrome.day_by_day':'DAY BY DAY','chrome.r1_name':'奇萊主北','chrome.r2_name':'能高安東軍','chrome.r3_name':'丹大林道','chrome.r4_name':'能高越嶺',
+        'chrome.checklist':'CHECKLIST','chrome.field_notes':'FIELD NOTES',
+        'chrome.note1':'奇萊主北 · 高度適應、看雲海日出。','chrome.note2':'能高安東軍 · 草原稜線、最長水線。','chrome.note3':'能高越嶺 · 下山接駁、溫泉整裝。',
+        'chrome.brand_personal':'個人山徑手記','chrome.footer_disclaimer':'內容若有異動以現場與官方公告為準。',
+        'style.name':'毛玻璃'
+      },
+      'en': {
+        'ui.sec_style':'STYLE','ui.sec_style_zh':'Style','ui.sec_accent':'ACCENT','ui.sec_accent_zh':'Accent',
+        'ui.sec_bg':'BACKGROUND','ui.sec_bg_zh':'Background','ui.sec_mode':'MODE','ui.sec_mode_zh':'Mode',
+        'ui.sec_lang':'LANGUAGE','ui.sec_lang_zh':'Language','ui.sec_export':'EXPORT','ui.sec_export_zh':'Export',
+        'ui.appearance':'Appearance','ui.appearance_sub':'APPEARANCE · THEME',
+        'ui.close':'Close settings',
+        'ui.default':'default','ui.default_suffix':' (default)','ui.accent_label':'Accent','ui.bg_label':'Background','ui.color_label':'Color','ui.current':'Current',
+        'chrome.brand':'Trail Journal','chrome.nav_aria':'Primary navigation','chrome.user_settings':'User settings',
+        'chrome.season_badge':'SEASON 2026','hero.title_a':'High-Mountain','hero.title_b':'Traverse 2026',
+        'chrome.best_season':'BEST SEASON','chrome.season_months':'Jul–Sep','chrome.season_rest':'; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+        'chrome.quick_links':'QUICK LINKS','chrome.route_overview':'OVERVIEW','chrome.ridge_caption':'Ridge sketch · alpine arrow bamboo & fir forest',
+        'chrome.day_by_day':'DAY BY DAY','chrome.r1_name':'Qilai Main-North','chrome.r2_name':'Nenggao-Andongjun','chrome.r3_name':'Danda Forest Road','chrome.r4_name':'Nenggao Crossing',
+        'chrome.checklist':'CHECKLIST','chrome.field_notes':'FIELD NOTES',
+        'chrome.note1':'Qilai Main-North · acclimatization, sea-of-clouds sunrise.','chrome.note2':'Nenggao-Andongjun · grassland ridge, longest water leg.','chrome.note3':'Nenggao Crossing · descent shuttle, hot-spring resupply.',
+        'chrome.brand_personal':'Personal trail journal','chrome.footer_disclaimer':'Details subject to on-site and official notices.',
+        'style.name':'glassmorphism'
+      }
+    },
+    // 切語言 / 載入後要重繪的「JS 動態文字」(theme-engine §10-5):
+    //   JS 渲染的風格清單名、accent/bg 色票標籤(★/aria-label)、<title>。
+    onApply: function(){
+      try{
+        if (typeof renderStyles === 'function') renderStyles();   // 風格清單名(依語言)
+        if (typeof renderAccents === 'function') renderAccents();  // 色票標籤(主色/Accent…)
+        if (typeof renderBgs === 'function') renderBgs();          // 色票標籤(背景/Background…)
+        document.title = (window.twT ? window.twT('chrome.brand') : '山徑手記') + ' · '
+                       + (window.twT ? window.twT('hero.title') : '高山縱走 2026 行記');
+      }catch(e){}
+    }
+  };
+</script>
+
+<!-- 設定面板邏輯(本款專屬:分頁已在上方 tab-script;此段為設定面板 / 色票 / 風格切換 / 匯出)
+     store / mode / i18n 引擎與共用內容字典由正本 assets/tw-engine.js 注入(見下方 TW-MAIN)。
+     本段只呼叫引擎對外 API:window.twT / twLang / patchStore / twSetAccent / twSetBg / twEffDark。 -->
+<script id="settings-script">
+(function(){
+ const STYLE_KEY='11-glassmorphism';                 // 本款
+ const root=document.documentElement, RS=root.style;
+
+ /* ===== 統一 store:讀取沿用本地薄包裝;寫入一律走正本 window.patchStore ===== */
+ const STORE_KEY='timmy-web-stylelab';
+ window.DEFAULT_BG='#f4f3ff';                          // 本款 light 出廠 bg(§10 rule 3:原色用常數,勿用 computed)
+ const DEFAULT_ACCENT='#5B6CF0';
+ function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
+ function saveStore(s){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(s)); }catch(e){} }
+ function patchStore(o){ if(window.patchStore) return window.patchStore(o); var s=loadStore(); Object.assign(s,o); saveStore(s); }
+
+ /* ===== i18n:查字典 / 當前語言一律走正本(twT / twLang);本段不自帶字典 ===== */
+ function curLang(){ return window.twLang ? window.twLang() : (root.lang || 'zh-Hant'); }
+ function t(key){ return window.twT ? window.twT(key) : key; }
+
+ /* ===== 目前色 ===== */
+ const norm=v=>(v||'').trim().toLowerCase();
+ const eq=(a,b)=>norm(a)===norm(b);
+ function curAccent(){ return (RS.getPropertyValue('--accent').trim())||DEFAULT_ACCENT; }
+ function curBg(){ return loadStore().bg || window.DEFAULT_BG; }
+ function isDark(){ return root.dataset.mode==='dark'; }
+
+ /* 寫入 URL(?accent=&bg=;不留歷史;不寫 mode/lang) */
+ function syncURL(){
+  try{
+   const u=new URL(location.href);
+   u.searchParams.set('accent',curAccent()); u.searchParams.set('bg',curBg());
+   history.replaceState(null,'',u);
+  }catch(e){}
+ }
+
+ /* ===== 風格清單(本款標 active;名稱依語言;其餘導向 <key>.html?accent=&bg=) ===== */
+ const STYLES=[
+  {key:'00-editorial',       zh:'編輯手札',  en:'Editorial',       grad:'linear-gradient(135deg,#1d3557,#9a7b4f)'},
+  {key:'g09-mintcitrus',     zh:'薄荷柑橘',  en:'Mint Citrus',     grad:'linear-gradient(135deg,#34D399,#A3E635)'},
+  {key:'16-soft-flat',       zh:'清爽扁平',  en:'Soft Flat',       grad:'linear-gradient(135deg,#60A5FA,#93C5FD)'},
+  {key:'11-glassmorphism',   zh:'毛玻璃',    en:'Glassmorphism',   grad:'linear-gradient(135deg,#5B6CF0,#8B5CF6,#14B8A6)'},
+  {key:'14-pastel-bento',    zh:'粉彩便當',  en:'Pastel Bento',    grad:'linear-gradient(135deg,#F9A8D4,#C4B5FD)'},
+  {key:'15-gradient-pop',    zh:'鮮豔漸層',  en:'Gradient Pop',    grad:'linear-gradient(135deg,#F8765C,#EC4899,#8B5CF6)'},
+  {key:'04-modern-broadsheet',zh:'彩色雜誌', en:'Color Magazine',  grad:'linear-gradient(135deg,#F5A524,#EC4899)'},
+  {key:'02-blueprint-grid',  zh:'彩色藍圖',  en:'Color Blueprint', grad:'linear-gradient(135deg,#38BDF8,#5B6CF0)'},
+  {key:'06-terminal-light',  zh:'彩色 IDE',  en:'Color IDE',       grad:'linear-gradient(135deg,#10B981,#38BDF8)'},
+  {key:'01-neo-brutalist',   zh:'撞色粗野派',en:'Neo-Brutalist',   grad:'linear-gradient(135deg,#F8765C,#F5A524)'}
+ ];
+ function renderStyles(){
+  const listEl=document.getElementById('styleList'); if(!listEl) return;
+  listEl.innerHTML='';
+  STYLES.forEach(function(s){
+   const active=s.key===STYLE_KEY;
+   const row=document.createElement(active?'div':'a');
+   row.className='style-row glass-soft'+(active?' active':'');
+   if(!active){
+    row.href='#';
+    row.addEventListener('click',function(ev){ ev.preventDefault();
+     location.href=s.key+'.html?accent='+encodeURIComponent(curAccent())+'&bg='+encodeURIComponent(curBg()); });
+   }else{ row.setAttribute('aria-current','true'); }
+   const label=(curLang()==='en')?s.en:s.zh;
+   row.innerHTML='<span class="dot" style="background:'+s.grad+'"></span>'+
+    '<span class="meta"><span>'+label+'</span><br><span class="en">'+s.en+'</span></span>'+
+    (active?'<span class="badge">'+t('ui.current')+'</span>':'');
+   listEl.appendChild(row);
+  });
+ }
+
+ /* ===== 色票工廠(原色置首,標 ★;勾選態用 .active)===== */
+ const ACCENTS=['#5B6CF0','#10B981','#F8765C','#F5A524','#EC4899','#14B8A6','#8B5CF6','#38BDF8'];
+ const BGS=['#FFFFFF','#FAF6F0','#E8F8F5','#EAF2FE','#EFEBFB','#FDEEE7','#EEF0F2'];
+ // accent / bg 實際套用交給正本(含 store 寫入、inline 與 dark 守衛、值顯示);本段只同步 URL + 重繪色票勾選
+ function setAccent(c){
+  if(window.twSetAccent){ window.twSetAccent(c); } else { RS.setProperty('--accent',c); patchStore({accent:c}); }
+  syncURL(); markActive('accentSwatches',curAccent());
+ }
+ function setBg(c){
+  if(window.twSetBg){ window.twSetBg(c); }          // dark 守衛由正本處理:深色不寫 inline --bg(否則蓋掉深色基底)
+  else { patchStore({bg:c}); if(!isDark()) RS.setProperty('--bg',c); }
+  syncURL(); markActive('bgSwatches',curBg());
+ }
+ function buildSwatches(hostId,kind){
+  const host=document.getElementById(hostId); if(!host) return; host.innerHTML='';
+  const isAccent=(kind==='accent');
+  const def=isAccent?DEFAULT_ACCENT:window.DEFAULT_BG;
+  const palette=isAccent?ACCENTS:BGS;
+  const list=[def].concat(palette.filter(c=>!eq(c,def)));
+  const baseLbl=isAccent?t('ui.accent_label'):t('ui.bg_label');
+  list.forEach(function(color,i){
+   const b=document.createElement('button');
+   b.type='button'; b.className='sw'; b.style.background=color; b.dataset.color=norm(color);
+   b.title=baseLbl+' '+color.toUpperCase()+(i===0?t('ui.default_suffix'):'');
+   b.setAttribute('aria-label',(i===0?t('ui.default'):baseLbl)+' '+color.toUpperCase());
+   b.addEventListener('click',function(){ isAccent?setAccent(color):setBg(color); });
+   if(i===0){ const tag=document.createElement('span'); tag.textContent='★';
+    tag.style.cssText='position:absolute;top:-.35rem;right:-.35rem;font-size:.6rem;line-height:1;color:var(--c-5)'; tag.title=t('ui.default'); b.appendChild(tag); }
+   host.appendChild(b);
+  });
+  markActive(hostId, isAccent?curAccent():curBg());
+ }
+ function markActive(hostId,cur){
+  const host=document.getElementById(hostId); if(!host) return;
+  const c=norm(cur);
+  host.querySelectorAll('.sw').forEach(b=>b.classList.toggle('active',b.dataset.color===c));
+ }
+ function renderAccents(){ buildSwatches('accentSwatches','accent'); }
+ function renderBgs(){ buildSwatches('bgSwatches','bg'); }
+ // 暴露給正本引擎的 TW_CONFIG.onApply 使用(本段為 IIFE,需掛上 window 才能在 onApply 閉包中取用)
+ window.renderStyles=renderStyles; window.renderAccents=renderAccents; window.renderBgs=renderBgs;
+
+ /* ===== 開 / 關面板 ===== */
+ const overlay=document.getElementById('settingsOverlay');
+ const userBtn=document.getElementById('userBtn');
+ function openP(){ renderStyles(); renderAccents(); renderBgs(); overlay.classList.remove('hidden'); userBtn.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+ function closeP(){ overlay.classList.add('hidden'); userBtn.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+ window.closeSettings=closeP;
+ userBtn.addEventListener('click',openP);
+ document.getElementById('settingsClose').addEventListener('click',closeP);
+ document.getElementById('settingsBackdrop').addEventListener('click',closeP);
+ document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!overlay.classList.contains('hidden'))closeP(); });
+
+ /* ===== 載入:URL(?accent=&bg=)優先 → 寫入統一 store;移除舊散用單獨鍵 ===== */
+ (function initSettings(){
+  try{
+   const q=new URLSearchParams(location.search);
+   const qa=q.get('accent'), qb=q.get('bg');
+   const s=loadStore();
+   if(qa){ const a=(qa.charAt(0)==='#'||qa.indexOf('(')>-1)?qa:'#'+qa; s.accent=a; }
+   if(qb){ const bb=(qb.charAt(0)==='#'||qb.indexOf('(')>-1)?qb:'#'+qb; s.bg=bb; }
+   s.style=STYLE_KEY; saveStore(s);
+   if(s.accent) RS.setProperty('--accent',s.accent);   // 確保 accent inline 生效(兩模式皆套用)
+   ['accent','bg','style'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  }catch(e){}
+ })();
+
+ /* ===================== 匯出自包含乾淨版 .html(§10 rule 6)===================== */
+ function exportHTML(){
+  const clone=document.documentElement.cloneNode(true);
+
+  // (a) 固定 mode / lang 到 <html>(system 已於引擎解析為具體 light/dark)
+  clone.setAttribute('data-mode', root.dataset.mode||'light');
+  clone.setAttribute('lang', curLang());
+
+  // 移除 clone <html> 上 inline style(setAccent/setBg 動態值);配色改由注入 <style> 固定
+  clone.removeAttribute('style');
+
+  // 以 id 移除設定面板/遮罩、使用者 icon
+  ['settingsOverlay','userBtn'].forEach(function(id){ const el=clone.querySelector('#'+id); if(el) el.remove(); });
+
+  // 移除所有 <script>,僅以 id/src 身分保留:Tailwind CDN、#tw-config、#tab-script
+  // (TW_CONFIG 與 TW-MAIN 引擎 script 皆無 id,於此一併移除;匯出檔自包含、不需引擎)
+  const KEEP={'tw-config':1,'tab-script':1};
+  clone.querySelectorAll('script').forEach(function(s){
+   const isCDN=/cdn\.tailwindcss\.com/.test(s.getAttribute('src')||'');
+   if(!isCDN && KEEP[s.id]!==1) s.remove();
+  });
+
+  // 移除引擎同步用的 TW 註解標記(TW-PREPAINT / TW-MAIN START/END)與其前的說明註解。
+  // 匯出檔不再同步,留著只是雜訊;以 comment 節點文字判定,僅清掉 TW 標記相關。
+  (function stripTwComments(node){
+   var tw=document.createTreeWalker(node, NodeFilter.SHOW_COMMENT, null);
+   var dead=[], c;
+   while((c=tw.nextNode())){
+    var v=c.nodeValue||'';
+    if(/TW-(PREPAINT|MAIN):(START|END)/.test(v) ||
+       /assets\/tw-engine\.js|sync_engine\.py|TW_CONFIG/.test(v)) dead.push(c);
+   }
+   dead.forEach(function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
+  })(clone);
+
+  // 移除設定面板專屬的死 CSS(面板元素已刪,選擇器 #settings* 永遠不命中)+ 其專用 keyframes slideIn,
+  // 讓匯出檔徹底不含設定面板痕跡(僅刪選擇器含 #settings 的規則;其餘 CSS 不動)。
+  clone.querySelectorAll('style').forEach(function(st){
+   var css=st.textContent;
+   if(css.indexOf('#settings')===-1) return;
+   css=css.replace(/[^{}]*#settings[^{}]*\{[^{}]*\}/g,'');   // 任何含 #settings 的選擇器規則
+   css=css.replace(/@keyframes\s+slideIn\s*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g,''); // 面板專用滑入動畫
+   st.textContent=css;
+  });
+
+  // (c) 於 <head> 末注入 :root{--accent;--bg}:只放 light bg;深色靠保留的 :root[data-mode=dark] 規則勝出
+  const head=clone.querySelector('head');
+  if(head){ const baked=document.createElement('style');
+   baked.textContent=':root{--accent:'+curAccent()+';--bg:'+curBg()+'}';
+   head.appendChild(baked); }
+
+  const html='<!DOCTYPE html>\n'+clone.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='山徑手記-glass.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  closeP();
+ }
+ const dlBtn=document.getElementById('downloadBtn');
+ if(dlBtn) dlBtn.addEventListener('click',exportHTML);
+
+ /* 主題引擎(mode + i18n)由正本 assets/tw-engine.js 提供(見下方 TW-MAIN 標記區):
+    - 統一 store=timmy-web-stylelab;dark 移除 inline --bg、light 寫回使用者 bg(twSetBg 含守衛)
+    - applyI18n 處理 data-i18n / data-i18n-attr / data-i18n-html,末尾呼叫 TW_CONFIG.onApply()
+      (本頁 onApply 已重繪 風格清單 / 色票標籤 / <title>)
+    - [data-set-mode] / [data-set-lang] 監聽、mql change、twSetAccent/twSetBg 皆由正本提供
+    初次渲染(風格清單 / 色票)亦由引擎載入時的 applyI18n → onApply 觸發,故此處不再自行呼叫。 */
+})();
+</script>
+
+<!-- ============ 通用主題引擎(mode + i18n + 共用 I18N 內容)============
+     由正本 assets/tw-engine.js 注入;改正本後跑 scripts/sync_engine.py 同步。
+     必須在上方 TW_CONFIG 與本款 UI 函式(renderStyles / renderAccents / renderBgs)
+     之後載入(其 applyI18n 會透過 TW_CONFIG.onApply 呼叫它們)。本標記區之間勿手改。 -->
+<!-- TW-MAIN:START -->
+<script>
+/* 主引擎(theme-engine §7b / §10 / §11)。依賴 per-page 先定義 window.TW_CONFIG:
+     {
+       style:        '06-terminal-light',   // 本頁 key(= 同目錄 html 檔名,不含 .html)
+       defaultAccent:'#5B6CF0',             // 出廠 accent(色票「原色」與 reset 用,不可 computed)
+       defaultBg:    '#E7E1F7',             // 出廠 light bg(色票「原色」與 light 還原用)
+       i18nChrome: { 'zh-Hant':{…}, 'en':{…} },  // 本款 chrome.* / style.name(覆寫/補進共用 I18N)
+       onApply:      function(){…}          // 切語言/載入後要重繪的動態文字(breadcrumb、JS 風格清單、色票標籤…)
+     }
+   引擎對外提供:window.twSetAccent(hex) / window.twSetBg(hex)(含 dark 守衛)、
+   window.patchStore(obj)、window.__twApplyMode / window.__twApplyI18n。
+   各頁色票 / 風格切換 / reset handler 呼叫上述,勿自行重寫 store / mode 邏輯。 */
+(function(){
+  var el = document.documentElement, rootStyle = el.style;
+  var KEY = 'timmy-web-stylelab';
+  var mql = matchMedia('(prefers-color-scheme: dark)');
+  var CFG = window.TW_CONFIG || (window.TW_CONFIG = {});
+
+  /* ---- 統一 store(theme-engine §2)---- */
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function saveStore(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  function patchStore(o){ var s = loadStore(); Object.assign(s, o); saveStore(s); }
+  window.patchStore = patchStore;
+
+  /* ---- 出廠值(來自 per-page;不可由 computed 讀,深色時 --bg 是深色基底)---- */
+  function defAccent(){ return CFG.defaultAccent || '#000000'; }
+  function defBg(){ return CFG.defaultBg || '#ffffff'; }
+
+  /* ---- i18n 字典(theme-engine §5 / §10):共用內容 9 款一致;chrome.* / style.name 逐款由 i18nChrome 覆寫 ---- */
+  var I18N = {
+    'zh-Hant': {
+      // 分頁 nav(breadcrumb / 狀態列 doc 用)
+      'nav.overview':'總覽','nav.routes':'路線','nav.gear':'裝備','nav.journal':'隨筆',
+      // hero / 共用內容
+      'hero.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL','hero.title':'高山縱走 2026 行記',
+      'hero.lead':'三條經典稜線、十四日徒步——本手記彙整路線、補給與沿途隨筆。',
+      // stats
+      'stats.overview':'數據概覽','stats.season':'最佳季節',
+      'stats.routes_label':'路線','stats.routes_sub':'條經典稜線',
+      'stats.dist_label':'總里程','stats.dist_sub':'含接駁',
+      'stats.days_label':'天數','stats.days_sub':'含整裝日',
+      // callout 季節
+      'callout.season_tag':'⚠ SEASON · 重點','callout.season_lead':'最佳季節',
+      'callout.season_body':'7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      'callout.season_full':'最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      // quick links
+      'quick.title':'快速前往','quick.routes':'路線詳解','quick.supply':'補給點地圖',
+      'quick.weather':'天氣與水源','quick.permit':'申請與入山證',
+      // routes 內容
+      'routes.title':'路線','routes.summary_h':'路線概要',
+      'routes.summary_p':'本季由北段奇萊連峰入山,沿主稜南下接能高安東軍,最後由南三段出能高越嶺道;全程多為高山箭竹與冷杉林,水源點集中於營地附近,需提前規劃補給。',
+      'routes.daily_h':'每日重點','routes.col_seg':'區段','routes.col_focus':'重點',
+      'routes.r1_seg':'D1–D3 奇萊主北','routes.r1_focus':'高度適應、看雲海日出',
+      'routes.r2_seg':'D4–D7 能高安東軍','routes.r2_focus':'草原稜線、最長水線',
+      'routes.r3_seg':'D8–D11 丹大林道','routes.r3_focus':'廢棄索道與獵徑',
+      'routes.r4_seg':'D12–D14 能高越嶺','routes.r4_focus':'下山接駁、溫泉整裝',
+      // gear 內容
+      'gear.title':'裝備','gear.list_h':'裝備清單',
+      'gear.i1':'60L 背包','gear.i2':'三季睡袋(-5°C)','gear.i3':'輕量帳','gear.i4':'濾水器',
+      'gear.i5':'行動糧 5 日','gear.i6':'頭燈備用電池','gear.i7':'急救包','gear.i8':'離線地圖',
+      // journal 內容
+      'journal.title':'隨筆','journal.season_p':'最佳季節 7–9 月,避開梅雨與初雪;入秋後留意首波寒流。',
+      // 通用 UI / 設定面板
+      'ui.footer_note':'個人山徑手記 · 內容若有異動以現場與官方公告為準。',
+      'ui.tabs_summary':'總覽 / 路線 / 裝備 / 隨筆',
+      'ui.prompt_hint':'主題 · 主色 · 背景 · 模式 · 語言',
+      'ui.sec_style':'STYLE · 風格','ui.sec_accent':'ACCENT · 主色','ui.sec_bg':'BACKGROUND · 背景色',
+      'ui.sec_mode':'MODE · 模式','ui.sec_lang':'LANGUAGE · 語言','ui.sec_export':'EXPORT · 下載',
+      'ui.bg_hint':'深色模式下以策展深色基底為準,背景色票僅作用於淺色',
+      'ui.light':'淺色','ui.dark':'深色','ui.system':'跟隨系統',
+      'ui.download':'下載 HTML','ui.export_title':'匯出目前頁面為自包含 HTML(固定目前配色與深色/語言)',
+      'ui.export_hint':'匯出目前頁面為單一檔案,固定目前配色與深色/語言狀態,移除設定面板與設定 script,保留分頁切換與全部內容。',
+      'ui.close':'關閉 (Esc)','ui.close_label':'關閉','ui.apply':'套用'
+    },
+    'en': {
+      'nav.overview':'Overview','nav.routes':'Routes','nav.gear':'Gear','nav.journal':'Journal',
+      'hero.kicker':'MOUNTAIN TRAILS · FIELD JOURNAL','hero.title':'High-Mountain Traverse 2026 Field Log',
+      'hero.lead':'Three classic ridgelines, fourteen days on foot — this log gathers routes, resupply and trail notes.',
+      'stats.overview':'At a Glance','stats.season':'Best Season',
+      'stats.routes_label':'Routes','stats.routes_sub':'classic ridgelines',
+      'stats.dist_label':'Distance','stats.dist_sub':'incl. shuttle',
+      'stats.days_label':'Days','stats.days_sub':'incl. packing day',
+      'callout.season_tag':'⚠ SEASON · KEY','callout.season_lead':'Best season',
+      'callout.season_body':'Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'callout.season_full':'Best season Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'quick.title':'Quick Links','quick.routes':'Route details','quick.supply':'Resupply map',
+      'quick.weather':'Weather & water','quick.permit':'Permits & entry',
+      'routes.title':'Routes','routes.summary_h':'Route Overview',
+      'routes.summary_p':'This season enters via the Qilai Range to the north, heads south along the main ridge to Nenggao-Andongjun, then exits the Nanthreesection by the Nenggao Crossing Trail; the route runs mostly through alpine arrow bamboo and fir forest, with water sources clustered near campsites — plan resupply ahead.',
+      'routes.daily_h':'Daily Highlights','routes.col_seg':'Segment','routes.col_focus':'Highlights',
+      'routes.r1_seg':'D1–D3 Qilai Main-North','routes.r1_focus':'Acclimatization, sea-of-clouds sunrise',
+      'routes.r2_seg':'D4–D7 Nenggao-Andongjun','routes.r2_focus':'Grassland ridge, longest water leg',
+      'routes.r3_seg':'D8–D11 Danda Forest Road','routes.r3_focus':'Abandoned cableway and hunting trails',
+      'routes.r4_seg':'D12–D14 Nenggao Crossing','routes.r4_focus':'Descent shuttle, hot-spring resupply',
+      'gear.title':'Gear','gear.list_h':'Gear Checklist',
+      'gear.i1':'60L backpack','gear.i2':'3-season bag (-5°C)','gear.i3':'Lightweight tent','gear.i4':'Water filter',
+      'gear.i5':'5 days of trail food','gear.i6':'Headlamp spare batteries','gear.i7':'First-aid kit','gear.i8':'Offline map',
+      'journal.title':'Journal','journal.season_p':'Best season Jul–Sep; avoid the plum rains and early snow, and watch for the first cold front in autumn.',
+      'ui.footer_note':'Personal trail journal · details subject to on-site and official notices.',
+      'ui.tabs_summary':'Overview / Routes / Gear / Journal',
+      'ui.prompt_hint':'theme · accent · background · mode · language',
+      'ui.sec_style':'STYLE','ui.sec_accent':'ACCENT','ui.sec_bg':'BACKGROUND',
+      'ui.sec_mode':'MODE','ui.sec_lang':'LANGUAGE','ui.sec_export':'EXPORT',
+      'ui.bg_hint':'In dark mode the curated dark base is used; background swatches apply to light mode only.',
+      'ui.light':'Light','ui.dark':'Dark','ui.system':'System',
+      'ui.download':'Download HTML','ui.export_title':'Export this page as a self-contained HTML (fixes current colors, mode & language)',
+      'ui.export_hint':'Export this page as a single file, fixing the current colors plus dark/language state, removing the settings panel and its scripts while keeping tab switching and all content.',
+      'ui.close':'Close (Esc)','ui.close_label':'Close','ui.apply':'Apply'
+    }
+  };
+
+  /* per-page chrome.* / style.name 併入(淺拷貝 merge,per-page 覆寫共用) */
+  (function mergeChrome(){
+    var c = CFG.i18nChrome || {};
+    ['zh-Hant','en'].forEach(function(lng){
+      if (c[lng]) for (var k in c[lng]) if (Object.prototype.hasOwnProperty.call(c[lng], k)) I18N[lng][k] = c[lng][k];
+    });
+  })();
+
+  function curLang(){ var s = loadStore(); return s.lang || el.lang || 'zh-Hant'; }
+  /* 對外查字典:缺 key 回中文,再缺回 key 本身(供 onApply 內動態文字用) */
+  window.twT = function(key){ var d = I18N[curLang()] || I18N['zh-Hant']; return d[key] != null ? d[key] : (I18N['zh-Hant'][key] != null ? I18N['zh-Hant'][key] : key); };
+  window.twLang = curLang;
+  window.twI18n = I18N;
+
+  /* ---- mode ---- */
+  function effDark(){ var m = loadStore().mode || 'light'; return m === 'dark' || (m === 'system' && mql.matches); }
+  function userBg(){ return loadStore().bg || defBg(); }
+  window.twEffDark = effDark;
+
+  function mark(sel, dataKey, val){
+    document.querySelectorAll(sel).forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset[dataKey] === val)); });
+  }
+
+  function applyMode(){
+    var dark = effDark(); el.dataset.mode = dark ? 'dark' : 'light';
+    if (dark){ rootStyle.removeProperty('--bg'); }        // 讓 :root[data-mode=dark]{--bg} 生效
+    else { var b = userBg(); if (b) rootStyle.setProperty('--bg', b); }
+    var mv = document.getElementById('modeVal'); if (mv) mv.textContent = loadStore().mode || 'light';
+    mark('[data-set-mode]', 'setMode', loadStore().mode || 'light');
+  }
+  window.__twApplyMode = applyMode;
+
+  /* ---- i18n:textContent + data-i18n-html(innerHTML)+ data-i18n-attr(屬性) ---- */
+  function applyI18n(){
+    var d = I18N[curLang()] || I18N['zh-Hant'];
+    document.querySelectorAll('[data-i18n]').forEach(function(n){
+      var k = n.getAttribute('data-i18n'); if (d[k] != null) n.textContent = d[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(n){
+      var k = n.getAttribute('data-i18n-html'); if (d[k] != null) n.innerHTML = d[k];
+    });
+    document.querySelectorAll('[data-i18n-attr]').forEach(function(n){
+      n.getAttribute('data-i18n-attr').split(',').forEach(function(pair){
+        var kv = pair.split(':'), attr = (kv[0] || '').trim(), key = (kv[1] || '').trim();
+        if (attr && d[key] != null) n.setAttribute(attr, d[key]);
+      });
+    });
+    el.lang = curLang();
+    var lv = document.getElementById('langVal'); if (lv) lv.textContent = curLang();
+    mark('[data-set-lang]', 'setLang', curLang());
+    // per-page 動態文字重繪(breadcrumb、JS 風格清單名、色票標籤、<title> 等)
+    if (typeof CFG.onApply === 'function'){ try{ CFG.onApply(); }catch(e){} }
+  }
+  window.__twApplyI18n = applyI18n;
+
+  /* ---- 對外:色票 / reset handler 呼叫(含 dark 守衛)---- */
+  // accent:兩模式皆 inline 套用;同步 store + #accentVal 顯示
+  window.twSetAccent = function(hex){
+    rootStyle.setProperty('--accent', hex);
+    patchStore({ accent: hex });
+    var v = document.getElementById('accentVal'); if (v) v.textContent = (hex || '').toUpperCase();
+  };
+  // bg:只有 light 才 inline(dark 交給 :root[data-mode=dark]{--bg};寫 inline 會破版);同步 store + #bgVal
+  window.twSetBg = function(hex){
+    patchStore({ bg: hex });
+    if (!effDark()) rootStyle.setProperty('--bg', hex);
+    var v = document.getElementById('bgVal'); if (v) v.textContent = (hex || '').toUpperCase();
+  };
+
+  /* ---- 事件:模式 / 語言切換;系統主題跟隨 ---- */
+  document.addEventListener('click', function(e){
+    var tm = e.target.closest('[data-set-mode]'); if (tm){ patchStore({ mode: tm.dataset.setMode }); applyMode(); return; }
+    var tl = e.target.closest('[data-set-lang]'); if (tl){ patchStore({ lang: tl.dataset.setLang }); applyI18n(); return; }
+  });
+  mql.addEventListener('change', function(){ if ((loadStore().mode || 'light') === 'system') applyMode(); });
+
+  /* ---- 初始套用 ---- */
+  applyMode();
+  applyI18n();
+})();
+</script>
+<!-- TW-MAIN:END -->
+</body>
+</html>
