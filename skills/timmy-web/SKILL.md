@@ -17,8 +17,8 @@ allowed-tools: Read, Write, Edit, Glob
 ## 開始前:需求訪談 (intake)
 
 產出任何網頁前,**先依 `web-spec.md` 的「## 問題」訪談使用者**(= 要做這個網頁的人 / 開發者,**不是 skill 作者**)。
-- **訪談順序**:Q1 主題 → Q2 靜/動態 → Q3 深淺 → Q4 語言 → Q5 區塊(依 Q1 主題用對應子清單)→ Q6 功能 → Q7 內容 → Q8 輸出與技術棧 → Q9 部署。
-- **風格 (Q10) 與主色/背景 (Q11) 留到最後**:不要一開始問;依「Q1 主題 + Q5 區塊 + Q6 功能 + Q7 內容」**主動建議 1–2 款風格與配色**給使用者確認/微調(**請使用者到線上風格實驗室 https://timmy-web-style.pages.dev/choose_style.html 即時預覽 10 款、調主色/背景並挑選喜歡的**;離線時退用本機 `examples/choose_style.html`)。
+- **訪談順序**:Q1 主題 → Q2 靜/動態 → Q3 深淺 → Q4 語言 → Q5 區塊(依 Q1 主題用對應子清單)→ Q6 功能 → Q7 內容 → Q8 輸出與技術棧 → Q9 部署 → Q10 AI 聊天助理(選用・預設啟用)。
+- **風格 (Q11) 與主色/背景 (Q12) 留到最後**:不要一開始問;依「Q1 主題 + Q5 區塊 + Q6 功能 + Q7 內容」**主動建議 1–2 款風格與配色**給使用者確認/微調(**請使用者到線上風格實驗室 https://timmy-web-style.pages.dev/choose_style.html 即時預覽 10 款、調主色/背景並挑選喜歡的**;離線時退用本機 `examples/choose_style.html`)。
 - **複製範本到目標專案再填**:skill 內 `web-spec.md` 是**乾淨範本,勿就地填寫**(避免污染正本)。把它複製成「正在做網頁的那個專案」的 `.claude/web-spec-<任務代稱>.md`(英文 kebab-case,如 `.claude/web-spec-portfolio.md`),再把對方的回答**勾選/填入該複本**(`- [x]` 選中、可複選;空白填文字)。一個專案做多個網頁就各存一份(檔名不同、不互相覆蓋)。
 - 問完、於「決議摘要」彙整後,再依結果進入下方組裝流程產出。
 
@@ -72,8 +72,8 @@ allowed-tools: Read, Write, Edit, Glob
 - **RWD**:桌機為右下浮動面板(寬 380、浮於 FAB 上方);**手機(≤480px)開啟時全螢幕**(滿版、去圓角、收起 FAB,靠 header ✕ 關;用 `inset:0` 避開 `100vh` 網址列破版)。
 - **供應商**:預設 **Gemini**(`gemini-2.5-flash`);另支援 **OpenAI**(`gpt-4o-mini`)、**Claude / Anthropic**(`claude-sonnet-4-6`)。Anthropic 瀏覽器直呼需 `anthropic-dangerous-direct-browser-access: true` 標頭(引擎已帶)。
 - **選模型(動態)**:填好金鑰後,模型下拉**自動向該供應商的 list-models API 抓取「該金鑰實際可用」的模型**(切供應商 / 改金鑰 / 按 ↻ 重抓);保留「自訂…」可手打任意 model id。
-- **推薦問題**:面板有「💡 推薦問題」鈕,**點了才**由 AI 依「目前對話 + 本頁標題/標題列」生成 3 個追問,呈現為可點 chips(點一下即送出);只在使用者點按時才花 API。
-- **可開關(per-page)**:**引擎預設全頁啟用**;某頁不要 chatbot 時,於該頁 `window.TW_CONFIG.chat = false` 即不注入(對應 `web-spec.md` Q6 功能未勾選 → 產出時設此旗標)。
+- **推薦問題**:由 AI 依「目前對話 + 本頁標題/標題列」生成 3 個追問,呈現為可點 chips(點一下即送出)。**預設「自動推薦」開啟**——每次 AI 回覆後自動更新追問(每輪多一次 API;設定面板「自動推薦問題」開關可即時關閉以省金鑰額度);亦可手動點「💡 推薦問題」鈕重生。
+- **可開關(per-page)**:**引擎預設全頁啟用**;某頁不要 chatbot 時,於該頁 `window.TW_CONFIG.chat = false` 即不注入(對應 `web-spec.md` Q10 選「不要」→ 產出時設此旗標)。
 - **沿用主題**:配色取自該頁 `--accent` / `--bg` + `[data-mode]`,自動適配 10 款與淺/深;標籤走 i18n(`chat.*` key,繁中 / English)。
 - **匯出**:下載乾淨 HTML 時**自動剝除**聊天 widget(視為預覽期工具,同設定面板);此剝除由引擎**集中處理**,不需逐頁改 export 邏輯。
 - **改它**:屬共用引擎一部分 → 只改正本 `assets/tw-engine.js`(`chat.*` 字典 + widget IIFE)再跑 `sync_engine.py`;**勿逐頁手改**。新風格頁若用新的「下載」鈕 id,於引擎 `EXPORT_TRIGGERS` 補一個即可。

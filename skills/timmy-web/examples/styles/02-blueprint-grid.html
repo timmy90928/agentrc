@@ -1481,7 +1481,7 @@
       'chat.greeting':'嗨!我是這個頁面的 AI 助理,有什麼想問的嗎?','chat.error':'發生錯誤:',
       'chat.validating':'驗證金鑰中…','chat.valid':'金鑰可用 ✓','chat.invalid':'金鑰無法使用:','chat.nokey_save':'請先填入 API 金鑰。',
       'chat.model_auto':'(填金鑰後自動載入清單)','chat.model_loading':'載入模型清單中…','chat.model_loadfail':'無法載入清單,可改用「自訂…」手動輸入','chat.model_custom':'自訂…','chat.model_custom_ph':'輸入 model id','chat.model_refresh':'重新載入模型',
-      'chat.suggest':'💡 推薦問題','chat.suggesting':'生成中…'
+      'chat.suggest':'💡 推薦問題','chat.suggesting':'生成中…','chat.autosuggest':'自動推薦問題'
     },
     'en': {
       'nav.overview':'Overview','nav.routes':'Routes','nav.gear':'Gear','nav.journal':'Journal',
@@ -1527,7 +1527,7 @@
       'chat.greeting':'Hi! I\'m the AI assistant for this page. Ask me anything.','chat.error':'Error: ',
       'chat.validating':'Verifying key…','chat.valid':'Key works ✓','chat.invalid':'Key not usable: ','chat.nokey_save':'Enter an API key first.',
       'chat.model_auto':'(enter key to auto-load list)','chat.model_loading':'Loading models…','chat.model_loadfail':'Could not load list — use “Custom…” to type one','chat.model_custom':'Custom…','chat.model_custom_ph':'Enter model id','chat.model_refresh':'Reload models',
-      'chat.suggest':'💡 Suggest questions','chat.suggesting':'Generating…'
+      'chat.suggest':'💡 Suggest questions','chat.suggesting':'Generating…','chat.autosuggest':'Auto-suggest questions'
     }
   };
 
@@ -1640,6 +1640,7 @@
   var state = load();
   state.provider = state.provider || 'gemini';
   state.turns = Array.isArray(state.turns) ? state.turns : [];
+  if (typeof state.autosuggest !== 'boolean') state.autosuggest = true;   // 預設開:每次回覆後自動更新推薦問題
 
   /* ---- 供應商(BYOK,瀏覽器直呼;規格查證日 2026-06-13)---- */
   var SYS = "You are a helpful, concise AI assistant embedded in a web page built with timmy-web. Reply in the user's language. Keep answers focused; use light Markdown.";
@@ -1751,6 +1752,8 @@
     '.twc-settings select,.twc-settings input{width:100%;padding:8px 10px;border:1px solid var(--twc-line);border-radius:9px;background:var(--twc-field);color:var(--twc-ink);font:inherit;outline:none}',
     '.twc-settings select:focus,.twc-settings input:focus{border-color:var(--twc-accent)}',
     '.twc-hint{font-size:11px;color:var(--twc-soft);line-height:1.5;margin:0}',
+    '.twc-check{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--twc-ink);cursor:pointer}',
+    '.twc-settings input[type=checkbox]{width:auto;flex:none;margin:0;accent-color:var(--twc-accent);cursor:pointer}',
     '.twc-modelrow{display:flex;gap:8px;align-items:stretch}',
     '.twc-modelrow .twc-model-sel{flex:1;min-width:0}',
     '.twc-mrefresh{flex:none;width:38px;border:1px solid var(--twc-line);border-radius:9px;background:var(--twc-field);color:var(--twc-soft);cursor:pointer;display:grid;place-items:center}',
@@ -1826,6 +1829,7 @@
           '</div>' +
           '<input class="twc-model twc-hide" type="text" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:chat.model_custom_ph" placeholder="輸入 model id">' +
           '<p class="twc-mnote"></p></div>' +
+        '<label class="twc-check"><input type="checkbox" class="twc-autosug"><span data-i18n="chat.autosuggest">自動推薦問題</span></label>' +
         '<p class="twc-hint" data-i18n="chat.keyhint"></p>' +
         '<div class="twc-saverow"><button class="twc-save" type="button" data-act="save" data-i18n="chat.save">儲存</button>' +
           '<span class="twc-status" role="status" aria-live="polite"></span></div>' +
@@ -1860,6 +1864,7 @@
   var elKey = root.querySelector('.twc-key');
   var elModel = root.querySelector('.twc-model');          // 自訂 model id(逃生口)
   var elModelSel = root.querySelector('.twc-model-sel');   // 動態模型下拉
+  var elAutoSug = root.querySelector('.twc-autosug');      // 「自動推薦問題」開關
   var modelCache = {};   // provider -> [model id]
   var loadedSig = null;  // 'provider|key':已抓過的識別,避免同金鑰重複請求
   var uiModel = state.model || '';  // 下拉「目前選擇」(獨立於已存 state.model;切供應商會重置、↻ 不丟失)
@@ -1897,6 +1902,7 @@
   function fillSettings(){
     elProv.value = curProv();
     elKey.value = state.key || '';
+    elAutoSug.checked = (state.autosuggest !== false);
     renderModelOptions(modelCache[curProv()]);
     loadModels();                       // 有金鑰即自動抓真實清單
   }
@@ -1908,6 +1914,8 @@
     else { elModel.classList.add('twc-hide'); uiModel = elModelSel.value; }
   });
   elModel.addEventListener('input', function(){ uiModel = elModel.value.trim(); });
+  // 「自動推薦問題」開關即時生效並持久化(獨立於「儲存」鈕,不需重新驗證金鑰)
+  elAutoSug.addEventListener('change', function(){ state.autosuggest = elAutoSug.checked; save(); });
 
   /* ---- 訊息 ---- */
   function addMsg(kind, text){
@@ -1950,6 +1958,7 @@
       if (ind.parentNode) ind.parentNode.removeChild(ind);
       reply = reply || '(empty response)';
       addMsg('bot', reply); state.turns.push({ role: 'assistant', content: reply }); persist();
+      if (state.autosuggest) suggestQuestions(true);   // 自動依對話更新推薦問題(silent:失敗不打擾)
     }).catch(function(err){
       if (ind.parentNode) ind.parentNode.removeChild(ind);
       addMsg('error', T('chat.error') + (err && err.message ? err.message : err));
@@ -1972,10 +1981,11 @@
     });
     elChips.style.display = qs.length ? 'flex' : 'none';
   }
-  function suggestQuestions(){
+  // silent=true(自動追問):無金鑰 / 失敗時不打擾(不開設定、不彈錯誤),僅靜默略過。
+  function suggestQuestions(silent){
     if (sugBusy) return;
     var key = (state.key || '').trim();
-    if (!key){ setOpen(true); root.setAttribute('data-settings', 'true'); addMsg('error', T('chat.needkey')); elKey.focus(); return; }
+    if (!key){ if (!silent){ setOpen(true); root.setAttribute('data-settings', 'true'); addMsg('error', T('chat.needkey')); elKey.focus(); } return; }
     sugBusy = true; elSug.disabled = true; elSug.textContent = T('chat.suggesting'); clearChips();
     var lang = (window.twLang ? window.twLang() : 'zh-Hant');
     var prompt = 'Based on this web page and our conversation, propose exactly 3 short, distinct questions the user is likely to want to ask next. '
@@ -1988,7 +1998,7 @@
       var qs = (text || '').split('\n').map(function(s){ return s.replace(/^[\s\-*\d.)、。]+/, '').trim(); }).filter(Boolean).slice(0, 3);
       renderChips(qs);
     }).catch(function(err){
-      addMsg('error', T('chat.error') + (err && err.message ? err.message : err));
+      if (!silent) addMsg('error', T('chat.error') + (err && err.message ? err.message : err));
     }).then(function(){ sugBusy = false; elSug.disabled = false; elSug.textContent = T('chat.suggest'); });
   }
 
