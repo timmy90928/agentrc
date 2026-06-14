@@ -67,13 +67,16 @@ allowed-tools: Read, Write, Edit, Glob
 每款風格頁右下角內建一顆浮動 icon,點開即 AI 聊天面板;由共用引擎注入(改一處、10 款同步,無需逐頁手改)。
 
 - **BYOK(Bring Your Own Key)**:使用者在面板 ⚙ 設定填自己的 API 金鑰,存 `localStorage['timmy-web-chat']`(**僅本機**),由**瀏覽器直接呼叫** LLM,不經任何中介伺服器。**嚴禁** hardcode 任何金鑰。
-- **儲存即驗證**:按「儲存」會先發一個最小請求驗證金鑰/模型是否可用,**通過才存**(綠 ✓)、失敗顯示原因不存(紅字)。
+- **金鑰即驗證**:填金鑰**失焦當下**就打 list-models 確認金鑰可用(綠 ✓ / 紅 ✗)、載入該金鑰可用模型,並**存入金鑰**;按「儲存」再以一次最小生成請求確認並存模型(失敗顯示原因不存)。
 - **開關**:右下角 FAB 即開關鈕,開啟時 icon 變 ✕、面板浮於其上;再點即關。
 - **RWD**:桌機為右下浮動面板(寬 380、浮於 FAB 上方);**手機(≤480px)開啟時全螢幕**(滿版、去圓角、收起 FAB,靠 header ✕ 關;用 `inset:0` 避開 `100vh` 網址列破版)。
 - **供應商**:預設 **Gemini**(`gemini-2.5-flash`);另支援 **OpenAI**(`gpt-4o-mini`)、**Claude / Anthropic**(`claude-sonnet-4-6`)。Anthropic 瀏覽器直呼需 `anthropic-dangerous-direct-browser-access: true` 標頭(引擎已帶)。
 - **選模型(動態)**:填好金鑰後,模型下拉**自動向該供應商的 list-models API 抓取「該金鑰實際可用」的模型**(切供應商 / 改金鑰 / 按 ↻ 重抓);保留「自訂…」可手打任意 model id。
-- **推薦問題**:由 AI 依「目前對話 + 本頁標題/標題列」生成 3 個追問,呈現為可點 chips(點一下即送出)。**預設「自動推薦」開啟**——每次 AI 回覆後自動更新追問(每輪多一次 API;設定面板「自動推薦問題」開關可即時關閉以省金鑰額度);亦可手動點「💡 推薦問題」鈕重生。
+- **推薦問題**:由 AI 依「目前對話 + 本頁標題/標題列」生成 3 個追問,呈現為可點 chips(點一下即送出)。
+  - **起手問題(cold start)**:金鑰驗證通過後自動備好第一組「依本頁內容」的起手問題,**快取進 localStorage(per-page)**;之後開啟即時顯示、不再花 API(換頁 / 換金鑰 / 手動 💡 才重生)。
+  - **自動追問**:**預設開**——每次 AI 回覆後自動更新追問(每輪多一次 API;設定面板「自動推薦問題」開關可即時關閉省額度)。**尚無建議時**輸入框上方才顯示「💡 推薦問題」鈕;**有建議後該鈕隱藏**,改由問題 chips 後的「🔄 換一批」(最後一顆)重生一組。
 - **可開關(per-page)**:**引擎預設全頁啟用**;某頁不要 chatbot 時,於該頁 `window.TW_CONFIG.chat = false` 即不注入(對應 `web-spec.md` Q10 選「不要」→ 產出時設此旗標)。
+- **per-page build-time 設定(`TW_CONFIG.chat*`,皆選用)**:`chatStarters`(字串陣列・作者預設起手問題,設了就用作者的、免 API)、`chatAutoSuggest`(true/false・自動推薦預設)、`chatProvider`(gemini/openai/anthropic)、`chatModel`(預設模型)。對應 `web-spec.md` Q10;未設則用引擎預設(Gemini / 自動推薦開 / AI 生成起手問題)。其餘(`chatTitle`/`chatGreeting`/`chatSystem` 人設 /`chatScope` 整站)仍規劃中。
 - **沿用主題**:配色取自該頁 `--accent` / `--bg` + `[data-mode]`,自動適配 10 款與淺/深;標籤走 i18n(`chat.*` key,繁中 / English)。
 - **匯出**:下載乾淨 HTML 時**自動剝除**聊天 widget(視為預覽期工具,同設定面板);此剝除由引擎**集中處理**,不需逐頁改 export 邏輯。
 - **改它**:屬共用引擎一部分 → 只改正本 `assets/tw-engine.js`(`chat.*` 字典 + widget IIFE)再跑 `sync_engine.py`;**勿逐頁手改**。新風格頁若用新的「下載」鈕 id,於引擎 `EXPORT_TRIGGERS` 補一個即可。

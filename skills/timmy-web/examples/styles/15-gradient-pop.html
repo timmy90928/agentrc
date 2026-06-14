@@ -953,7 +953,7 @@ tailwind.config={theme:{extend:{
       'chat.greeting':'嗨!我是這個頁面的 AI 助理,有什麼想問的嗎?','chat.error':'發生錯誤:',
       'chat.validating':'驗證金鑰中…','chat.valid':'金鑰可用 ✓','chat.invalid':'金鑰無法使用:','chat.nokey_save':'請先填入 API 金鑰。',
       'chat.model_auto':'(填金鑰後自動載入清單)','chat.model_loading':'載入模型清單中…','chat.model_loadfail':'無法載入清單,可改用「自訂…」手動輸入','chat.model_custom':'自訂…','chat.model_custom_ph':'輸入 model id','chat.model_refresh':'重新載入模型',
-      'chat.suggest':'💡 推薦問題','chat.suggesting':'生成中…','chat.autosuggest':'自動推薦問題'
+      'chat.suggest':'💡 推薦問題','chat.suggesting':'生成中…','chat.autosuggest':'自動推薦問題','chat.keybad':'金鑰無法使用 ✗','chat.another':'🔄 換一批'
     },
     'en': {
       'nav.overview':'Overview','nav.routes':'Routes','nav.gear':'Gear','nav.journal':'Journal',
@@ -999,7 +999,7 @@ tailwind.config={theme:{extend:{
       'chat.greeting':'Hi! I\'m the AI assistant for this page. Ask me anything.','chat.error':'Error: ',
       'chat.validating':'Verifying key…','chat.valid':'Key works ✓','chat.invalid':'Key not usable: ','chat.nokey_save':'Enter an API key first.',
       'chat.model_auto':'(enter key to auto-load list)','chat.model_loading':'Loading models…','chat.model_loadfail':'Could not load list — use “Custom…” to type one','chat.model_custom':'Custom…','chat.model_custom_ph':'Enter model id','chat.model_refresh':'Reload models',
-      'chat.suggest':'💡 Suggest questions','chat.suggesting':'Generating…','chat.autosuggest':'Auto-suggest questions'
+      'chat.suggest':'💡 Suggest questions','chat.suggesting':'Generating…','chat.autosuggest':'Auto-suggest questions','chat.keybad':'Key not usable ✗','chat.another':'🔄 Another set'
     }
   };
 
@@ -1099,8 +1099,11 @@ tailwind.config={theme:{extend:{
  * ========================================================================= */
 (function(){
   if (window.__twChatInit) return; window.__twChatInit = true;
-  // 該頁可停用 AI 助理:per-page 設 window.TW_CONFIG.chat = false 即不注入(web-spec.md 功能未勾選時用)。預設啟用。
+  // 該頁可停用 AI 助理:per-page 設 window.TW_CONFIG.chat = false 即不注入(web-spec.md Q10 選「不要」時用)。預設啟用。
   if (window.TW_CONFIG && window.TW_CONFIG.chat === false) return;
+  // per-page build-time 設定(web-spec.md Q10):chatStarters(字串陣列・作者預設起手問題)、
+  //   chatAutoSuggest(bool・自動推薦預設)、chatProvider / chatModel(預設供應商 / 模型)。皆選用,未設則用引擎預設。
+  var CFG = window.TW_CONFIG || {};
   var T = function(k){ return window.twT ? window.twT(k) : k; };
   var CKEY = 'timmy-web-chat';
   // 各風格頁的「下載乾淨 HTML」觸發鈕 id(集中於此,新頁若用新 id 在此補一個即可)
@@ -1110,9 +1113,10 @@ tailwind.config={theme:{extend:{
   function load(){ try{ return JSON.parse(localStorage.getItem(CKEY)) || {}; }catch(e){ return {}; } }
   function save(){ try{ localStorage.setItem(CKEY, JSON.stringify(state)); }catch(e){} }
   var state = load();
-  state.provider = state.provider || 'gemini';
+  state.provider = state.provider || CFG.chatProvider || 'gemini';        // build-time 預設供應商(curProv 仍會把無效值回退 gemini)
   state.turns = Array.isArray(state.turns) ? state.turns : [];
-  if (typeof state.autosuggest !== 'boolean') state.autosuggest = true;   // 預設開:每次回覆後自動更新推薦問題
+  if (!state.model && CFG.chatModel) state.model = CFG.chatModel;          // build-time 預設模型
+  if (typeof state.autosuggest !== 'boolean') state.autosuggest = (typeof CFG.chatAutoSuggest === 'boolean') ? CFG.chatAutoSuggest : true;  // build-time 自動推薦預設(否則開)
 
   /* ---- 供應商(BYOK,瀏覽器直呼;規格查證日 2026-06-13)---- */
   var SYS = "You are a helpful, concise AI assistant embedded in a web page built with timmy-web. Reply in the user's language. Keep answers focused; use light Markdown.";
@@ -1261,6 +1265,8 @@ tailwind.config={theme:{extend:{
     '.twc-chips{display:none;flex-wrap:wrap;gap:6px;padding:8px 10px 0}',
     '.twc-chip{text-align:left;padding:7px 11px;border:1px solid var(--twc-line);border-radius:12px;background:var(--twc-panel);color:var(--twc-ink);font:inherit;font-size:12.5px;line-height:1.4;cursor:pointer;max-width:100%}',
     '.twc-chip:hover{border-color:var(--twc-accent);background:color-mix(in srgb,var(--twc-accent) 7%,var(--twc-panel))}',
+    '.twc-more{align-self:flex-start;padding:7px 12px;border:1px solid var(--twc-accent);border-radius:12px;background:color-mix(in srgb,var(--twc-accent) 10%,var(--twc-panel));color:var(--twc-accent);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}',
+    '.twc-more:hover{background:color-mix(in srgb,var(--twc-accent) 18%,var(--twc-panel))}',
     '@media (max-width:480px){#tw-chatbot{right:12px;bottom:12px}',
     '#tw-chatbot[data-open="true"] .twc-fab{display:none}',          /* 手機全螢幕:收起 FAB,靠 header ✕ 關 */
     '.twc-panel{position:fixed;inset:0;width:auto;height:auto;border-radius:0;border-width:0}}'   /* inset:0 滿版,避開 100vh 網址列破版 */
@@ -1356,19 +1362,20 @@ tailwind.config={theme:{extend:{
     else { elModel.classList.add('twc-hide'); }
   }
   // 動態載入:用目前 provider + key 打 list-models;通過才填清單,失敗保留「自訂…」可手打
+  // 回傳 Promise:成功 resolve 模型陣列(可能為空陣列),失敗 / 無金鑰 resolve null(不 reject,呼叫端可據此判定金鑰是否可用)。
   function loadModels(force){
     var prov = curProv(); var key = elKey.value.trim();
-    if (!key){ setMNote('chat.model_auto'); renderModelOptions(modelCache[prov]); return; }
+    if (!key){ setMNote('chat.model_auto'); renderModelOptions(modelCache[prov]); return Promise.resolve(null); }
     var sig = prov + '|' + key;
-    if (!force && loadedSig === sig && modelCache[prov]){ renderModelOptions(modelCache[prov]); return; }
+    if (!force && loadedSig === sig && modelCache[prov]){ renderModelOptions(modelCache[prov]); return Promise.resolve(modelCache[prov]); }
     setMNote('chat.model_loading');
     var rb = root.querySelector('.twc-mrefresh'); if (rb) rb.disabled = true;
-    PROVIDERS[prov].list(key).then(function(listed){
+    return PROVIDERS[prov].list(key).then(function(listed){
       modelCache[prov] = listed; loadedSig = sig; renderModelOptions(listed);
-      setMNote(listed.length ? '' : 'chat.model_loadfail');
+      setMNote(listed.length ? '' : 'chat.model_loadfail'); if (rb) rb.disabled = false; return listed;
     }).catch(function(){
-      setMNote('chat.model_loadfail'); renderModelOptions(modelCache[prov]);
-    }).then(function(){ if (rb) rb.disabled = false; });
+      setMNote('chat.model_loadfail'); renderModelOptions(modelCache[prov]); if (rb) rb.disabled = false; return null;
+    });
   }
 
   function fillSettings(){
@@ -1380,7 +1387,15 @@ tailwind.config={theme:{extend:{
   }
   fillSettings();
   elProv.addEventListener('change', function(){ state.provider = elProv.value; uiModel = ''; loadModels(); });
-  elKey.addEventListener('change', function(){ if (elKey.value.trim()) loadModels(); });
+  // 填金鑰當下:打 list-models 同時「確認金鑰可用 ✓ / ✗」+ 載入該金鑰可用模型;成功 → 存入瀏覽器並立刻備好第一組起手問題(快取)。
+  elKey.addEventListener('change', function(){
+    var key = elKey.value.trim(); if (!key) return;
+    setStatus('', T('chat.validating'));
+    loadModels(true).then(function(listed){
+      if (listed){ state.key = key; save(); setStatus('ok', T('chat.valid')); primeStarters(); }
+      else { setStatus('err', T('chat.keybad')); }
+    });
+  });
   elModelSel.addEventListener('change', function(){
     if (elModelSel.value === '__custom__'){ elModel.classList.remove('twc-hide'); uiModel = elModel.value.trim(); elModel.focus(); }
     else { elModel.classList.add('twc-hide'); uiModel = elModelSel.value; }
@@ -1405,6 +1420,7 @@ tailwind.config={theme:{extend:{
     elMsgs.scrollTop = elMsgs.scrollHeight;
   }
   renderHistory();
+  showCachedStartersIfAny();   // 載入時:本頁若有快取的起手問題且尚無對話即顯示(0 API)
 
   var busy = false;
   function setBusy(b){ busy = b; elSend.disabled = b; }
@@ -1443,7 +1459,10 @@ tailwind.config={theme:{extend:{
       .map(function(h){ return (h.textContent || '').trim(); }).filter(Boolean).join(' / ');
     return ((document.title || '') + (hs ? ' — ' + hs : '')).slice(0, 400);
   }
-  function clearChips(){ elChips.innerHTML = ''; elChips.style.display = 'none'; }
+  function regenerate(){ if (!state.turns.length) primeStarters(true); else suggestQuestions(); }  // 「推薦問題」鈕 / chips 後的「換一批」共用
+  // 已有建議(chips)時就不顯示「💡 推薦問題」鈕(避免重複);改由問題後的「🔄 換一批」重生。
+  function syncSugbar(){ var b = root.querySelector('.twc-sugbar'); if (b) b.style.display = elChips.children.length ? 'none' : 'flex'; }
+  function clearChips(){ elChips.innerHTML = ''; elChips.style.display = 'none'; syncSugbar(); }
   function renderChips(qs){
     elChips.innerHTML = '';
     qs.forEach(function(q){
@@ -1451,14 +1470,16 @@ tailwind.config={theme:{extend:{
       c.addEventListener('click', function(){ clearChips(); elInput.value = q; autoGrow(); send(); });
       elChips.appendChild(c);
     });
-    elChips.style.display = qs.length ? 'flex' : 'none';
+    if (qs.length){   // 在問題 chips 後面接一顆「🔄 換一批」(重生一組)
+      var more = document.createElement('button'); more.type = 'button'; more.className = 'twc-more'; more.textContent = T('chat.another');
+      more.addEventListener('click', regenerate);
+      elChips.appendChild(more);
+    }
+    elChips.style.display = qs.length ? 'flex' : 'none'; syncSugbar();
   }
-  // silent=true(自動追問):無金鑰 / 失敗時不打擾(不開設定、不彈錯誤),僅靜默略過。
-  function suggestQuestions(silent){
-    if (sugBusy) return;
-    var key = (state.key || '').trim();
-    if (!key){ if (!silent){ setOpen(true); root.setAttribute('data-settings', 'true'); addMsg('error', T('chat.needkey')); elKey.focus(); } return; }
-    sugBusy = true; elSug.disabled = true; elSug.textContent = T('chat.suggesting'); clearChips();
+  function pageId(){ return (location.pathname || '/') + '#' + (document.title || ''); }   // 本頁識別(快取以此為 key)
+  // 共用:組 prompt → 請 AI → 回傳最多 3 個問題(陣列)。依「最近對話 + 本頁內容」。
+  function requestSuggestions(){
     var lang = (window.twLang ? window.twLang() : 'zh-Hant');
     var prompt = 'Based on this web page and our conversation, propose exactly 3 short, distinct questions the user is likely to want to ask next. '
       + 'Page context: "' + pageContext() + '". Reply with ONLY the 3 questions, each on its own line — no numbering, no bullets, no extra text. '
@@ -1466,12 +1487,42 @@ tailwind.config={theme:{extend:{
     var p = PROVIDERS[curProv()];
     var model = (state.model || '').trim() || p.model;
     var turns = state.turns.slice(-6).concat([{ role: 'user', content: prompt }]);
-    p.send(key, model, turns).then(function(text){
-      var qs = (text || '').split('\n').map(function(s){ return s.replace(/^[\s\-*\d.)、。]+/, '').trim(); }).filter(Boolean).slice(0, 3);
-      renderChips(qs);
-    }).catch(function(err){
+    return p.send((state.key || '').trim(), model, turns).then(function(text){
+      return (text || '').split('\n').map(function(s){ return s.replace(/^[\s\-*\d.)、。]+/, '').trim(); }).filter(Boolean).slice(0, 3);
+    });
+  }
+  // 手動 / 自動追問:依對話即時生成(ephemeral,不快取)。silent=true → 無金鑰 / 失敗時靜默略過。
+  function suggestQuestions(silent){
+    if (sugBusy) return;
+    if (!(state.key || '').trim()){ if (!silent){ setOpen(true); root.setAttribute('data-settings', 'true'); addMsg('error', T('chat.needkey')); elKey.focus(); } return; }
+    sugBusy = true; elSug.disabled = true; elSug.textContent = T('chat.suggesting'); clearChips();
+    requestSuggestions().then(renderChips).catch(function(err){
       if (!silent) addMsg('error', T('chat.error') + (err && err.message ? err.message : err));
     }).then(function(){ sugBusy = false; elSug.disabled = false; elSug.textContent = T('chat.suggest'); });
+  }
+  // 起手問題(cold start):有本頁快取就直接顯示(0 API);否則生成並快取進 localStorage。填金鑰確認後 / 載入時呼叫。
+  // 作者預設起手問題(TW_CONFIG.chatStarters,字串陣列・最多 4 個);設了就用作者的,免 API。
+  function cfgStarters(){
+    if (!Array.isArray(CFG.chatStarters)) return null;
+    var a = CFG.chatStarters.filter(function(s){ return typeof s === 'string' && s.trim(); }).slice(0, 4);
+    return a.length ? a : null;
+  }
+  function showCachedStartersIfAny(){
+    if (state.turns.length) return false;
+    var fixed = cfgStarters();
+    if (fixed){ renderChips(fixed); return true; }             // 作者固定起手優先
+    var c = state.starters;
+    if (c && c.page === pageId() && c.qs && c.qs.length){ renderChips(c.qs); return true; }
+    return false;
+  }
+  function primeStarters(force){
+    if (cfgStarters()){ showCachedStartersIfAny(); return; }    // 作者固定起手 → 顯示作者的,不 AI 生成/快取
+    if (!force && showCachedStartersIfAny()) return;            // 有快取 → 用快取,不重生
+    if (sugBusy || !(state.key || '').trim()) return;
+    sugBusy = true; elSug.disabled = true; elSug.textContent = T('chat.suggesting');
+    requestSuggestions().then(function(qs){
+      if (qs.length){ state.starters = { page: pageId(), qs: qs }; save(); if (!state.turns.length) renderChips(qs); }
+    }).catch(function(){}).then(function(){ sugBusy = false; elSug.disabled = false; elSug.textContent = T('chat.suggest'); });
   }
 
   function autoGrow(){ elInput.style.height = 'auto'; elInput.style.height = Math.min(elInput.scrollHeight, 120) + 'px'; }
@@ -1514,8 +1565,8 @@ tailwind.config={theme:{extend:{
     else if (act === 'close'){ setOpen(false); }
     else if (act === 'settings'){ var openS = root.getAttribute('data-settings') !== 'true'; root.setAttribute('data-settings', openS ? 'true' : 'false'); if (openS) loadModels(); }
     else if (act === 'reload-models'){ loadModels(true); }
-    else if (act === 'suggest'){ suggestQuestions(); }
-    else if (act === 'clear'){ state.turns = []; save(); renderHistory(); clearChips(); }
+    else if (act === 'suggest'){ regenerate(); }   // 冷啟動 → 重生並更新起手快取;對話中 → 即時追問
+    else if (act === 'clear'){ state.turns = []; save(); renderHistory(); clearChips(); showCachedStartersIfAny(); }
     else if (act === 'save'){ saveSettings(); }
   });
   root.querySelector('.twc-form').addEventListener('submit', function(e){ e.preventDefault(); send(); });
@@ -1529,7 +1580,7 @@ tailwind.config={theme:{extend:{
      靜態 data-i18n / data-i18n-attr 節點由引擎 applyI18n 自行重譯,毋須處理。 */
   document.addEventListener('click', function(e){
     if (e.target.closest && e.target.closest('[data-set-lang]')){
-      setTimeout(function(){ renderModelOptions(modelCache[curProv()]); setMNote(mnoteKey); }, 0);
+      setTimeout(function(){ renderModelOptions(modelCache[curProv()]); setMNote(mnoteKey); var m = elChips.querySelector('.twc-more'); if (m) m.textContent = T('chat.another'); }, 0);
     }
   });
 
