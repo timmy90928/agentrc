@@ -1,0 +1,233 @@
+{
+  "title": "口試簡報交付前檢查",
+  "target": "碩士口試簡報 deck(oral-defense slides)",
+  "checklist": "口試簡報交付前",
+  "date": "2026-06-21 14:30",
+  "model": "Claude Opus 4.8",
+  "intro": "本報告檢查碩士口試簡報於交付前是否就緒,涵蓋內容完整度、時間控制、視覺排版、問答準備與提交規定五大面向。第三次複查,聚焦尚未解決的超時與圖表來源問題。",
+  "items": [
+    {
+      "id": "content-1",
+      "category": "內容",
+      "title": "涵蓋研究問題 / 方法 / 結果 / 貢獻四大塊",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "投影片 p.2 路線圖四塊齊全",
+      "recommendation": ""
+    },
+    {
+      "id": "content-2",
+      "category": "內容",
+      "title": "每頁單一重點、無文字牆",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "p.12 整段貼上方法描述",
+      "recommendation": "拆成條列重點,細節留口頭補充。",
+      "fix": {
+        "where": "投影片 p.12",
+        "what": "方法段落改條列",
+        "from": "一整段 5 行敘述",
+        "to": "3 條重點 bullet"
+      }
+    },
+    {
+      "id": "content-3",
+      "category": "內容",
+      "title": "結論頁明確回應研究問題",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "p.23 逐一對應 RQ1–RQ3",
+      "recommendation": ""
+    },
+    {
+      "id": "time-1",
+      "category": "時間控制",
+      "title": "預講總長 ≤ 15 分鐘",
+      "status": "fail",
+      "severity": "high",
+      "evidence": "實測 18:30,超時 3.5 分",
+      "recommendation": "刪減文獻回顧頁數以壓回 15 分內。",
+      "fix": {
+        "where": "p.20–24 文獻回顧",
+        "what": "投影片頁數",
+        "from": "5 頁",
+        "to": "2 頁(濃縮成一張比較表)"
+      }
+    },
+    {
+      "id": "time-2",
+      "category": "時間控制",
+      "title": "各段時間配比合理(結果段最長)",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "結果段僅 4 分,偏短",
+      "recommendation": "把省下的時間移給結果與貢獻段。"
+    },
+    {
+      "id": "visual-1",
+      "category": "視覺 / 排版",
+      "title": "字級 ≥ 24pt、後排可讀",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "內文 28pt / 標題 40pt",
+      "recommendation": ""
+    },
+    {
+      "id": "visual-2",
+      "category": "視覺 / 排版",
+      "title": "所有圖表標註來源",
+      "status": "fail",
+      "severity": "medium",
+      "evidence": "p.15 圖 3.2 無出處",
+      "recommendation": "補上資料來源標註。",
+      "fix": {
+        "where": "p.15 圖 3.2 圖說",
+        "what": "來源標註",
+        "to": "(資料來源:本研究整理)"
+      }
+    },
+    {
+      "id": "visual-3",
+      "category": "視覺 / 排版",
+      "title": "母片 / 配色一致",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "全簡報套用系所母片",
+      "recommendation": ""
+    },
+    {
+      "id": "qa-1",
+      "category": "問答準備",
+      "title": "預想問題清單 ≥ 15 題且有備答",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "oral-qa-bank 共 18 題",
+      "recommendation": ""
+    },
+    {
+      "id": "qa-2",
+      "category": "問答準備",
+      "title": "對研究限制 / 效度威脅有備答",
+      "status": "warn",
+      "severity": "low",
+      "evidence": "外部效度一題尚無完整答法",
+      "recommendation": "補一段樣本代表性的說明。"
+    },
+    {
+      "id": "submit-1",
+      "category": "提交",
+      "title": "檔名 / 格式符合系所規定",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "PDF + 命名 學號_姓名_口試",
+      "recommendation": ""
+    },
+    {
+      "id": "submit-2",
+      "category": "提交",
+      "title": "於期限前上傳系統",
+      "status": "na",
+      "severity": "info",
+      "evidence": "提交日為 6/24,尚未到",
+      "recommendation": ""
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-06-19 22:10",
+      "total": 12,
+      "pass": 3,
+      "fail": 5,
+      "warn": 3,
+      "na": 1,
+      "info": 0,
+      "pass_rate": 27.3,
+      "statuses": {
+        "content-1": "pass",
+        "content-2": "fail",
+        "content-3": "warn",
+        "time-1": "fail",
+        "time-2": "fail",
+        "visual-1": "pass",
+        "visual-2": "fail",
+        "visual-3": "warn",
+        "qa-1": "fail",
+        "qa-2": "warn",
+        "submit-1": "pass",
+        "submit-2": "na"
+      }
+    },
+    {
+      "date": "2026-06-20 16:45",
+      "total": 12,
+      "pass": 4,
+      "fail": 3,
+      "warn": 4,
+      "na": 1,
+      "info": 0,
+      "pass_rate": 36.4,
+      "statuses": {
+        "content-1": "pass",
+        "content-2": "warn",
+        "content-3": "warn",
+        "time-1": "fail",
+        "time-2": "fail",
+        "visual-1": "pass",
+        "visual-2": "fail",
+        "visual-3": "pass",
+        "qa-1": "warn",
+        "qa-2": "warn",
+        "submit-1": "pass",
+        "submit-2": "na"
+      }
+    },
+    {
+      "date": "2026-06-21 14:30",
+      "total": 12,
+      "pass": 6,
+      "fail": 2,
+      "warn": 3,
+      "na": 1,
+      "info": 0,
+      "pass_rate": 54.5,
+      "statuses": {
+        "content-1": "pass",
+        "content-2": "warn",
+        "content-3": "pass",
+        "time-1": "fail",
+        "time-2": "warn",
+        "visual-1": "pass",
+        "visual-2": "fail",
+        "visual-3": "pass",
+        "qa-1": "pass",
+        "qa-2": "warn",
+        "submit-1": "pass",
+        "submit-2": "na"
+      }
+    }
+  ],
+  "delta": {
+    "fixed": [
+      "結論頁明確回應研究問題",
+      "預想問題清單 ≥ 15 題且有備答"
+    ],
+    "regressed": [],
+    "still_failing": [
+      "每頁單一重點、無文字牆",
+      "預講總長 ≤ 15 分鐘",
+      "各段時間配比合理(結果段最長)",
+      "所有圖表標註來源",
+      "對研究限制 / 效度威脅有備答"
+    ],
+    "has_prev": true
+  },
+  "summary": {
+    "total": 12,
+    "pass": 6,
+    "fail": 2,
+    "warn": 3,
+    "na": 1,
+    "info": 0,
+    "pass_rate": 54.5
+  }
+}

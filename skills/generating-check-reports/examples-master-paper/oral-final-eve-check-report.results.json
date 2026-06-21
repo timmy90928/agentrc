@@ -1,0 +1,109 @@
+{
+  "title": "口試前一日最終檢查",
+  "target": "口試當日整備(2026-06-24 口試)",
+  "checklist": "口試前最終整備",
+  "date": "2026-06-21 09:40",
+  "model": "Claude Opus 4.8",
+  "intro": "口試前一日的最終整備檢查,確認簡報上傳與備援、預講計時、問答清單與當日現場 / 交通安排皆已就緒。",
+  "items": [
+    {
+      "id": "deck-1",
+      "category": "簡報",
+      "title": "最終版簡報已上傳系統並自存一份",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "系統回條 + 本機 PDF",
+      "recommendation": ""
+    },
+    {
+      "id": "deck-2",
+      "category": "簡報",
+      "title": "備援:USB + 雲端 + PDF 三路",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "USB / Drive / 信箱各一份",
+      "recommendation": ""
+    },
+    {
+      "id": "talk-1",
+      "category": "講演",
+      "title": "預講計時達標(≤ 15 分)",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "末次預講 14:20",
+      "recommendation": ""
+    },
+    {
+      "id": "talk-2",
+      "category": "講演",
+      "title": "開場與結論可脫稿",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "開場 / 結論已熟記",
+      "recommendation": ""
+    },
+    {
+      "id": "qa-1",
+      "category": "問答",
+      "title": "問答清單已列印、重點標記",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "18 題清單列印,紅筆標記弱項",
+      "recommendation": ""
+    },
+    {
+      "id": "logi-1",
+      "category": "現場",
+      "title": "投影 / 轉接 / 簡報筆現場測試",
+      "status": "warn",
+      "severity": "low",
+      "evidence": "需當日早到測 HDMI 轉接",
+      "recommendation": "提早 30 分鐘到場測設備。"
+    },
+    {
+      "id": "logi-2",
+      "category": "現場",
+      "title": "服裝 / 交通 / 報到時間確認",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "正裝備妥;預計提早 40 分到",
+      "recommendation": ""
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-06-21 09:40",
+      "total": 7,
+      "pass": 6,
+      "fail": 0,
+      "warn": 1,
+      "na": 0,
+      "info": 0,
+      "pass_rate": 85.7,
+      "statuses": {
+        "deck-1": "pass",
+        "deck-2": "pass",
+        "talk-1": "pass",
+        "talk-2": "pass",
+        "qa-1": "pass",
+        "logi-1": "warn",
+        "logi-2": "pass"
+      }
+    }
+  ],
+  "delta": {
+    "fixed": [],
+    "regressed": [],
+    "still_failing": [],
+    "has_prev": false
+  },
+  "summary": {
+    "total": 7,
+    "pass": 6,
+    "fail": 0,
+    "warn": 1,
+    "na": 0,
+    "info": 0,
+    "pass_rate": 85.7
+  }
+}
