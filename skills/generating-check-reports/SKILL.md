@@ -31,7 +31,8 @@ allowed-tools: Read, Write, Edit, Glob, Bash
    - `severity` ∈ `critical` / `high` / `medium` / `low` / `info`(僅 fail/warn 需在意);
    - `evidence`:具體證據(`file:line`、指令輸出摘要),**勿空泛**;
    - `recommendation`:未過項目給可執行建議;
-   - `fix`(選用,**修正涉及改文字 / 設定 / 值時務必填**):精確指出**哪裡 (`where`)、什麼 (`what`)、改成什麼 (`from` → `to`)**。報告會渲染成醒目的 before → after,不要只留一句模糊建議。**論文 / 文件修改**等同字多次出現的場景,另補 `before` / `after` 前後文,報告會以「原文 / 改為」兩行把改動嵌進上下文高亮(見 `references/results-schema.md`)。
+   - `fix`(選用,**修正涉及改文字 / 設定 / 值時務必填**):精確指出**哪裡 (`where`)、什麼 (`what`)、改成什麼 (`from` → `to`)**。報告會渲染成醒目的 before → after,不要只留一句模糊建議。
+     - **規則:只要被改的字「前後還有其他文字」(它是句子 / 行裡的一段,而非獨立完整的值),就一定補 `before` / `after` 前後文**——報告會以「原文 / 改為」兩行把改動嵌進上下文高亮,避免同字多次出現時定位不到(論文 / 文件修改尤其必要)。只有「整行 / 整個值」被替換、前後無其他字時才可省略 before/after(見 `references/results-schema.md`)。
 4. **組裝 results JSON**:依 `references/results-schema.md` 的 schema 寫出 `title / target / checklist / date / items[]`。
    **`date` 由你填入對話當下時間**(render script 不取系統時間);可只到日 `YYYY-MM-DD`,或細到分 `YYYY-MM-DD HH:MM`。**此字串也是歷史去重鍵**:同日多次重檢想各留一個趨勢點就帶上時間(不同時間戳→新增點;相同→覆寫)。
    **`model` 填你自己的 AI 模型名稱**(如 `Claude Opus 4.8`),會顯示在報告頁尾標明由哪個模型產生。

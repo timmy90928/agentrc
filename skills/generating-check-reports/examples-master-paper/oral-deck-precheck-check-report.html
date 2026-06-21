@@ -251,7 +251,6 @@
       <h1 class="title" id="r-title">—</h1>
       <div class="meta">
         <span>目標 <b id="r-target">—</b></span>
-        <span>清單 <b id="r-checklist">—</b></span>
         <span>檢查時間 <b id="r-date">—</b></span>
         <span id="r-count-wrap" hidden>檢查次數 <b id="r-count">—</b></span>
       </div>
@@ -352,7 +351,6 @@
   // ── 報頭 ──
   byId("r-title").textContent = D.title || "檢查報告";
   byId("r-target").textContent = D.target || "—";
-  byId("r-checklist").textContent = D.checklist || "—";
   byId("r-date").textContent = D.date || "—";
   var nChecks = Array.isArray(D.history) ? D.history.length : 0;
   if (nChecks > 0) { byId("r-count").textContent = "第 " + nChecks + " 次"; byId("r-count-wrap").hidden = false; }
