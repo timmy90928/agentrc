@@ -84,6 +84,13 @@
       "status": "fail",
       "severity": "high",
       "evidence": "目前分支 = main",
+      "tags": [
+        "交付阻擋",
+        {
+          "label": "待處理",
+          "color": "#e11d48"
+        }
+      ],
       "recommendation": "切到 feat/<kebab-desc> 分支再提交;勿直接在 main 動工。",
       "fix": {
         "where": "當前 git 分支",

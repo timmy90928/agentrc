@@ -14,7 +14,8 @@
   - 把更新後的 history/delta「寫回 <results.json>」(狀態正本),再渲染 HTML(原地覆寫 <output.html>)。
   - → 同一(目標 × checklist)永遠只有一份 results.json + 一份 HTML,重檢覆寫、不產生 v2/v3。
 
-通過率定義: pass_rate = pass / (pass + fail + warn) * 100,排除 na / info(無法評分項)。
+通過率定義: pass_rate = (角色=pass 的項) / (角色 ∈ {pass,fail} 的項) * 100;角色=neutral(na/info 及自訂中性狀態)不計分。
+自訂狀態: 頂層 `statuses` 可定義新狀態 {label,color,role};role∈pass/fail/neutral 決定計分與未過判定。
 不呼叫系統時間: 報告日期一律取自 results.json 的 "date"(由模型於檢查時填入)。
 """
 import json
@@ -26,9 +27,32 @@ SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL_DIR / "assets" / "report-template.html"
 PLACEHOLDER = '"__REPORT_DATA__"'  # 模板內唯一佔位符(含外層雙引號)
 
-SCORED = ("pass", "fail", "warn")      # 計入通過率的狀態
-FAILING = ("fail", "warn")             # 視為「未過」的狀態(供 delta 用)
-VALID_STATUS = ("pass", "fail", "warn", "na", "info")
+# 內建狀態的「角色」:pass=算通過、fail=算未過、neutral=不計分(像 na/info)。
+# warn 角色為 fail(計入分母、視為未過),但語意較軟。
+BUILTIN_ROLES = {"pass": "pass", "fail": "fail", "warn": "fail", "na": "neutral", "info": "neutral"}
+ROLE_VALUES = ("pass", "fail", "neutral")
+
+
+def build_roles(data: dict) -> dict:
+    """status-key -> role(pass/fail/neutral)。內建 5 種 + 使用者 `statuses` 自訂的新狀態。"""
+    roles = dict(BUILTIN_ROLES)
+    defs = data.get("statuses")
+    if isinstance(defs, dict):
+        for k, d in defs.items():
+            r = (d or {}).get("role", "neutral")
+            if r not in ROLE_VALUES:
+                print(f"[WARN] 自訂 status {k!r} 的 role={r!r} 非法,改為 neutral", file=sys.stderr)
+                r = "neutral"
+            roles[k] = r
+    return roles
+
+
+def is_fail(roles: dict, st) -> bool:
+    return roles.get(st) == "fail"
+
+
+def is_pass(roles: dict, st) -> bool:
+    return roles.get(st) == "pass"
 
 
 def die(msg: str) -> "None":
@@ -51,21 +75,22 @@ def load_json(path: Path) -> dict:
     return data
 
 
-def count_items(items: list) -> dict:
-    """由 items[] 算各狀態計數與通過率。未知 status 視為 info 並警告。"""
-    counts = {s: 0 for s in VALID_STATUS}
+def count_items(items: list, roles: dict) -> dict:
+    """由 items[] 算各狀態計數與通過率(依角色)。未知 status(無內建亦無自訂)視為 info。"""
+    counts = {}
     for it in items:
         st = it.get("status", "info")
-        if st not in counts:
-            print(f"[WARN] 未知 status {st!r}(item id={it.get('id')}),計為 info", file=sys.stderr)
+        if st not in roles:
+            print(f"[WARN] 未知 status {st!r}(item id={it.get('id')});未在 statuses 定義,計為 info", file=sys.stderr)
             st = "info"
-        counts[st] += 1
-    scored = sum(counts[s] for s in SCORED)
-    pass_rate = round(counts["pass"] / scored * 100, 1) if scored else 0.0
+        counts[st] = counts.get(st, 0) + 1
+    scored = sum(n for s, n in counts.items() if roles.get(s) in ("pass", "fail"))
+    passing = sum(n for s, n in counts.items() if roles.get(s) == "pass")
+    pass_rate = round(passing / scored * 100, 1) if scored else 0.0
     return {
         "total": len(items),
-        "pass": counts["pass"], "fail": counts["fail"], "warn": counts["warn"],
-        "na": counts["na"], "info": counts["info"],
+        "pass": counts.get("pass", 0), "fail": counts.get("fail", 0), "warn": counts.get("warn", 0),
+        "na": counts.get("na", 0), "info": counts.get("info", 0),
         "pass_rate": pass_rate,
     }
 
@@ -85,8 +110,8 @@ def title_of(items: list, item_id: str) -> str:
     return item_id
 
 
-def compute_delta(items: list, cur: dict, prev: "dict|None") -> dict:
-    """對照上一筆 run 的逐項狀態,分類出 fixed / regressed / still_failing(各為標題清單)。"""
+def compute_delta(items: list, cur: dict, prev: "dict|None", roles: dict) -> dict:
+    """對照上一筆 run 的逐項狀態(依角色),分類出 fixed / regressed / still_failing。"""
     if not prev:
         return {"fixed": [], "regressed": [], "still_failing": [], "has_prev": False}
     fixed, regressed, still = [], [], []
@@ -94,16 +119,16 @@ def compute_delta(items: list, cur: dict, prev: "dict|None") -> dict:
         was = prev.get(iid)
         if was is None:
             continue  # 新增項,不算進 delta
-        if was in FAILING and st == "pass":
+        if is_fail(roles, was) and is_pass(roles, st):
             fixed.append(title_of(items, iid))
-        elif was == "pass" and st in FAILING:
+        elif is_pass(roles, was) and is_fail(roles, st):
             regressed.append(title_of(items, iid))
-        elif was in FAILING and st in FAILING:
+        elif is_fail(roles, was) and is_fail(roles, st):
             still.append(title_of(items, iid))
     return {"fixed": fixed, "regressed": regressed, "still_failing": still, "has_prev": True}
 
 
-def build_timeline(history: list, id_title: dict) -> list:
+def build_timeline(history: list, id_title: dict, roles: dict) -> list:
     """走訪整段 history(每筆含 statuses),逐次算出「該次相對前次」的變更:
        fixed(修好)/ new_issues(新發現問題)/ still_failing(仍未解)。供歷史頁畫成時間軸。"""
     tl = []
@@ -114,15 +139,15 @@ def build_timeline(history: list, id_title: dict) -> list:
         for iid, st in cur.items():
             title = id_title.get(iid, iid)
             if prev is None:
-                if st in FAILING:
+                if is_fail(roles, st):
                     new_issues.append(title)          # 初次檢查:當下未過項即「初次發現」
             else:
                 was = prev.get(iid)
-                if was in FAILING and st == "pass":
+                if is_fail(roles, was) and is_pass(roles, st):
                     fixed.append(title)
-                elif was not in FAILING and st in FAILING:
+                elif not is_fail(roles, was) and is_fail(roles, st):
                     new_issues.append(title)          # 上次未失敗(含新增項)→ 本次失敗
-                elif was in FAILING and st in FAILING:
+                elif is_fail(roles, was) and is_fail(roles, st):
                     still.append(title)
         tl.append({
             "date": e.get("date", ""), "pass_rate": e.get("pass_rate", 0),
@@ -197,11 +222,12 @@ def main():
 
     data = load_json(results_path)
     items = data["items"]
+    roles = build_roles(data)  # 內建 + 自訂 status 的角色(pass/fail/neutral)
 
-    summary = count_items(items)
+    summary = count_items(items, roles)
     cur_status = status_map(items)
     prev_status = update_history(data, summary, cur_status)
-    data["delta"] = compute_delta(items, cur_status, prev_status)
+    data["delta"] = compute_delta(items, cur_status, prev_status, roles)
     data["summary"] = summary  # 注入供模板總覽用(與 history[-1] 計數一致)
 
     # 寫回狀態正本(含累積 history / delta),再渲染 HTML 視圖。
@@ -210,7 +236,7 @@ def main():
     # 逐次變更時間軸(由 history 的 statuses 鏈計算;供歷史頁呈現)。
     id_title = {str(it.get("id", f"#{i}")): it.get("title", str(it.get("id", f"#{i}")))
                 for i, it in enumerate(items)}
-    timeline = build_timeline(data["history"], id_title)
+    timeline = build_timeline(data["history"], id_title, roles)
 
     # 每項「自第幾次起為此狀態」(用含 statuses 的 data.history 計算)。
     since = compute_since(items, data["history"])
@@ -220,6 +246,7 @@ def main():
     for h in view.get("history", []):
         h.pop("statuses", None)
     view["timeline"] = timeline
+    view["roles"] = roles  # 供模板判定狀態角色(failing / passing / neutral)
     hist = data["history"]
     for idx, it in enumerate(view.get("items", [])):
         if idx < len(since) and since[idx]:

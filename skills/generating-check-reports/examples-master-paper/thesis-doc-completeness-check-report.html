@@ -171,6 +171,7 @@
   .it-title{font-weight:500;color:var(--text)}
   .it-id{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--faint);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:0 6px}
   .sev-tag{font-size:11px;font-weight:500}
+  .tag{font-size:11px;border:1px solid var(--line-2);border-radius:99px;padding:0 9px;color:var(--muted);background:var(--surface-2);line-height:1.8;white-space:nowrap}
   .it-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:6px}
   .since{font-size:12px;font-weight:500}
   .since.ok{color:var(--pass-fg)} .since.bad{color:var(--warn-fg)}
@@ -233,7 +234,7 @@
 </head>
 <body>
 <!-- 結果資料由 render_report.py 注入(取代下方佔位符) -->
-<script>window.REPORT_DATA = {"title": "論文文件完整性檢查", "target": "碩士論文定稿 thesis.docx", "checklist": "文件完整性", "date": "2026-06-21 11:05", "model": "Claude Opus 4.8", "intro": "本報告檢查碩士論文定稿的文件完整性,涵蓋章節結構、引用格式 (APA 7)、圖表編號、數據一致與附錄是否齊備,作為送印前的最後把關。", "items": [{"id": "abs-1", "category": "章節完整", "title": "中英文摘要齊備且對應", "status": "pass", "severity": "medium", "evidence": "中摘 p.iii / 英摘 p.iv", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["pass"]}, {"id": "abs-2", "category": "章節完整", "title": "六章結構齊全(緒論→結論)", "status": "pass", "severity": "high", "evidence": "Ch.1–6 目次完整", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["pass"]}, {"id": "ref-1", "category": "引用", "title": "參考文獻格式一致(APA 7)", "status": "fail", "severity": "medium", "evidence": "第 3、7 筆期刊名未斜體、缺卷期", "recommendation": "統一為 APA 7 期刊格式。", "fix": {"where": "參考文獻 第 3、7 筆", "what": "APA 期刊條目", "from": "期刊名正體、無卷期", "to": "期刊名斜體 + 卷(期), 頁碼"}, "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["fail"]}, {"id": "ref-2", "category": "引用", "title": "內文引用皆出現在文獻清單", "status": "warn", "severity": "medium", "evidence": "Chen (2024) 內文有、清單缺", "recommendation": "補上 Chen (2024) 條目或移除引用。", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["warn"]}, {"id": "data-1", "category": "數據一致", "title": "內文數值與分析表一致", "status": "fail", "severity": "high", "evidence": "4.2 節內文寫 18%,但表 4.3 為 20%", "recommendation": "更正內文數值,與表 4.3 一致。", "fix": {"where": "p.42 第 2 段", "what": "A 組通過率數值", "before": "實驗結果顯示 A 組的通過率為 ", "from": "18%", "to": "20%", "after": ",顯著高於對照組。"}, "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["fail"]}, {"id": "fig-1", "category": "格式", "title": "圖表編號連續且有標題", "status": "warn", "severity": "low", "evidence": "圖 4.3 後跳號至圖 4.5", "recommendation": "重編圖號使其連續。", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["warn"]}, {"id": "fmt-1", "category": "格式", "title": "頁碼 / 頁首頁尾符合系所範本", "status": "pass", "severity": "low", "evidence": "正文起阿拉伯頁碼,符合範本", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["pass"]}, {"id": "apx-1", "category": "附錄", "title": "致謝 / 授權頁 / 口試委員審定書", "status": "na", "severity": "info", "evidence": "審定書待口試後補簽", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["na"]}], "history": [{"date": "2026-06-21 11:05", "total": 8, "pass": 3, "fail": 2, "warn": 2, "na": 1, "info": 0, "pass_rate": 42.9}], "delta": {"fixed": [], "regressed": [], "still_failing": [], "has_prev": false}, "summary": {"total": 8, "pass": 3, "fail": 2, "warn": 2, "na": 1, "info": 0, "pass_rate": 42.9}, "timeline": [{"date": "2026-06-21 11:05", "pass_rate": 42.9, "pass": 3, "fail": 2, "warn": 2, "fixed": [], "new_issues": ["參考文獻格式一致(APA 7)", "內文引用皆出現在文獻清單", "內文數值與分析表一致", "圖表編號連續且有標題"], "still_failing": [], "is_first": true}]};</script>
+<script>window.REPORT_DATA = {"title": "論文文件完整性檢查", "target": "碩士論文定稿 thesis.docx", "checklist": "文件完整性", "date": "2026-06-21 11:05", "model": "Claude Opus 4.8", "intro": "本報告檢查碩士論文定稿的文件完整性,涵蓋章節結構、引用格式 (APA 7)、圖表編號、數據一致與附錄是否齊備,作為送印前的最後把關。", "items": [{"id": "abs-1", "category": "章節完整", "title": "中英文摘要齊備且對應", "status": "pass", "severity": "medium", "evidence": "中摘 p.iii / 英摘 p.iv", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["pass"]}, {"id": "abs-2", "category": "章節完整", "title": "六章結構齊全(緒論→結論)", "status": "pass", "severity": "high", "evidence": "Ch.1–6 目次完整", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["pass"]}, {"id": "ref-1", "category": "引用", "title": "參考文獻格式一致(APA 7)", "status": "fail", "severity": "medium", "evidence": "第 3、7 筆期刊名未斜體、缺卷期", "recommendation": "統一為 APA 7 期刊格式。", "fix": {"where": "參考文獻 第 3、7 筆", "what": "APA 期刊條目", "from": "期刊名正體、無卷期", "to": "期刊名斜體 + 卷(期), 頁碼"}, "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["fail"]}, {"id": "ref-2", "category": "引用", "title": "內文引用皆出現在文獻清單", "status": "warn", "severity": "medium", "evidence": "Chen (2024) 內文有、清單缺", "recommendation": "補上 Chen (2024) 條目或移除引用。", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["warn"]}, {"id": "data-1", "category": "數據一致", "title": "內文數值與分析表一致", "status": "fail", "severity": "high", "evidence": "4.2 節內文寫 18%,但表 4.3 為 20%", "recommendation": "更正內文數值,與表 4.3 一致。", "fix": {"where": "p.42 第 2 段", "what": "A 組通過率數值", "before": "實驗結果顯示 A 組的通過率為 ", "from": "18%", "to": "20%", "after": ",顯著高於對照組。"}, "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["fail"]}, {"id": "fig-1", "category": "格式", "title": "圖表編號連續且有標題", "status": "warn", "severity": "low", "evidence": "圖 4.3 後跳號至圖 4.5", "recommendation": "重編圖號使其連續。", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["warn"]}, {"id": "fmt-1", "category": "格式", "title": "頁碼 / 頁首頁尾符合系所範本", "status": "pass", "severity": "low", "evidence": "正文起阿拉伯頁碼,符合範本", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["pass"]}, {"id": "apx-1", "category": "附錄", "title": "致謝 / 授權頁 / 口試委員審定書", "status": "na", "severity": "info", "evidence": "審定書待口試後補簽", "recommendation": "", "since": {"n": 1, "date": "2026-06-21 11:05"}, "track": ["na"]}], "history": [{"date": "2026-06-21 11:05", "total": 8, "pass": 3, "fail": 2, "warn": 2, "na": 1, "info": 0, "pass_rate": 42.9}], "delta": {"fixed": [], "regressed": [], "still_failing": [], "has_prev": false}, "summary": {"total": 8, "pass": 3, "fail": 2, "warn": 2, "na": 1, "info": 0, "pass_rate": 42.9}, "timeline": [{"date": "2026-06-21 11:05", "pass_rate": 42.9, "pass": 3, "fail": 2, "warn": 2, "fixed": [], "new_issues": ["參考文獻格式一致(APA 7)", "內文引用皆出現在文獻清單", "內文數值與分析表一致", "圖表編號連續且有標題"], "still_failing": [], "is_first": true}], "roles": {"pass": "pass", "fail": "fail", "warn": "fail", "na": "neutral", "info": "neutral"}};</script>
 
 <div class="wrap">
 
@@ -343,10 +344,31 @@
   var STATUS = { pass: "通過", fail: "失敗", warn: "提醒", na: "N/A", info: "參考" };
   var SEVERITY = { critical: "嚴重", high: "高", medium: "中", low: "低", info: "資訊" };
   var SEVVAR = { critical: "--sev-critical", high: "--sev-high", medium: "--sev-medium", low: "--sev-low", info: "--sev-info" };
+  var TABS = { overview: "總覽", current: "本次結果", history: "歷史趨勢" };
+  // 選用 labels 覆寫:只蓋既有鍵,沒給就用預設(安全閥,避免冒出不想要的固定字)
+  var L = (D.labels && typeof D.labels === "object") ? D.labels : {};
+  function mergeLabels(target, over) { if (over) Object.keys(over).forEach(function (k) { if (k in target && over[k] != null && over[k] !== "") target[k] = over[k]; }); }
+  mergeLabels(STATUS, L.status); mergeLabels(SEVERITY, L.severity); mergeLabels(TABS, L.tabs);
+  // 自訂新狀態值:statuses[key] = {label,color,role};加入 STATUS(供顯示)與角色判定
+  var BUILTIN = { pass: 1, fail: 1, warn: 1, na: 1, info: 1 };
+  var STATUSDEFS = (D.statuses && typeof D.statuses === "object") ? D.statuses : {};
+  Object.keys(STATUSDEFS).forEach(function (k) { var d = STATUSDEFS[k] || {}; if (d.label) STATUS[k] = d.label; });
+  var ROLES = (D.roles && typeof D.roles === "object") ? D.roles
+    : { pass: "pass", fail: "fail", warn: "fail", na: "neutral", info: "neutral" };
+  var roleOf = function (k) { return ROLES[k] || "neutral"; };
+  var isFail = function (k) { return roleOf(k) === "fail"; };
+  var isPass = function (k) { return roleOf(k) === "pass"; };
+  var dotColor = function (k) { return BUILTIN[k] ? "var(--" + k + "-dot)" : ((STATUSDEFS[k] && STATUSDEFS[k].color) || "#64748b"); };
   var slabel = function (k) { return STATUS[k] || STATUS.info; };
-  var skey = function (k) { return STATUS[k] ? k : "info"; };
+  var skey = function (k) { return STATUS.hasOwnProperty(k) ? k : "info"; };
   var sevlabel = function (k) { return SEVERITY[k] || SEVERITY.info; };
   var sevvar = function (k) { return SEVVAR[k] || SEVVAR.info; };
+  // 套用分頁名(按鈕 + 列印標題)與通過/失敗/提醒統計卡標
+  Object.keys(TABS).forEach(function (tk) {
+    var btn = document.querySelector('.tab[data-tab="' + tk + '"]'); if (btn) btn.textContent = TABS[tk];
+    var pt = document.querySelector('[data-panel="' + tk + '"] .print-only'); if (pt) pt.textContent = TABS[tk];
+  });
+  ["pass", "fail", "warn"].forEach(function (sk) { var c = document.querySelector('.stat.' + sk + ' .cap'); if (c) c.textContent = slabel(sk); });
 
   // ── 報頭 ──
   byId("r-title").textContent = D.title || "檢查報告";
@@ -406,7 +428,7 @@
 
   // 嚴重度分佈
   var sevCount = {}; Object.keys(SEVERITY).forEach(function (k) { sevCount[k] = 0; });
-  items.forEach(function (i) { if (i.status === "fail" || i.status === "warn") sevCount[i.severity in SEVERITY ? i.severity : "info"]++; });
+  items.forEach(function (i) { if (isFail(skey(i.status))) sevCount[i.severity in SEVERITY ? i.severity : "info"]++; });
   var sevMax = Math.max(1, Object.keys(sevCount).reduce(function (m, k) { return Math.max(m, sevCount[k]); }, 0));
   var sevHtml = ["critical", "high", "medium", "low", "info"].map(function (k) {
     var n = sevCount[k], hit = n > 0;
@@ -429,8 +451,8 @@
     }).join("");
   } else { byId("o-delta").hidden = true; byId("o-delta-none").hidden = false; }
 
-  // 需優先處理:critical / high 的失敗項(嚴重者在前)
-  var priority = items.filter(function (i) { return i.status === "fail" && (i.severity === "critical" || i.severity === "high"); })
+  // 需優先處理:critical / high 的硬失敗項(角色 fail 但非 warn;含自訂 fail 狀態),嚴重者在前
+  var priority = items.filter(function (i) { var k = skey(i.status); return isFail(k) && k !== "warn" && (i.severity === "critical" || i.severity === "high"); })
     .sort(function (a, b) { return (a.severity === "critical" ? 0 : 1) - (b.severity === "critical" ? 0 : 1); });
   if (priority.length) {
     byId("o-priority-n").textContent = "(" + priority.length + " 項)";
@@ -469,9 +491,12 @@
   var checked = loadChecks();
 
   var activeFilter = "all", query = "", sevFilter = null, catFilter = null;
-  function counts(k) { return items.filter(function (i) { return i.status === k; }).length; }
+  function counts(k) { return items.filter(function (i) { return skey(i.status) === k; }).length; }
   function renderFilters() {
-    var defs = [["all", "全部 " + items.length]].concat(["fail", "warn", "pass", "na", "info"].map(function (k) { return [k, slabel(k) + " " + counts(k)]; }));
+    // 內建 fail/warn/pass 永遠顯示;自訂狀態(有出現的)插在中間;na/info 殿後
+    var customPresent = Object.keys(STATUSDEFS).filter(function (k) { return !BUILTIN[k] && counts(k) > 0; });
+    var order = ["fail", "warn", "pass"].concat(customPresent).concat(["na", "info"]);
+    var defs = [["all", "全部 " + items.length]].concat(order.map(function (k) { return [k, slabel(k) + " " + counts(k)]; }));
     byId("c-filters").innerHTML = defs.map(function (f) {
       return '<button class="filterbtn' + (activeFilter === f[0] ? " active" : "") + '" data-f="' + f[0] + '">' + esc(f[1]) + '</button>';
     }).join("");
@@ -479,12 +504,13 @@
       b.onclick = function () { activeFilter = b.getAttribute("data-f"); sevFilter = null; catFilter = null; renderFilters(); renderChips(); renderGroups(); };
     });
   }
+  function tagText(i) { return Array.isArray(i.tags) ? i.tags.map(function (t) { return (t && typeof t === "object") ? (t.label || "") : t; }).join(" ") : ""; }
   function matchQuery(i) {
     if (!query) return true;
-    return ((i.title || "") + " " + (i.evidence || "") + " " + (i.recommendation || "") + " " + (i.category || "")).toLowerCase().indexOf(query) >= 0;
+    return ((i.title || "") + " " + (i.evidence || "") + " " + (i.recommendation || "") + " " + (i.category || "") + " " + tagText(i)).toLowerCase().indexOf(query) >= 0;
   }
-  // 嚴重度篩選只對未過項(fail/warn)有意義,與總覽「未過項目嚴重度分佈」一致
-  function matchSev(i) { return !sevFilter || (i.severity === sevFilter && (i.status === "fail" || i.status === "warn")); }
+  // 嚴重度篩選只對未過項(角色 fail)有意義,與總覽「未過項目嚴重度分佈」一致
+  function matchSev(i) { return !sevFilter || (i.severity === sevFilter && isFail(skey(i.status))); }
   function matchCat(i) { return !catFilter || (i.category || "未分類") === catFilter; }
   function renderChips() {
     var html = (sevFilter ? '<button class="sevchip" data-clear="sev">嚴重度:<b>' + esc(sevlabel(sevFilter)) + '</b><span class="x">✕</span></button>' : "") +
@@ -541,40 +567,55 @@
     if (!rows) return "";
     return '<div class="fixbox"><div class="fix-title">需修改 — 哪裡 / 什麼 / 改成什麼</div>' + rows + '</div>';
   }
+  function badgeHtml(k) {  // 內建狀態用 CSS class;自訂狀態用其 color 內聯上色
+    if (BUILTIN[k]) return '<span class="badge ' + k + '"><span class="dot"></span>' + slabel(k) + '</span>';
+    var c = dotColor(k);
+    return '<span class="badge custom" style="background:' + c + '22;color:' + c + '"><span class="dot" style="background:' + c + '"></span>' + slabel(k) + '</span>';
+  }
+  function tagChips(tags) {  // 每項自由標籤(像 issue label);純標記,不影響統計
+    if (!Array.isArray(tags) || !tags.length) return "";
+    return tags.map(function (t) {
+      var label = (t && typeof t === "object") ? (t.label || "") : t;
+      var color = (t && typeof t === "object" && t.color) ? t.color : null;
+      if (label === "" || label == null) return "";
+      var style = color ? ' style="background:' + color + '22;color:' + color + ';border-color:' + color + '66"' : "";
+      return '<span class="tag"' + style + '>' + esc(label) + '</span>';
+    }).join("");
+  }
   function itemRow(i, idx) {
     var id = String(i.id != null ? i.id : (i.category || "") + "#" + (i.title || idx));
     var k = skey(i.status), done = checked.has(id);
-    var fresh = i.status === "pass" && i.since && nChecks >= 2 && i.since.n === nChecks; // 本次才轉綠
-    var sv = (i.status === "fail" || i.status === "warn") && i.severity ?
+    var fresh = isPass(k) && i.since && nChecks >= 2 && i.since.n === nChecks; // 本次才由未過轉通過
+    var sv = isFail(k) && i.severity ?
       '<span class="sev-tag" style="color:var(' + sevvar(i.severity) + ')">嚴重度:' + sevlabel(i.severity) + '</span>' : "";
     // since 文字:精簡「第 N 次起通過/未解決」+ 緊湊時間(去年份;完整時間在色塊 tooltip 與趨勢頁)
     var since = "";
-    if (nChecks >= 2 && i.since && (i.status === "pass" || i.status === "fail" || i.status === "warn")) {
-      var ok = i.status === "pass";
+    if (nChecks >= 2 && i.since && roleOf(k) !== "neutral") {
+      var ok = isPass(k);
       var dshort = String(i.since.date).replace(/^\d{4}-/, "");
       since = fresh
         ? '<span class="since ok">✨ 本次・第 ' + i.since.n + ' 次新通過</span>'
         : '<span class="since ' + (ok ? "ok" : "bad") + '">' + (ok ? "✓" : "⚠") + ' 第 ' + i.since.n + ' 次起' +
           (ok ? "通過" : "未解決") + '<span class="since-dt">' + esc(dshort) + '</span></span>';
     }
-    // 逐項迷你狀態軌:歷次 pass/warn/fail 變化(左舊 → 右新),置於行首作視覺錨
+    // 逐項迷你狀態軌:歷次狀態變化(左舊 → 右新),置於行首作視覺錨;支援自訂狀態顏色
     var track = "";
     if (nChecks >= 2 && Array.isArray(i.track)) {
       track = '<div class="track-mini" title="歷次狀態(左舊→右新)">' + i.track.map(function (s, ci) {
-        var key = s && STATUS[s] ? s : null;
+        var key = s && STATUS.hasOwnProperty(s) ? s : null;
         var last = ci === i.track.length - 1;
         var dt = (D.history && D.history[ci]) ? D.history[ci].date : ("第 " + (ci + 1) + " 次");
-        return '<i class="' + (last ? "now" : "") + '" style="background:' + (key ? "var(--" + key + "-dot)" : "var(--line-2)") +
+        return '<i class="' + (last ? "now" : "") + '" style="background:' + (key ? dotColor(key) : "var(--line-2)") +
           '" title="' + esc(dt + " — " + (key ? slabel(key) : "未列入")) + '"></i>';
       }).join("") + '</div>';
     }
     var meta = (since || track) ? '<div class="it-meta">' + track + since + '</div>' : "";
     return '<div class="item' + (done ? " done" : "") + (fresh ? " fresh" : "") + '">' +
       '<input class="chk no-print" type="checkbox" data-id="' + esc(id) + '"' + (done ? " checked" : "") + ' title="標記已處理">' +
-      '<span class="badge ' + k + '"><span class="dot"></span>' + slabel(k) + '</span>' +
+      badgeHtml(k) +
       '<div class="item-main">' +
         '<div class="it-head"><span class="it-title">' + esc(i.title || i.id || "—") + '</span>' +
-          (i.id != null ? '<span class="it-id">#' + esc(i.id) + '</span>' : "") + sv + '</div>' +
+          (i.id != null ? '<span class="it-id">#' + esc(i.id) + '</span>' : "") + sv + tagChips(i.tags) + '</div>' +
         meta +
         (i.evidence ? '<div class="ev">' + esc(i.evidence) + '</div>' : "") +
         (i.recommendation ? '<div class="rec"><b>建議:</b> ' + esc(i.recommendation) + '</div>' : "") +
