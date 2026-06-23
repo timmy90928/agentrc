@@ -211,7 +211,9 @@
   .tl-rate{padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
   .tl-counts{font-size:12px;color:var(--faint)}
   .tl-change{margin-top:6px;font-size:13px}
-  .tl-change .k{font-size:12px;font-weight:600;margin-right:4px}
+  .tl-change .k{font-size:12px;font-weight:600}
+  .tl-list{margin:3px 0 0;padding-left:18px}
+  .tl-list li{color:var(--muted);margin-top:1px}
 
   .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);
     display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
@@ -645,8 +647,9 @@
     }
     var tl = Array.isArray(D.timeline) ? D.timeline : [];
     function line(label, arr, col) {
-      return (arr && arr.length) ? '<div class="tl-change"><span class="k" style="color:' + col + '">' + label + ' (' + arr.length + ')</span>' +
-        '<span class="muted">: ' + arr.map(esc).join("、") + '</span></div>' : "";
+      if (!arr || !arr.length) return "";
+      return '<div class="tl-change"><span class="k" style="color:' + col + '">' + label + ' (' + arr.length + ')</span>' +
+        '<ul class="tl-list">' + arr.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ul></div>';
     }
     byId("h-delta").innerHTML = tl.length ? tl.slice().reverse().map(function (t, idx) {
       var latest = idx === 0;
