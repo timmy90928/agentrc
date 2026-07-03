@@ -1,0 +1,268 @@
+{
+  "title": "agentrc 交付前檢查",
+  "target": "C:/Users/Timmy/Downloads/agentrc @ main",
+  "checklist": "專案交付前檢查",
+  "date": "2026-06-21 13:50",
+  "model": "Claude Opus 4.8",
+  "intro": "本報告依「專案交付前檢查」清單檢視 agentrc repo,涵蓋目錄結構、文件、Git 規範、安全與跨工具部署五面向,作為合併前的把關。",
+  "items": [
+    {
+      "id": "struct-1",
+      "category": "目錄結構",
+      "title": ".gitignore 含 .claude/temp/",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": ".gitignore:4",
+      "recommendation": ""
+    },
+    {
+      "id": "struct-2",
+      "category": "目錄結構",
+      "title": "無推理暫存檔誤入版控",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "git status 乾淨;skills/timmy-web/.claude/temp/ 已被忽略",
+      "recommendation": ""
+    },
+    {
+      "id": "struct-3",
+      "category": "目錄結構",
+      "title": "每個 git 散布子夾皆附 README",
+      "status": "warn",
+      "severity": "low",
+      "evidence": "template/ 有 README;新 skill examples/ 尚無",
+      "recommendation": "為缺 README 的散布子夾補一頁精簡門面,指向正本。"
+    },
+    {
+      "id": "doc-1",
+      "category": "文件",
+      "title": "README 結構樹與實際佈局一致",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "README.md 目錄結構區塊已含新 skill",
+      "recommendation": ""
+    },
+    {
+      "id": "doc-2",
+      "category": "文件",
+      "title": "CLAUDE.md 以 @import 回指 README",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "CLAUDE.md:5 @README.md",
+      "recommendation": ""
+    },
+    {
+      "id": "doc-3",
+      "category": "文件",
+      "title": "每個 SKILL.md 本文 < 500 行",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "generating-check-reports/SKILL.md 約 130 行",
+      "recommendation": ""
+    },
+    {
+      "id": "doc-4",
+      "category": "文件",
+      "title": "README 安裝指令的腳本路徑正確",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "README 安裝範例寫成根目錄路徑,實際在 install/ 子目錄",
+      "recommendation": "更正 README 安裝指令的腳本路徑(此為本次新發現項目)。",
+      "fix": {
+        "where": "README.md:118",
+        "what": "安裝指令的腳本路徑",
+        "before": "在 cmd / PowerShell 執行 `",
+        "from": "python install.py --dry-run",
+        "to": "python install/install.py --dry-run",
+        "after": "` 預覽部署。"
+      }
+    },
+    {
+      "id": "git-1",
+      "category": "Git 規範",
+      "title": "於非 main/master 分支工作",
+      "status": "fail",
+      "severity": "high",
+      "evidence": "目前分支 = main",
+      "tags": [
+        "交付阻擋",
+        {
+          "label": "待處理",
+          "color": "#e11d48"
+        }
+      ],
+      "recommendation": "切到 feat/<kebab-desc> 分支再提交;勿直接在 main 動工。",
+      "fix": {
+        "where": "當前 git 分支",
+        "what": "切換到功能分支再提交",
+        "from": "main",
+        "to": "feat/generating-check-reports"
+      }
+    },
+    {
+      "id": "git-2",
+      "category": "Git 規範",
+      "title": "近期 commit 遵循 Conventional Commits",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "git log: feat(timmy-web): …",
+      "recommendation": ""
+    },
+    {
+      "id": "git-3",
+      "category": "Git 規範",
+      "title": "無大型二進位/產物誤入版控",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "僅縮圖 PNG;無 node_modules / dist",
+      "recommendation": ""
+    },
+    {
+      "id": "sec-1",
+      "category": "安全",
+      "title": "無 hardcoded secrets / API key",
+      "status": "pass",
+      "severity": "critical",
+      "evidence": "grep 金鑰樣式無命中;聊天 widget 走 BYOK",
+      "recommendation": ""
+    },
+    {
+      "id": "sec-2",
+      "category": "安全",
+      "title": ".env / 憑證未進版控",
+      "status": "pass",
+      "severity": "critical",
+      "evidence": "repo 無 .env 追蹤",
+      "recommendation": ""
+    },
+    {
+      "id": "sec-3",
+      "category": "安全",
+      "title": "破壞性指令均先確認",
+      "status": "na",
+      "severity": "info",
+      "evidence": "本次無破壞性操作",
+      "recommendation": ""
+    },
+    {
+      "id": "tool-1",
+      "category": "跨工具",
+      "title": "install --dry-run 能偵測新 skill",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "尚未實跑 dry-run 驗證部署",
+      "recommendation": "跑 `python install/install.py --dry-run` 確認新 skill 列入複製清單。"
+    },
+    {
+      "id": "tool-2",
+      "category": "跨工具",
+      "title": "三工具 delta 已查證補完",
+      "status": "info",
+      "severity": "info",
+      "evidence": "claude/gemini/codex delta 皆已查證",
+      "recommendation": ""
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-06-18 22:58",
+      "total": 14,
+      "pass": 6,
+      "fail": 4,
+      "warn": 2,
+      "na": 1,
+      "info": 1,
+      "pass_rate": 50.0,
+      "statuses": {
+        "struct-1": "pass",
+        "struct-2": "pass",
+        "struct-3": "warn",
+        "doc-1": "fail",
+        "doc-2": "pass",
+        "doc-3": "fail",
+        "git-1": "fail",
+        "git-2": "pass",
+        "git-3": "pass",
+        "sec-1": "pass",
+        "sec-2": "fail",
+        "sec-3": "na",
+        "tool-1": "warn",
+        "tool-2": "info"
+      }
+    },
+    {
+      "date": "2026-06-19 17:39",
+      "total": 14,
+      "pass": 8,
+      "fail": 2,
+      "warn": 2,
+      "na": 1,
+      "info": 1,
+      "pass_rate": 66.7,
+      "statuses": {
+        "struct-1": "pass",
+        "struct-2": "pass",
+        "struct-3": "warn",
+        "doc-1": "fail",
+        "doc-2": "pass",
+        "doc-3": "pass",
+        "git-1": "fail",
+        "git-2": "pass",
+        "git-3": "pass",
+        "sec-1": "pass",
+        "sec-2": "pass",
+        "sec-3": "na",
+        "tool-1": "warn",
+        "tool-2": "info"
+      }
+    },
+    {
+      "date": "2026-06-21 13:50",
+      "total": 15,
+      "pass": 9,
+      "fail": 1,
+      "warn": 3,
+      "na": 1,
+      "info": 1,
+      "pass_rate": 69.2,
+      "statuses": {
+        "struct-1": "pass",
+        "struct-2": "pass",
+        "struct-3": "warn",
+        "doc-1": "pass",
+        "doc-2": "pass",
+        "doc-3": "pass",
+        "doc-4": "warn",
+        "git-1": "fail",
+        "git-2": "pass",
+        "git-3": "pass",
+        "sec-1": "pass",
+        "sec-2": "pass",
+        "sec-3": "na",
+        "tool-1": "warn",
+        "tool-2": "info"
+      }
+    }
+  ],
+  "delta": {
+    "fixed": [
+      "README 結構樹與實際佈局一致"
+    ],
+    "regressed": [],
+    "still_failing": [
+      "每個 git 散布子夾皆附 README",
+      "於非 main/master 分支工作",
+      "install --dry-run 能偵測新 skill"
+    ],
+    "has_prev": true
+  },
+  "summary": {
+    "total": 15,
+    "pass": 9,
+    "fail": 1,
+    "warn": 3,
+    "na": 1,
+    "info": 1,
+    "pass_rate": 69.2
+  }
+}

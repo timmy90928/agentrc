@@ -29,7 +29,8 @@ agentrc/
 ├── CLAUDE.md                 # Claude Code 工作入口(精簡;@import README + agent 操作提醒)
 ├── .gitignore
 ├── skills/                   # 【跨工具・正本】自有 skills(一子夾 = 一 skill)
-│   └── timmy-web/            #   SKILL.md(正本)+ README + references/ + scripts/ + examples/…
+│   ├── timmy-web/            #   SKILL.md(正本)+ README + references/ + scripts/ + examples/…
+│   └── generating-check-reports/  # checklist 驅動 → 單檔 HTML 檢查報告(template + render script)
 ├── mcp/                      # 【跨工具・正本】MCP server 清單
 │   ├── servers.json          #   單一來源(目前空 scaffold)
 │   └── README.md
@@ -112,6 +113,7 @@ REM Windows(在 cmd / PowerShell 執行,非 git-bash)
 ## 現有 skills
 
 - [`timmy-web`](skills/timmy-web/) — 單檔 HTML + Tailwind CDN 網頁,10 款策展風格(預設編輯/手札風)、淺/深/系統主題、繁中 / English i18n、RWD 貼邊寬版、右下角浮動 AI 聊天助理(BYOK 自帶金鑰)、一鍵匯出。線上實驗室:<https://timmy-web-style.pages.dev/>。詳見 [`README`](skills/timmy-web/README.md) / 正本 [`SKILL.md`](skills/timmy-web/SKILL.md)。
+- [`generating-check-reports`](skills/generating-check-reports/) — checklist 驅動的**單檔 HTML 檢查報告**產生器:模型逐項檢查任意目標 → 結果 JSON → `render_report.py` 渲染出總覽 / 本次結果 / 歷史趨勢三分頁報告。內建起手清單,重檢**原地覆寫**並累積歷史趨勢與「與上次差異」,不長 v2/v3。詳見 [`README`](skills/generating-check-reports/README.md) / 正本 [`SKILL.md`](skills/generating-check-reports/SKILL.md)。
 
 ## 現況 / 開放項
 

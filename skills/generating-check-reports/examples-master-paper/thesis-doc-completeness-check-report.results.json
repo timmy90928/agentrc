@@ -1,0 +1,133 @@
+{
+  "title": "論文文件完整性檢查",
+  "target": "碩士論文定稿 thesis.docx",
+  "checklist": "文件完整性",
+  "date": "2026-06-21 11:05",
+  "model": "Claude Opus 4.8",
+  "intro": "本報告檢查碩士論文定稿的文件完整性,涵蓋章節結構、引用格式 (APA 7)、圖表編號、數據一致與附錄是否齊備,作為送印前的最後把關。",
+  "items": [
+    {
+      "id": "abs-1",
+      "category": "章節完整",
+      "title": "中英文摘要齊備且對應",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "中摘 p.iii / 英摘 p.iv",
+      "recommendation": ""
+    },
+    {
+      "id": "abs-2",
+      "category": "章節完整",
+      "title": "六章結構齊全(緒論→結論)",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "Ch.1–6 目次完整",
+      "recommendation": ""
+    },
+    {
+      "id": "ref-1",
+      "category": "引用",
+      "title": "參考文獻格式一致(APA 7)",
+      "status": "fail",
+      "severity": "medium",
+      "evidence": "第 3、7 筆期刊名未斜體、缺卷期",
+      "recommendation": "統一為 APA 7 期刊格式。",
+      "fix": {
+        "where": "參考文獻 第 3、7 筆",
+        "what": "APA 期刊條目",
+        "from": "期刊名正體、無卷期",
+        "to": "期刊名斜體 + 卷(期), 頁碼"
+      }
+    },
+    {
+      "id": "ref-2",
+      "category": "引用",
+      "title": "內文引用皆出現在文獻清單",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "Chen (2024) 內文有、清單缺",
+      "recommendation": "補上 Chen (2024) 條目或移除引用。"
+    },
+    {
+      "id": "data-1",
+      "category": "數據一致",
+      "title": "內文數值與分析表一致",
+      "status": "fail",
+      "severity": "high",
+      "evidence": "4.2 節內文寫 18%,但表 4.3 為 20%",
+      "recommendation": "更正內文數值,與表 4.3 一致。",
+      "fix": {
+        "where": "p.42 第 2 段",
+        "what": "A 組通過率數值",
+        "before": "實驗結果顯示 A 組的通過率為 ",
+        "from": "18%",
+        "to": "20%",
+        "after": ",顯著高於對照組。"
+      }
+    },
+    {
+      "id": "fig-1",
+      "category": "格式",
+      "title": "圖表編號連續且有標題",
+      "status": "warn",
+      "severity": "low",
+      "evidence": "圖 4.3 後跳號至圖 4.5",
+      "recommendation": "重編圖號使其連續。"
+    },
+    {
+      "id": "fmt-1",
+      "category": "格式",
+      "title": "頁碼 / 頁首頁尾符合系所範本",
+      "status": "pass",
+      "severity": "low",
+      "evidence": "正文起阿拉伯頁碼,符合範本",
+      "recommendation": ""
+    },
+    {
+      "id": "apx-1",
+      "category": "附錄",
+      "title": "致謝 / 授權頁 / 口試委員審定書",
+      "status": "na",
+      "severity": "info",
+      "evidence": "審定書待口試後補簽",
+      "recommendation": ""
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-06-21 11:05",
+      "total": 8,
+      "pass": 3,
+      "fail": 2,
+      "warn": 2,
+      "na": 1,
+      "info": 0,
+      "pass_rate": 42.9,
+      "statuses": {
+        "abs-1": "pass",
+        "abs-2": "pass",
+        "ref-1": "fail",
+        "ref-2": "warn",
+        "data-1": "fail",
+        "fig-1": "warn",
+        "fmt-1": "pass",
+        "apx-1": "na"
+      }
+    }
+  ],
+  "delta": {
+    "fixed": [],
+    "regressed": [],
+    "still_failing": [],
+    "has_prev": false
+  },
+  "summary": {
+    "total": 8,
+    "pass": 3,
+    "fail": 2,
+    "warn": 2,
+    "na": 1,
+    "info": 0,
+    "pass_rate": 42.9
+  }
+}
