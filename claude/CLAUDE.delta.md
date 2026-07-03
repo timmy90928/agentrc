@@ -4,7 +4,14 @@
 > 專案專屬規範請改寫在各專案的 `./CLAUDE.md` 或 `.claude/rules/`。
 
 ## 版本控制:Claude 署名 (co-author trailer)
-- commit 結尾放完整 trailer 單行 `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`(body 之後空一行,GitHub 靠此辨識共同作者)。此即 harness 預設;PR body 亦維持預設的「🤖 Generated with Claude Code」標記。
+- commit 結尾**沿用 harness 當下預設的 co-author trailer**(完整單行,body 之後空一行,GitHub 靠此辨識共同作者);trailer 中的模型名隨版本變動,**勿在規範中釘死、勿自行改寫**。PR body 亦維持預設的「🤖 Generated with Claude Code」標記。
+
+## 模型分工調度 (Model Dispatch)——建議而非強制
+- **實質任務才分派,瑣碎直接做**——簡單問答、單點小修不要為分派繞路(orchestrator 的 context 開銷仍在)。
+- **重推理**(架構設計、根因分析、演算法、技術取捨)→ subagent **`deep-reasoner`**(Opus)。
+- **機械執行**(規格明確的批次修改、跑測試 / lint、格式整理、依樣板產檔)→ subagent **`fast-worker`**(Sonnet),節省高階模型用量。
+- 主模型負責**拆解規格、驗收與整合**:給子 agent 的指令要規格明確;子 agent 產出仍須驗證後才回報使用者。
+- 這兩個 agent 的正本在 agentrc `claude/agents/`,由 install 部署到 `~/.claude/agents/`;若清單中不存在(未安裝 / 未重啟),退回主模型自行處理,勿臆造 agent 名。
 
 ## 專案目錄結構 (Project Structure)
 專案的預期階層如下(部分資料夾於需要時才建立,非全部都須同時存在):
