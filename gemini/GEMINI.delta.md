@@ -1,13 +1,21 @@
 <!-- ===== Gemini CLI 專屬機制 (delta);接在 shared/principles.md 之後,串接成 ~/.gemini/GEMINI.md ===== -->
 
-> 以下為 **Gemini CLI 專屬**段落(`.gemini/` 路徑、native skills、記憶/`GEMINI.md` 階層、custom commands、subagents、署名),由 install 接在工具中立通則(`shared/principles.md`)之後。
-> 機制依 Gemini CLI **官方一手文件**查證(`docs/cli/skills.md`、`docs/cli/gemini-md.md`、`docs/cli/custom-commands`、`docs/core/subagents.md`),**查證日 2026-06-11**;Gemini CLI 演進快,沿用前建議以 `/help`、`/memory show`、`/skills`、`/memory reload` 實測確認。
-> 專案專屬規範請改寫在各專案的 `./GEMINI.md` 或子目錄 `GEMINI.md`。
+> 以下為 **Gemini 家族(Google Antigravity `agy` CLI / IDE + Gemini CLI)專屬**段落(`.gemini/` 路徑、native skills、記憶/`GEMINI.md` 階層、custom commands、subagents、署名),由 install 接在工具中立通則(`shared/principles.md`)之後。
+> **Gemini CLI 個人版已於 2026-06-18 日落**,本檔(`~/.gemini/GEMINI.md`)的主要讀者現為其官方後繼 **Antigravity(`agy`)**;標註「Gemini CLI」的指令僅適用仍在用 CLI 的環境(企業版 / 存量)。
+> 機制查證:Gemini CLI 依官方一手文件(`docs/cli/skills.md`、`docs/cli/gemini-md.md`、`docs/cli/custom-commands`、`docs/core/subagents.md`),查證日 2026-06-11;Antigravity 查證日 2026-06-12(路徑類細節中度信心)。沿用前實測確認——agy:`/help`、`agy doctor`、`/skills`;Gemini CLI:`/help`、`/memory show`、`/skills`、`/memory reload`。
+> 專案專屬規範請改寫在各專案的 `./GEMINI.md` 或子目錄 `GEMINI.md`(Antigravity 亦讀專案 `AGENTS.md`,precedence 見下方對應要點)。
 
-## 版本控制:Gemini 署名 (co-author trailer)
-- **Gemini CLI 目前無官方既定的 commit co-author trailer 與 PR body 標記**(官方 repo 的署名討論串維護者未拍板,且有信箱未對應有效 CLA 帳號的 open issue)。**嚴禁臆造 `Co-Authored-By:` 信箱**。
-- 由 Gemini 產出 commit / PR 時:**先詢問使用者**要用的 trailer / 標記字串再寫入;使用者未指定則**不加** co-author trailer。
-- 註:坊間流傳的 `gemini-code-assist[bot]` 等字串屬非官方提案,非 CLI 預設,勿逕用。
+## 版本控制:Gemini 家族署名 (co-author trailer)
+- **Gemini CLI 與 Antigravity 皆無官方既定的 commit co-author trailer 與 PR body 標記**(官方 repo 的署名討論串維護者未拍板,且有信箱未對應有效 CLA 帳號的 open issue)。**嚴禁臆造 `Co-Authored-By:` 信箱**。
+- 由 Gemini 家族工具產出 commit / PR 時:**先詢問使用者**要用的 trailer / 標記字串再寫入;使用者未指定則**不加** co-author trailer。
+- 註:坊間流傳的 `gemini-code-assist[bot]` 等字串屬非官方提案,非預設,勿逕用。
+
+## Antigravity(`agy`)對應要點
+- **共用 `~/.gemini/` 設定根**(非 `~/.antigravity/`),讀 `~/.gemini/GEMINI.md` → 本檔對 Antigravity 同樣生效。⚠️ 與 Gemini CLI **共寫同一份** `~/.gemini/GEMINI.md`(gemini-cli#16058);agentrc install 覆寫前自動備份,仍留意互蓋。
+- **指示檔 precedence**:System > `GEMINI.md` > `AGENTS.md` > `.agents/rules/`(專案層亦讀 root / nested `AGENTS.md`,無需改名)。
+- **skills**:同一份 `SKILL.md` 開放標準;全域 `~/.agents/skills/`(agentrc install 已鏡像)或 `~/.gemini/skills/`,專案 `.agents/skills/`;以 `/skills` 檢視載入狀態。
+- **MCP**:`~/.gemini/config/mcp_config.json`(JSON `mcpServers`;IDE 另有 `~/.gemini/antigravity/mcp_config.json`),agentrc install 已一併寫入。
+- 環境健檢用 `agy doctor`;路徑類細節屬中度信心,首次使用先實測確認。
 
 ## 專案目錄結構 (Project Structure) — Gemini 對應
 與 Claude 版同義,差別僅在工具目錄(`.claude/` → `.gemini/`)與「無 path-scoped 規則目錄」。預期階層(部分資料夾按需建立):
@@ -40,7 +48,7 @@ project-root/
 - **Gemini CLI 自 v0.26.0(2026-01)起原生支援 `SKILL.md` Agent Skills**,與 Claude Code **共用同一份 `SKILL.md` 開放標準正本**(由 `agentrc` install 一併複製,只差安裝目錄)。
 - **探索目錄(優先序低→高)**:內建 → extension 內附 → **使用者** `~/.gemini/skills/`(別名 `~/.agents/skills/`)→ **工作區** `.gemini/skills/`(別名 `.agents/skills/`);同層 `.agents/skills/` 優先於 `.gemini/skills/`。
 - `SKILL.md` 置於 skills 目錄根或**下一層** `<skill-name>/SKILL.md`(建議下一層,便於附帶 `scripts/`、`references/`);frontmatter 至少 `name`(= 資料夾名)+ `description`(觸發關鍵,務必具體)。叫用時 Gemini 以 `activate_skill` 工具把 `SKILL.md` 本文與目錄結構載入。
-- **熱重載,無需重啟**:新增 / 改 skill 後跑 `/skills reload`(別名 `/skills refresh`)重掃即可生效(對比 Claude:新建 skills 目錄需重啟)。
+- **熱重載,無需重啟**:新增 / 改 skill 後,Gemini CLI 跑 `/skills reload`(別名 `/skills refresh`)重掃即可生效(對比 Claude:新建 skills 目錄需重啟);Antigravity 以 `/skills` 檢視,重載機制以 `/help` 實測確認。
 - **無官方 `skill-creator`**:可沿用 Claude `/skill-creator` 產出的 `SKILL.md`(標準相同、跨工具通用),或依 `references/skill-authoring.md` 手寫。
 
 ### 記憶 / 規則模組化 (GEMINI.md 階層 + @import) — 取代 Claude path-scoped rules
@@ -48,7 +56,7 @@ project-root/
   1. **階層式 `GEMINI.md`**:全域 `~/.gemini/GEMINI.md` → 專案根 `./GEMINI.md` → **子目錄 `GEMINI.md`**(JIT:當工具存取某目錄 / 其上層時自動載入該層 `GEMINI.md`);全部串接進 prompt。**唯一的「條件式」載入是子目錄 JIT —— 依被存取的目錄,而非自訂 glob。**
   2. **`@相對路徑.md` import**:把大 `GEMINI.md` 拆成多檔。**注意**:`@import` 仍 inline 展開、計入 context(與 Claude `@import` 同理),**不省 context**;真正想省 context 用上面的子目錄 JIT。
   3. **`context.fileName`**(`settings.json`):可改記憶檔名或設定多個。
-- 檢視 / 重載:`/memory show`(看串接後全文)、`/memory reload`(重掃所有 `GEMINI.md`)。確認規則是否生效用 `/memory show`,勿憑假設。
+- 檢視 / 重載(**Gemini CLI 指令**):`/memory show`(看串接後全文)、`/memory reload`(重掃所有 `GEMINI.md`)。確認規則是否生效用 `/memory show`,勿憑假設;Antigravity 對應指令未查得,以 `/help` 確認。
 
 ### 自訂指令與 extensions (.gemini/commands/、gemini-extension.json)
 - **自訂 slash commands(TOML)**:`~/.gemini/commands/`(全域)、`.gemini/commands/`(專案,覆寫同名);**子目錄 = 命名空間**(`.gemini/commands/git/commit.toml` → `/git:commit`,冒號分隔,檔名大小寫敏感)。欄位:`prompt`(**必填**,送給模型的提示)、`description`(選填,`/help` 顯示)。動態注入:`{{args}}`(使用者參數)、`!{...}`(shell 執行,需確認)、`@{...}`(注入檔案 / 目錄內容)。

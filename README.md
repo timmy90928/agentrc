@@ -38,8 +38,8 @@ agentrc/
 │   ├── principles.md
 │   └── README.md
 ├── claude/                   # 【Claude 側・正本】只裝回 ~/.claude
-│   ├── CLAUDE.delta.md       #   Claude 專屬機制
-│   ├── agents/               #   Claude subagents(*.md,空 scaffold)
+│   ├── CLAUDE.delta.md       #   Claude 專屬機制(含〈模型分工調度〉)
+│   ├── agents/               #   Claude subagents(*.md):deep-reasoner(Opus)、fast-worker(Sonnet)
 │   └── README.md
 ├── gemini/                   # 【Gemini 側・正本】只裝回 ~/.gemini
 │   ├── GEMINI.delta.md       #   Gemini 專屬機制
@@ -119,10 +119,10 @@ REM Windows(在 cmd / PowerShell 執行,非 git-bash)
 
 - **官方 8 skill 不 vendor**:`canvas-design` / `docx` / `frontend-design` / `pdf` / `pptx` / `skill-creator` / `theme-factory` / `webapp-testing` 留在各工具 `skills/` 既有,不納入本 repo;需要時用 `git sparse-checkout` 從 `github.com/anthropics/skills` 取得。
 - `mcp/servers.json` 目前為空 scaffold。
-- `gemini/GEMINI.delta.md` **已依 Gemini CLI 官方文件查證補完**(2026-06-11):原生 `SKILL.md`(v0.26.0 起)、`GEMINI.md` 階層 + `@import`(無 path-scoped glob)、TOML custom commands、`.gemini/agents/*.md` subagents。**Gemini 無官方 commit trailer**,由 Gemini 產 commit 時須先問使用者、勿臆造信箱。
+- `gemini/GEMINI.delta.md` **已改寫為 Gemini 家族(Antigravity `agy` + Gemini CLI)雙讀者版**(2026-07-03):**Gemini CLI 個人版已於 2026-06-18 日落**,`~/.gemini/GEMINI.md` 主要讀者現為 Antigravity,delta 內含〈Antigravity 對應要點〉小節,CLI 專屬指令(`/memory show`、`/skills reload` 等)均已標註。機制查證:Gemini CLI 依官方文件(2026-06-11)——原生 `SKILL.md`(v0.26.0 起)、`GEMINI.md` 階層 + `@import`(無 path-scoped glob)、TOML custom commands、`.gemini/agents/*.md` subagents。**Gemini 家族均無官方 commit trailer**,產 commit 時須先問使用者、勿臆造信箱。
 - `codex/AGENTS.delta.md` **已依 Codex CLI 官方文件查證補完**(2026-06-12):原生 `SKILL.md`(~2025-12 起,跨工具可攜)、`AGENTS.md` 階層(root→leaf 串接、deeper override;`AGENTS.override.md` 優先;無 `@import`、無 path-scoped glob)、`~/.codex/agents/*.toml` subagents、`config.toml` `[mcp_servers]`/`codex mcp add`。**官方有預設 commit trailer** `Co-authored-by: Codex <noreply@openai.com>`。**待留意**:skills 使用者目錄 `~/.codex/skills` ↔ `~/.agents/skills` 過渡中(install 暫裝前者,見 `openai/skills#420`)。
 - **Google Antigravity**(查證日 2026-06-12;依「沿用既有」決議,**不另開第 4 套**):Google 的 agentic 平台(IDE + **`agy` CLI** + SDK),**Gemini 3 家族**、Gemini CLI 官方後繼(Gemini CLI 個人版 **2026-06-18 日落**)。**共用 `~/.gemini/` 設定根**並讀 `~/.gemini/GEMINI.md` → agentrc 的 **Gemini 部署已涵蓋其全域指示檔**。為補齊 Antigravity 路徑差異,**`install` 裝 Gemini 時已主動**:② 把 **skills 鏡像到 `~/.agents/skills/`**(Antigravity 全域 skills;專案則 `.agents/skills/`)外加 `~/.gemini/skills/`;③ 把 **MCP 同時寫入 `~/.gemini/config/mcp_config.json`**(JSON `mcpServers`)外加 `~/.gemini/settings.json`;並把 **`agy`** 納入 Gemini 工具偵測(只裝 Antigravity 也會觸發)。其餘:① 也讀專案 `AGENTS.md`(precedence:System > `GEMINI.md` > `AGENTS.md` > `.agents/rules/`);④ **無**官方 commit trailer。⚠️ Antigravity 與 Gemini CLI **共寫同一 `~/.gemini/GEMINI.md`**(gemini-cli#16058);install 覆寫前自動備份,仍留意互蓋。**路徑類細節為中度信心,首次於本機以 `agy` / `~/.gemini/` 實測確認。**
-- `claude/agents/`、`gemini/agents/`、`codex/agents/` 為空 scaffold(目前零自訂 agent)。
+- `claude/agents/` 已有兩個 subagent(2026-07-03):**`deep-reasoner`**(Opus,深度推理)與 **`fast-worker`**(Sonnet,機械執行),調度指引在 `claude/CLAUDE.delta.md`〈模型分工調度〉(建議而非強制;Codex 第二視角因目前無訂閱暫不納入)。`gemini/agents/`、`codex/agents/` 仍為空 scaffold。
 
 ## Windows / 跨平台補充
 
