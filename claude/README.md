@@ -3,6 +3,6 @@
 Claude Code 專屬的設定正本;`install` 只把這裡的內容裝回 `~/.claude/`。
 
 - [`CLAUDE.delta.md`](CLAUDE.delta.md) — Claude 專屬機制(`.claude/` 路徑、native skills、`.claude/rules/` + `paths:` path-scoped 規則、署名 trailer)。`install` 串接在 [`../shared/principles.md`](../shared/principles.md) 之後 → `~/.claude/CLAUDE.md`。
-- [`agents/`](agents/) — Claude subagents(`*.md` + YAML frontmatter):`deep-reasoner`(Opus,深度推理)、`fast-worker`(Sonnet,機械執行);調度指引見 `CLAUDE.delta.md`〈模型分工調度〉。
+- [`agents/`](agents/) — Claude subagents(`*.md` + YAML frontmatter):`deep-reasoner`(Opus,深度推理)、`fast-worker`(Sonnet,機械執行)、`codex-runner`(Sonnet 外殼,安全橋接 Codex CLI);調度與授權指引見 `CLAUDE.delta.md`〈模型分工調度〉。
 
 完整架構見根目錄 [`../README.md`](../README.md)(人看正本)。

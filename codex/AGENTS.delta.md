@@ -1,7 +1,7 @@
 <!-- ===== Codex CLI 專屬機制 (delta);接在 shared/principles.md 之後,串接成 ~/.codex/AGENTS.md ===== -->
 
 > 以下為 **OpenAI Codex CLI 專屬**段落(`AGENTS.md` 階層、`~/.codex/` 路徑、native skills、TOML subagents、`config.toml`、署名),由 install 接在工具中立通則(`shared/principles.md`)之後。
-> 機制依 Codex CLI **官方一手文件**查證(`developers.openai.com/codex/*`、`github.com/openai/codex`、`openai/skills`),**查證日 2026-06-12**;Codex 演進快(尤其 skills 使用者目錄 `~/.codex/skills` ↔ `~/.agents/skills` 仍在過渡,見 `openai/skills#420`),沿用前以 `/skills`、`codex --help` 實測確認。
+> 機制依 Codex **官方一手文件**與本機 CLI 查證(`developers.openai.com/codex/*`、`codex --help` / `codex debug models`),**查證日 2026-07-11**;Codex 演進快(尤其 models、subagents 與 skills 路徑),沿用前應以當下官方文件與本機 catalog 實測確認。
 > 專案專屬規範請改寫在各專案的 repo-root `AGENTS.md` 或子目錄 `AGENTS.md`。
 
 ## 版本控制:Codex 署名 (co-author trailer)
@@ -9,6 +9,13 @@
 - 由 `config.toml` 的 `[features].codex_git_commit` 之 `commit_attribution` 控制:預設 `"Codex <noreply@openai.com>"`;設 `""` 關閉;可自訂(如 `Codex Agent <codex-agent@yourco.com>`)。**注入 prompt(非 git hook)**,由模型寫進 commit message。
 - **PR body 標記**:無官方既定(NOT FOUND)——勿臆造。
 - 跟隨 repo 既有 `git log` 風格;trailer 之外的通則見 shared〈版本控制與提交〉。
+
+## Agent 分工調度 (Model Dispatch)——建議而非強制
+- **實質任務才分派，瑣碎工作直接做**；只有工作可清楚切成獨立、具體的子任務時才使用 subagent，避免不必要的 token 與協調成本。
+- **重推理**（架構、複雜根因、演算法、技術選型與取捨）→ `deep-reasoner`（`gpt-5.6-sol` / `high` / `read-only`）。
+- **機械執行**（規格明確的批次修改、局部 refactor、格式整理、依樣板產檔、測試 / lint / build）→ `fast-worker`（`gpt-5.6-terra` / `low` / `workspace-write`）。
+- 主 agent 負責拆解、授權邊界、整合與驗收；subagent 產出仍須由主 agent 查證後才能回報使用者。
+- 兩個 agent 的正本在 agentrc `codex/agents/`，由 install 部署到 `~/.codex/agents/`。若 agent 尚未安裝或目前 client 未重新載入，退回主 agent 自行處理，不臆造可用性。
 
 ## 專案目錄結構 (Project Structure) — Codex 對應
 與 Claude / Gemini 版同義,差別在指示檔名(`AGENTS.md`)、工具目錄(`.codex/`)與 subagents 為 **TOML**。預期階層(部分資料夾按需建立):
@@ -53,9 +60,10 @@ project-root/
 - **官方已標記 deprecated → 改用 skills**(reusable instructions 一律走 skills)。改提示需重啟。
 
 ### Subagents (.codex/agents/*.toml)
-- **全域設定**:`config.toml` 的 `[agents]` 表(`max_threads`、`max_depth`、`job_max_runtime_seconds`)。
+- **全域設定**:`config.toml` 的 `[agents]` 表(`max_threads`、`max_depth`、`job_max_runtime_seconds`、`interrupt_message`)；官方目前預設 `max_threads = 6`、`max_depth = 1`。
 - **自訂 agent = TOML 檔**(一檔一 agent):個人 `~/.codex/agents/<name>.toml`、專案 `.codex/agents/<name>.toml`。
-- **必填**:`name`、`description`、`developer_instructions`(= system prompt 本文)。**選填(略則繼承父 session)**:`model`、`model_reasoning_effort`、`sandbox_mode`、`mcp_servers`、`nickname_candidates`。
+- **必填**:`name`、`description`、`developer_instructions`(= system prompt 本文)。**選填(略則繼承父 session)**:`model`、`model_reasoning_effort`、`sandbox_mode`、`mcp_servers`、`skills.config`、`nickname_candidates`。
+- Codex 內建 `default`、`worker`、`explorer`；自訂 agent 同名時會覆蓋內建角色。subagent 仍會套用父 turn 的即時 sandbox / approval overrides。
 - 叫用 `/agent` 切換 / 檢視。注意 `codex exec` 是**非互動腳本模式,非 subagent**。
 
 ### config 與 MCP (~/.codex/config.toml)

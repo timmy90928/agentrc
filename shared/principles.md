@@ -16,10 +16,24 @@
 
 ## 版本控制與提交 (Git & Commits)
 - **前提**:先跟隨該 repo 既有 `git log` 風格與**分支命名**慣例(下列為無既有風格時的預設)。破壞性 git 操作仍受上方〈安全與不可逆操作〉約束。
-- **Commit message**:預設 **Conventional Commits**——`feat: / fix: / docs: / refactor: / chore:` 等前綴 + 英文祈使句,首行精簡(≤ 72 字);必要時空行後於本文補「為何這樣改」。
+- **Commit message 格式**:
+  - **Subject**:預設採用 **Conventional Commits**——`feat: / fix: / docs: / refactor: / chore:` 等前綴 + 英文祈使句;首行精簡(≤ 72 字),準確概括主要變更。
+  - **Body**:除 typo、純格式調整等單點瑣碎變更外,subject 後空一行,以英文段落或條列說明「具體改了什麼」及必要的「為何這樣改」;不得只重述 subject。多項變更優先使用 `- ` 條列,內容份量應與變更複雜度相稱。
+  - **Trailers**:body 後空一行,再加入 `Co-Authored-By:` 等 trailers;署名格式依下方〈署名與模型〉規則。
+  - **完整結構**:
+
+    ```text
+    <type>(<optional-scope>): <concise imperative summary>
+
+    - <concrete change or reason>
+    - <another concrete change or reason>
+
+    Co-Authored-By: <工具名稱> <實際模型名稱> <有效信箱>
+    ```
 - **何時 commit / push**:**commit 與 push 皆只在使用者明確要求時才執行**,平時不主動進行版控(回到 harness 保守預設)。
 - **分支 (branch)**:**視變更份量決定**——實質功能 / 重構 / 跨多檔的工作**開新分支**(`<type>/<kebab-desc>`,如 `feat/login-form`;**預設從最新 `main` 開出**,刻意堆疊 (stacked) 除外;合併後刪除已無用的本地分支);瑣碎、低風險的小修(typo、文件、單檔小 fix)可直接 commit 到 `main`。**拿不準時開分支**。
-- **署名 (co-author trailer)**:commit 結尾放完整 trailer 單行 `Co-Authored-By: <工具對應身分>`(body 之後空一行,GitHub 靠此辨識共同作者);PR body 維持各工具預設標記。**具體 trailer 字串與 PR 標記見各工具 delta。**
+- **PR 合併方式 (merge method)**:執行合併前,先唯讀確認 repo 實際支援的方式與既有歷史慣例,比較 **merge commit / squash merge / rebase merge** 對 commit 保留、commit hash、線性歷史及 merge commit 的影響;再依本次分支內容提出一個明確建議與理由,列出可選方式讓使用者決定。**未取得使用者對本次合併方式的明確選擇前,不得執行合併**;若平台僅支援一種方式,也須先說明限制並取得確認。
+- **署名與模型 (co-author trailer)**:commit 結尾在 body 之後空一行,加入完整單行 `Co-Authored-By: <工具名稱> <實際模型名稱> <工具 / provider 的有效信箱>`(例如 `Co-Authored-By: Codex GPT-5.6 Sol <noreply@openai.com>`、`Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`)。模型名稱使用該次實際執行模型的正式顯示名稱,**不得硬編碼固定版本、不得臆測**;信箱須沿用各工具 / provider 的有效 co-author 信箱,供 GitHub 辨識共同作者。若同一 commit 有多個實際參與產出的模型,每個模型各列一行完整 `Co-Authored-By:`;未能確認模型名稱或有效信箱時,commit 前先向使用者確認。PR body 維持各工具預設標記。**各工具的有效信箱與 PR 標記見各工具 delta。**
 
 ## 輸出與溝通規範 (Output & Communication Rules)
 - 所有回答與說明以繁體中文 (Traditional Chinese) 為主。但**繁中僅用於對話與說明**;程式碼、識別字 (identifiers)、commit message、log、檔名等技術產出**一律依專案既有慣例(通常為英文)**,不強行中文化。

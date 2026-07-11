@@ -1,6 +1,14 @@
 # claude/agents/ — Claude Code subagents (正本)
 
-放 Claude Code subagent 定義(`*.md`);`install` 複製到 `~/.claude/agents/`。**目前為空 scaffold**(本機尚無自訂 agent)。
+放 Claude Code subagent 定義(`*.md`);`install` 複製到 `~/.claude/agents/`。
+
+## 現有 agents
+
+- **`deep-reasoner`**(Opus)— 深度推理:架構設計、根因分析、演算法、技術取捨。
+- **`fast-worker`**(Sonnet)— 機械執行:規格明確的批次修改、跑測試 / lint / build、格式整理、依樣板產檔。
+- **`codex-runner`**(Sonnet 外殼)— 橋接 OpenAI Codex CLI:把明確工作透過 `codex exec` 分派給 Codex(第二執行引擎 / 第二視角 / Codex 專屬 review),本身只組指令與驗證、不親自改檔。
+
+> 三個 agent 的調度與 `codex-runner` 寫入授權邊界見 `claude/CLAUDE.delta.md`〈模型分工調度〉。
 
 ## 格式(Claude Code)
 
