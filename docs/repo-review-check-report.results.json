@@ -1,0 +1,538 @@
+{
+  "title": "agentrc 專案檢閱與改善建議",
+  "target": "C:/Users/Timmy/Developer/agentrc @ docs/repo-review-report（含目前未提交變更）",
+  "checklist": "內建 project-delivery + doc-completeness + basic-security，並依 agentrc 安裝器與 Codex bridge 風險增補",
+  "intro": "本次重檢沿用原 checklist；Codex custom agents 已依指定改為 deep-reasoner = GPT-5.6 Sol / high、fast-worker = GPT-5.6 Terra / low。TOML 與部署流程有效，但本機 catalog 尚未取得 GPT-5.6 limited preview access；其餘未授權項目維持原判定。",
+  "date": "2026-07-11 01:01",
+  "model": "OpenAI GPT-5",
+  "items": [
+    {
+      "id": "bridge-shell-injection",
+      "category": "Codex bridge",
+      "title": "Codex prompt 不應直接插入 Bash 雙引號參數",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "claude/agents/codex-runner.md 已禁止 prompt shell argument 插值，改為每次使用新高熵 delimiter 的 quoted heredoc 經 stdin 傳入。",
+      "recommendation": "",
+      "tags": [
+        "安全",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "bridge-explicit-policy",
+      "category": "Codex bridge",
+      "title": "唯讀任務必須明確釘住 sandbox 與 approval policy",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "claude/agents/codex-runner.md 明定唯讀任務使用 codex -s read-only -a never exec；本機 codex-cli 0.142.3 help 已接受此參數組合。",
+      "recommendation": "",
+      "tags": [
+        "安全",
+        "Codex CLI",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "bridge-approval-boundary",
+      "category": "Codex bridge",
+      "title": "放寬 Codex 寫入權限須由主 agent 取得使用者明確同意",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "claude/agents/codex-runner.md 明定 workspace-write 前由主 agent 向使用者取得明確同意，並禁止 danger-full-access、bypass sandbox 與以 --full-auto 當授權捷徑。",
+      "recommendation": "",
+      "tags": [
+        "安全",
+        "授權",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "codex-entry-import",
+      "category": "Codex 專案入口",
+      "title": "root AGENTS.md 使用 Codex 不支援的 @import",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "root AGENTS.md 已移除 @README.md 假 import，明確要求實質工作前完整讀取 README，並在檔內保留不可漏掉的 Codex 操作規則。",
+      "recommendation": "",
+      "tags": [
+        "文件正確性",
+        "Codex",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "codex-entry-paths",
+      "category": "Codex 專案入口",
+      "title": "root AGENTS.md 多處 Codex 路徑大小寫與檔名錯誤",
+      "status": "pass",
+      "severity": "high",
+      "evidence": "root AGENTS.md 已統一為 codex/AGENTS.delta.md、~/.codex/AGENTS.md、.codex/temp/，並移除不存在的 .codex/rules 指引。",
+      "recommendation": "",
+      "tags": [
+        "跨平台",
+        "文件正確性",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "codex-entry-copy-drift",
+      "category": "Codex 專案入口",
+      "title": "root AGENTS.md 的開場文字仍是 Claude 入口的複製殘留",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "root AGENTS.md 已重寫為 Codex 專用入口，不再包含複製殘留、重複工具名稱或與檔案現況矛盾的敘述。",
+      "recommendation": "",
+      "tags": [
+        "文件 drift",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "bridge-doc-drift",
+      "category": "文件一致性",
+      "title": "新增 codex-runner 後，README 與 dispatch 規則仍只描述兩個 agents",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": "README.md、claude/README.md、claude/CLAUDE.delta.md 與 claude/agents/README.md 已同步第三個 codex-runner、觸發條件及 workspace-write 授權邊界。",
+      "recommendation": "",
+      "tags": [
+        "文件 drift",
+        "目前變更",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "install-mcp-invalid-json",
+      "category": "安裝器",
+      "title": "目標 MCP JSON 解析失敗時不應重建並覆寫既有設定",
+      "status": "fail",
+      "severity": "high",
+      "evidence": "install/install.py:148-154 在 JSONDecodeError 時把 data 設為空物件，接著 merge 並寫回；雖有備份，仍會讓使用中的其他設定消失。",
+      "recommendation": "採 fail-closed：解析失敗時輸出錯誤並跳過該檔；除非使用者明確要求修復，不得覆寫。",
+      "tags": [
+        "資料保護",
+        "MCP"
+      ],
+      "fix": {
+        "where": "install/install.py:151-154",
+        "what": "JSONDecodeError 分支",
+        "from": "except json.JSONDecodeError:\n            data = {}",
+        "to": "except json.JSONDecodeError as e:\n            log(f\"invalid JSON in {path}: {e} — skipping\")\n            return"
+      }
+    },
+    {
+      "id": "install-subprocess-status",
+      "category": "安裝器",
+      "title": "MCP CLI 註冊失敗不應被吞掉後仍回報 done",
+      "status": "fail",
+      "severity": "medium",
+      "evidence": "install/install.py:191-193 與 :213 使用 subprocess.run(..., check=False)，main 最後無條件輸出 done。",
+      "recommendation": "收集 returncode，任一註冊失敗就回報失敗摘要並讓程式以非零狀態結束；避免假成功。",
+      "tags": [
+        "可靠性",
+        "MCP"
+      ],
+      "fix": {
+        "where": "install/install.py:191-213",
+        "what": "外部 CLI 失敗處理",
+        "from": "check=False",
+        "to": "check=True"
+      }
+    },
+    {
+      "id": "install-stale-agents",
+      "category": "安裝器",
+      "title": "來源移除 agent 後，安裝目錄會殘留舊 agent",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "install/install.py:130-143 只逐檔 copy2，沒有 manifest 或 repo-managed agent 清理；skills 有 replace，agents 沒有對稱策略。",
+      "recommendation": "維護 repo-owned manifest，安裝時只刪除上次由 agentrc 部署、但本次來源已不存在的 agent；不要清空整個使用者 agents 目錄。",
+      "tags": [
+        "冪等",
+        "升級"
+      ]
+    },
+    {
+      "id": "install-backup-idempotence",
+      "category": "安裝器",
+      "title": "每次安裝都產生 instruction backup，與冪等宣稱有落差",
+      "status": "warn",
+      "severity": "low",
+      "evidence": "install/install.py:126-127 無內容差異判斷便 backup + write；README.md:79 與 install/README.md:3 宣稱冪等。重跑會持續累積 .bak 時間戳檔。",
+      "recommendation": "先比較 UTF-8 內容；相同則 skip，不備份也不重寫。另可加保留上限或清理策略。",
+      "tags": [
+        "冪等",
+        "備份"
+      ],
+      "fix": {
+        "where": "install/install.py:126-127",
+        "what": "instruction 寫入前置條件",
+        "from": "backup(target)\n    write_text(target, combined)",
+        "to": "if not target.exists() or target.read_text(encoding=\"utf-8\") != combined:\n        backup(target)\n        write_text(target, combined)"
+      }
+    },
+    {
+      "id": "posix-executable",
+      "category": "跨平台",
+      "title": "install.sh 在 Git index 中沒有 executable bit",
+      "status": "fail",
+      "severity": "high",
+      "evidence": "git ls-files --stage install/install.sh 回傳 mode 100644；README.md:89 與 install/README.md:19 指示直接執行 ./install/install.sh。",
+      "recommendation": "把 index mode 改為 100755，並在 POSIX CI 實際執行 dry-run。",
+      "tags": [
+        "macOS",
+        "Linux",
+        "交付阻擋"
+      ],
+      "fix": {
+        "where": "Git index: install/install.sh",
+        "what": "檔案執行權限",
+        "from": "100644",
+        "to": "100755"
+      }
+    },
+    {
+      "id": "wrapper-usage-codex",
+      "category": "跨平台",
+      "title": "兩個 wrapper 的 Usage 註解漏列 codex",
+      "status": "warn",
+      "severity": "low",
+      "evidence": "install/install.cmd:3 與 install/install.sh:3 只列 claude/gemini/all；install.py 實際 choices 包含 codex。",
+      "recommendation": "同步 Usage 註解為 claude|gemini|codex|all。",
+      "tags": [
+        "文件 drift"
+      ],
+      "fix": {
+        "where": "install/install.cmd:3、install/install.sh:3",
+        "what": "--tool 選項列表",
+        "from": "claude/gemini/all（或 claude|gemini|all）",
+        "to": "claude|gemini|codex|all"
+      }
+    },
+    {
+      "id": "gitignore-codex-temp",
+      "category": "目錄結構",
+      "title": ".gitignore 未涵蓋 Codex 推理暫存目錄",
+      "status": "pass",
+      "severity": "medium",
+      "evidence": ".gitignore 已加入 .codex/temp/ 與 **/.codex/temp/，與 codex/AGENTS.delta.md 的暫存規範一致。",
+      "recommendation": "",
+      "tags": [
+        "暫存",
+        "版控",
+        "本次修正"
+      ]
+    },
+    {
+      "id": "broken-showcase-link",
+      "category": "文件一致性",
+      "title": "timmy-web 設計文件指向已不存在的 showcase.html",
+      "status": "fail",
+      "severity": "low",
+      "evidence": "Markdown 相對連結掃描找到 skills/timmy-web/references/design-system.md:3 -> ../examples/showcase.html；同檔 :153,155、components.md:3、base-template.html:7 亦沿用舊名稱，現有檔是 examples/showcase-editorial-backup.html。",
+      "recommendation": "決定 canonical showcase：若備份檔就是現行展示，統一改連結；若應有活樣張，恢復 examples/showcase.html 並納入同步檢查。",
+      "tags": [
+        "broken link",
+        "timmy-web"
+      ],
+      "fix": {
+        "where": "skills/timmy-web/references/design-system.md:3",
+        "what": "視覺全貌連結",
+        "from": "../examples/showcase.html",
+        "to": "../examples/showcase-editorial-backup.html",
+        "before": "視覺全貌請開 [",
+        "after": "](../examples/showcase.html)。"
+      }
+    },
+    {
+      "id": "license-missing",
+      "category": "文件完整性",
+      "title": "repo 未提供 LICENSE 或明確的使用授權聲明",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "rg --files -g LICENSE* -g COPYING* 無結果；README 也沒有授權章節。",
+      "recommendation": "若此 repo 會公開或讓他人複用 skills，選定授權並新增 LICENSE；若刻意 private / all-rights-reserved，也在 README 明示。",
+      "tags": [
+        "發布決策"
+      ]
+    },
+    {
+      "id": "automated-tests",
+      "category": "測試",
+      "title": "安裝器與報告 renderer 缺少自動化測試",
+      "status": "fail",
+      "severity": "high",
+      "evidence": "python -m unittest discover -v 回報 Ran 0 tests；repo 無 test_*.py、*_test.py 或 tests/。目前只有手動 dry-run、sample 與 sync_engine --check。",
+      "recommendation": "優先為 temp HOME 下的 install 行為建立整合測試：內容相同冪等、無效 JSON fail-closed、保留非 repo-owned 設定、agent 退役清理；renderer 加 schema/history/delta snapshot 測試。",
+      "tags": [
+        "回歸風險",
+        "優先修正"
+      ]
+    },
+    {
+      "id": "dry-run",
+      "category": "驗證通過",
+      "title": "install.py 全工具 dry-run 可完成且不寫入",
+      "status": "pass",
+      "severity": "info",
+      "evidence": "python install/install.py --dry-run --tool all 完成 Claude/Gemini/Codex 預覽，最後輸出 done. (dry-run, nothing written)。",
+      "recommendation": ""
+    },
+    {
+      "id": "timmy-engine-sync",
+      "category": "驗證通過",
+      "title": "timmy-web 共用引擎與 10 個風格頁同步",
+      "status": "pass",
+      "severity": "info",
+      "evidence": "python skills/timmy-web/scripts/sync_engine.py --check：需更新 0、未變 10、略過 0、錯誤 0。",
+      "recommendation": ""
+    },
+    {
+      "id": "syntax-json",
+      "category": "驗證通過",
+      "title": "受版控 Python 與 JSON 可解析",
+      "status": "pass",
+      "severity": "info",
+      "evidence": "AST/JSON 檢查成功解析 3 個 tracked Python files 與 5 個 tracked JSON files。",
+      "recommendation": ""
+    },
+    {
+      "id": "skill-length",
+      "category": "驗證通過",
+      "title": "所有 SKILL.md 均低於 500 行",
+      "status": "pass",
+      "severity": "info",
+      "evidence": "template/SKILL.md 44 行、skills/timmy-web/SKILL.md 106 行、skills/generating-check-reports/SKILL.md 92 行。",
+      "recommendation": ""
+    },
+    {
+      "id": "secret-scan",
+      "category": "安全",
+      "title": "未發現私鑰、憑證檔或 assignment-shaped hardcoded secret",
+      "status": "pass",
+      "severity": "critical",
+      "evidence": "掃描排除 .git 後，private-key header、.env/pem/key/p12/pfx/credentials 類檔名、常見 key/token/password 指派型態均無命中；僅為輕量靜態掃描。",
+      "recommendation": ""
+    },
+    {
+      "id": "large-binaries",
+      "category": "安全",
+      "title": "受版控檔案沒有超過 1 MiB 的大型產物",
+      "status": "pass",
+      "severity": "info",
+      "evidence": "git ls-files 逐檔大小掃描無 > 1 MiB 結果；現有 PNG 屬示範縮圖/截圖且未達門檻。",
+      "recommendation": ""
+    },
+    {
+      "id": "review-branch",
+      "category": "Git",
+      "title": "本次有意義工作位於非 main 分支",
+      "status": "pass",
+      "severity": "info",
+      "evidence": "git status --branch 顯示 docs/repo-review-report；未執行 commit 或 push。",
+      "recommendation": ""
+    },
+    {
+      "id": "preexisting-changes",
+      "category": "Git",
+      "title": "檢閱包含原有未提交變更，尚不可視為可發布快照",
+      "status": "info",
+      "severity": "info",
+      "evidence": "檢閱開始時已有 M claude/agents/README.md、?? AGENTS.md、?? claude/agents/codex-runner.md；本次未覆寫這些檔。",
+      "recommendation": "修正後再重跑同一份報告，確認 delta 與發布 readiness。"
+    },
+    {
+      "id": "codex-custom-agents",
+      "category": "Codex subagents",
+      "title": "deep-reasoner 與 fast-worker custom agents 已建立並可由安裝器部署",
+      "status": "warn",
+      "severity": "medium",
+      "evidence": "deep-reasoner 已設定 gpt-5.6-sol / high / read-only，fast-worker 已設定 gpt-5.6-terra / low / workspace-write；TOML 解析與 install dry-run 通過，但本機 codex debug models 尚未列出兩個 limited-preview model IDs。",
+      "recommendation": "取得 GPT-5.6 preview access 且本機 catalog 出現兩個 model ID 後，再執行實際 agent spawn 驗證。",
+      "tags": [
+        "Codex",
+        "Limited Preview"
+      ]
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-07-11 00:08",
+      "total": 25,
+      "pass": 7,
+      "fail": 13,
+      "warn": 4,
+      "na": 0,
+      "info": 1,
+      "pass_rate": 29.2,
+      "statuses": {
+        "bridge-shell-injection": "fail",
+        "bridge-explicit-policy": "fail",
+        "bridge-approval-boundary": "fail",
+        "codex-entry-import": "fail",
+        "codex-entry-paths": "fail",
+        "codex-entry-copy-drift": "fail",
+        "bridge-doc-drift": "fail",
+        "install-mcp-invalid-json": "fail",
+        "install-subprocess-status": "fail",
+        "install-stale-agents": "warn",
+        "install-backup-idempotence": "warn",
+        "posix-executable": "fail",
+        "wrapper-usage-codex": "warn",
+        "gitignore-codex-temp": "fail",
+        "broken-showcase-link": "fail",
+        "license-missing": "warn",
+        "automated-tests": "fail",
+        "dry-run": "pass",
+        "timmy-engine-sync": "pass",
+        "syntax-json": "pass",
+        "skill-length": "pass",
+        "secret-scan": "pass",
+        "large-binaries": "pass",
+        "review-branch": "pass",
+        "preexisting-changes": "info"
+      }
+    },
+    {
+      "date": "2026-07-11 00:26",
+      "total": 25,
+      "pass": 15,
+      "fail": 5,
+      "warn": 4,
+      "na": 0,
+      "info": 1,
+      "pass_rate": 62.5,
+      "statuses": {
+        "bridge-shell-injection": "pass",
+        "bridge-explicit-policy": "pass",
+        "bridge-approval-boundary": "pass",
+        "codex-entry-import": "pass",
+        "codex-entry-paths": "pass",
+        "codex-entry-copy-drift": "pass",
+        "bridge-doc-drift": "pass",
+        "install-mcp-invalid-json": "fail",
+        "install-subprocess-status": "fail",
+        "install-stale-agents": "warn",
+        "install-backup-idempotence": "warn",
+        "posix-executable": "fail",
+        "wrapper-usage-codex": "warn",
+        "gitignore-codex-temp": "pass",
+        "broken-showcase-link": "fail",
+        "license-missing": "warn",
+        "automated-tests": "fail",
+        "dry-run": "pass",
+        "timmy-engine-sync": "pass",
+        "syntax-json": "pass",
+        "skill-length": "pass",
+        "secret-scan": "pass",
+        "large-binaries": "pass",
+        "review-branch": "pass",
+        "preexisting-changes": "info"
+      }
+    },
+    {
+      "date": "2026-07-11 00:40",
+      "total": 26,
+      "pass": 16,
+      "fail": 5,
+      "warn": 4,
+      "na": 0,
+      "info": 1,
+      "pass_rate": 64.0,
+      "statuses": {
+        "bridge-shell-injection": "pass",
+        "bridge-explicit-policy": "pass",
+        "bridge-approval-boundary": "pass",
+        "codex-entry-import": "pass",
+        "codex-entry-paths": "pass",
+        "codex-entry-copy-drift": "pass",
+        "bridge-doc-drift": "pass",
+        "install-mcp-invalid-json": "fail",
+        "install-subprocess-status": "fail",
+        "install-stale-agents": "warn",
+        "install-backup-idempotence": "warn",
+        "posix-executable": "fail",
+        "wrapper-usage-codex": "warn",
+        "gitignore-codex-temp": "pass",
+        "broken-showcase-link": "fail",
+        "license-missing": "warn",
+        "automated-tests": "fail",
+        "dry-run": "pass",
+        "timmy-engine-sync": "pass",
+        "syntax-json": "pass",
+        "skill-length": "pass",
+        "secret-scan": "pass",
+        "large-binaries": "pass",
+        "review-branch": "pass",
+        "preexisting-changes": "info",
+        "codex-custom-agents": "pass"
+      }
+    },
+    {
+      "date": "2026-07-11 01:01",
+      "total": 26,
+      "pass": 15,
+      "fail": 5,
+      "warn": 5,
+      "na": 0,
+      "info": 1,
+      "pass_rate": 60.0,
+      "statuses": {
+        "bridge-shell-injection": "pass",
+        "bridge-explicit-policy": "pass",
+        "bridge-approval-boundary": "pass",
+        "codex-entry-import": "pass",
+        "codex-entry-paths": "pass",
+        "codex-entry-copy-drift": "pass",
+        "bridge-doc-drift": "pass",
+        "install-mcp-invalid-json": "fail",
+        "install-subprocess-status": "fail",
+        "install-stale-agents": "warn",
+        "install-backup-idempotence": "warn",
+        "posix-executable": "fail",
+        "wrapper-usage-codex": "warn",
+        "gitignore-codex-temp": "pass",
+        "broken-showcase-link": "fail",
+        "license-missing": "warn",
+        "automated-tests": "fail",
+        "dry-run": "pass",
+        "timmy-engine-sync": "pass",
+        "syntax-json": "pass",
+        "skill-length": "pass",
+        "secret-scan": "pass",
+        "large-binaries": "pass",
+        "review-branch": "pass",
+        "preexisting-changes": "info",
+        "codex-custom-agents": "warn"
+      }
+    }
+  ],
+  "delta": {
+    "fixed": [],
+    "regressed": [
+      "deep-reasoner 與 fast-worker custom agents 已建立並可由安裝器部署"
+    ],
+    "still_failing": [
+      "目標 MCP JSON 解析失敗時不應重建並覆寫既有設定",
+      "MCP CLI 註冊失敗不應被吞掉後仍回報 done",
+      "來源移除 agent 後，安裝目錄會殘留舊 agent",
+      "每次安裝都產生 instruction backup，與冪等宣稱有落差",
+      "install.sh 在 Git index 中沒有 executable bit",
+      "兩個 wrapper 的 Usage 註解漏列 codex",
+      "timmy-web 設計文件指向已不存在的 showcase.html",
+      "repo 未提供 LICENSE 或明確的使用授權聲明",
+      "安裝器與報告 renderer 缺少自動化測試"
+    ],
+    "has_prev": true
+  },
+  "summary": {
+    "total": 26,
+    "pass": 15,
+    "fail": 5,
+    "warn": 5,
+    "na": 0,
+    "info": 1,
+    "pass_rate": 60.0
+  }
+}

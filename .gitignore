@@ -1,6 +1,8 @@
 # 推理暫存 / 草稿(不 commit)
 .claude/temp/
 **/.claude/temp/
+.codex/temp/
+**/.codex/temp/
 
 # Python 快取
 **/__pycache__/
